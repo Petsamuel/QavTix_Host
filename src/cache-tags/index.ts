@@ -1,0 +1,19 @@
+export const CACHE_TAGS = {
+    DASHBOARD_OVERVIEW: "dashboard-overview",
+    UPCOMING_EVENTS:    "upcoming-events",
+    DASHBOARD_FEED: "dashboard-feed",
+    CUSTOMERS: "customers",
+    CUSTOMER: "customer-profile",
+
+    FINANCIALS: "financials",
+    MARKETING: "marketing",
+    CHECKIN: "checkin",
+    SUBSCRIPTION: "sub",
+
+     // Settings
+    PAYMENT_METHODS:  "payment_methods",
+    NOTIFICATION_SETTINGS: "notification_settings",
+    PROFILE:               "profile",
+    PRIVACY_SETTINGS:       "privacy_settings",
+    TWO_FACTOR:            "two_factor",
+}

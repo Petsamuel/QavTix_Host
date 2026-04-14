@@ -7,21 +7,15 @@ import NotificationsTab from '../slots/activity/NotificationTabContent'
 
 type TabType = 'activity' | 'notifications'
 
-interface ActivityNotificationsProps {
-  activities: ActivityItem[]
-  notifications: NotificationItem[]
-  onMarkAsRead?: (id: string) => void
-  onMarkAllAsRead?: () => void
+interface ActivitySectionPWProps {
+    activities:    DashboardActivity[]
+    notifications: DashboardNotification[]
 }
 
 export default function ActivitySectionPW({
-  activities,
-  notifications,
-  onMarkAsRead,
-  onMarkAllAsRead
-}: ActivityNotificationsProps) {
-
-
+    activities,
+    notifications,
+}: ActivitySectionPWProps) {
     const [activeTab, setActiveTab] = useState<TabType>('activity')
 
     return (
@@ -31,10 +25,10 @@ export default function ActivitySectionPW({
                     <button
                         onClick={() => setActiveTab('activity')}
                         className={cn(
-                        "flex-1 px-6 py-4 text-sm md:text-[13px] font-bold transition-colors relative",
-                        activeTab === 'activity'
-                            ? "text-brand-primary-6"
-                            : "text-brand-neutral-6 hover:text-neutral-8"
+                            "flex-1 px-6 py-4 text-sm md:text-[13px] font-bold transition-colors relative",
+                            activeTab === 'activity'
+                                ? "text-brand-primary-6"
+                                : "text-brand-neutral-6 hover:text-neutral-8"
                         )}
                     >
                         Recent Activity
@@ -46,10 +40,10 @@ export default function ActivitySectionPW({
                     <button
                         onClick={() => setActiveTab('notifications')}
                         className={cn(
-                        "flex-1 px-6 py-4 text-sm md:text-[13px] font-bold transition-colors relative",
-                        activeTab === 'notifications'
-                            ? "text-brand-primary-6"
-                            : "text-brand-neutral-6 hover:text-neutral-8"
+                            "flex-1 px-6 py-4 text-sm md:text-[13px] font-bold transition-colors relative",
+                            activeTab === 'notifications'
+                                ? "text-brand-primary-6"
+                                : "text-brand-neutral-6 hover:text-neutral-8"
                         )}
                     >
                         Notifications
@@ -60,16 +54,11 @@ export default function ActivitySectionPW({
                 </div>
             </div>
 
-            {/* Tab Content */}
             <div className="py-3 w-full">
                 {activeTab === 'activity' ? (
                     <RecentActivityTab activities={activities} />
                 ) : (
-                    <NotificationsTab 
-                        notifications={notifications}
-                        onMarkAsRead={onMarkAsRead}
-                        onMarkAllAsRead={onMarkAllAsRead}
-                    />
+                    <NotificationsTab notifications={notifications} />
                 )}
             </div>
         </div>

@@ -7,8 +7,8 @@ import EventInfo from "../../event/EventInfo"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dispatch, SetStateAction } from "react"
 import { liveEventsStatusConfig } from "../resources/status-config"
-import EventsItemDropdown from "../../dropdown/EventsItemDropdown"
-import { liveEventActions } from "../../dropdown/resources/live-events-actions"
+import EventsItemDropdown from "../../dropdown/ItemActionDropdown"
+import { liveEventActions } from "../../dropdown/resources/events-actions"
 
 interface EventsManagementTableProps {
     setSelectedEvents: Dispatch<SetStateAction<string[]>>

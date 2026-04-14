@@ -5,7 +5,7 @@
 import { useState } from "react"
 import { DateRange } from "react-day-picker"
 import DateFilter from "../custom-utils/TableDataDisplayAreas/filters/DateFilter"
-import { EventTypeFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventTypeFilter"
+import { EventTypeFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventFilter"
 import ExportButton1 from "@/lib/features/export/ExportDataBtn1"
 import { buildMetricsFromConfig } from "@/helper-fns/buildMetricsConfig"
 import { analyticsMetricStatCardsConfig2, salesAnalyticsMetricsConfig } from "../cards/resources/metrics-config"

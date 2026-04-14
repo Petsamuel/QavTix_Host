@@ -1,3 +1,5 @@
+import { NAVIGATION_LINKS } from "@/enums/navigation";
+
 export const POPUP_MESSAGE_ALERT_CONFIG = {
     verification: {
         icon: "noto:hourglass-with-flowing-sand",
@@ -28,4 +30,24 @@ export interface PopUpMessageAlert {
     buttonText?: string;
     navigateTo?: string; 
     actionType?: 'RETRY_PAYMENT' | 'VERIFY_DOCS'; 
+}
+
+
+export const verificationPendingPopupAlert : PopUpMessageAlert = {
+    id: "verificationPendingPopupAlert",
+    description: "Your documents are being reviewed. You can create draft events, but they won't be listed until verified.",
+    title: "Verification Pending",
+    type: "verification",
+    buttonText: "Check Status",
+    navigateTo: NAVIGATION_LINKS.FINANCIALS.href
+}
+
+
+export const payoutPopupAlert : PopUpMessageAlert = {
+    id: "payoutPopupAlert",
+    description: "₦125,000 Ready for Withdrawal. Your earnings from last week's events are ready.",
+    title: "Payout Available",
+    type: "verification",
+    buttonText: "Check Status",
+    navigateTo: NAVIGATION_LINKS.FINANCIALS.href
 }

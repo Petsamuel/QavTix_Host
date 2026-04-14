@@ -23,8 +23,11 @@ export const alertSlice = createSlice({
             state.alerts = action.payload;
             state.isOpen = action.payload.length > 0;
         },
+        popPopupAlert: (state, action: PayloadAction<PopUpMessageAlert>) => {
+            state.alerts.filter(v => v.id !== action.payload.id)
+        },
         pushPopupAlert: (state, action: PayloadAction<PopUpMessageAlert>) => {
-            state.alerts.push(action.payload);
+            state.alerts.push(action.payload)
             state.isOpen = true;
         },
         closePopupAlertModal: (state) => {
@@ -34,5 +37,5 @@ export const alertSlice = createSlice({
     },
 })
 
-export const { triggerPopupAlert, setSystemPopupAlert, pushPopupAlert, closePopupAlertModal } = alertSlice.actions;
+export const { triggerPopupAlert, popPopupAlert, setSystemPopupAlert, pushPopupAlert, closePopupAlertModal } = alertSlice.actions;
 export default alertSlice.reducer;

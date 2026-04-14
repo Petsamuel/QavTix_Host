@@ -34,13 +34,27 @@ export const NAVIGATION_LINKS = {
         icon: "hugeicons:add-to-list",
         label: "Check-In System"
     },
-    SECURITY: {
-        href: "/dashboard/security",
+    SETTINGS: {
+        href: "/dashboard/settings",
         icon: "hugeicons:security-lock",
-        label: "Security"
-    }
-} as const;
+        label: "Settings"
+    },
+} as const
 
+export const SETTINGS_SUB_LINKS = [
+    {
+        href:  "/dashboard/settings/account",
+        label: "Account",
+    },
+    {
+        href:  "/dashboard/settings/security",
+        label: "Security",
+    },
+    {
+        href:  "/dashboard/settings/subscription",
+        label: "Manage Subscription",
+    },
+] as const
 
 export const CUSTOMERS_PROFILE = {
     href: `${NAVIGATION_LINKS.CUSTOMERS.href}/profile/[profile_id]`,
@@ -52,3 +66,5 @@ export const CREATE_EVENT = {
     label: "Create Event"
 } as const;
 
+
+export const EXPLORE_EVENT_LINK = `${process.env.NEXT_PUBLIC_APP_DOMAIN}/events` as const;

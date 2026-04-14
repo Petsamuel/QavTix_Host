@@ -1,5 +1,22 @@
-import MarketingToolsPageContentWrapper from "@/components/page-wrappers/MarketingToolsPageContentWrapper";
+import { getPromoCodes, getAffiliateLinks, getEmailCampaigns } from "@/actions/marketing"
+import MarketingToolsPageContentWrapper from "@/components/page-wrappers/MarketingToolsPageContentWrapper"
 
-export default function MarketingToolsPage(){
-    return <MarketingToolsPageContentWrapper />
+export default async function MarketingToolsPage() {
+    const [promoResult, affiliateResult, campaignResult] = await Promise.all([
+        getPromoCodes(),
+        getAffiliateLinks(),
+        getEmailCampaigns(),
+    ])
+
+    if (!promoResult.success || !affiliateResult.success || !campaignResult.success) {
+        throw new Error("Failed to load marketing tools")
+    }
+
+    return (
+        <MarketingToolsPageContentWrapper
+            initialPromoCodes={promoResult.data     ?? { results: [], count: 0, next: null, previous: null, total_pages: 1 }}
+            initialAffiliates={affiliateResult.data ?? { results: [], count: 0, next: null, previous: null, total_pages: 1, cards: { total_affiliates: 0, new_this_month: 0, total_tickets_sold: 0, total_commission_paid: "0.00" } }}
+            initialCampaigns={campaignResult.data   ?? { results: [], count: 0, next: null, previous: null, total_pages: 1 }}
+        />
+    )
 }

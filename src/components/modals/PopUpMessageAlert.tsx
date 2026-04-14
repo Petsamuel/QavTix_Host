@@ -60,6 +60,12 @@ export default function PopUpMessageAlertModal() {
         setCurrentIndex(0)
     }
 
+    useEffect(() => {
+        if (!alerts.length){
+            dispatch(closePopupAlertModal())
+        }
+    },[alerts.length])
+
     if (!isOpen || alerts.length === 0 || !currentAlert || !config || !iconSrc) return null;
 
     return (

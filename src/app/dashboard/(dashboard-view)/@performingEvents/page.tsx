@@ -1,29 +1,23 @@
-import { mockPerformingEvents } from "@/components-data/demo-data";
-import TopPerformingEventsSlotPW from "@/components/page-wrappers/TopPerformingEventsSlotPW";
+import { getDashboardFeed } from "@/actions/dashboard"
+import ActivitySectionError from "@/components/error-components/DashboardSlotError"
+import TopPerformingEventsSlotPW from "@/components/page-wrappers/TopPerformingEventsSlotPW"
 
-const getData = async () => {
-  let data: { eventsData: TopPerformingEvent[] } = {
-    eventsData: [],
-  };
+export default async function PerformingEventsSlot() {
 
-  await new Promise((resolve) => {
-    setTimeout(() => {
-      data.eventsData = mockPerformingEvents;      
-      resolve(true); 
-    }, 8000) // 5 second delay
-  });
+    const result = await getDashboardFeed()
 
-  return data;
-}
-
-
-export default async function PerformingEventsSlot(){
-
-    const data = await getData()
+    if (!result.success || !result.data) {
+		return (
+			<ActivitySectionError 
+				title="Failed to load top events"
+				desc="We couldn't fetch your top performing events. Please refresh the page."
+			/>
+		)
+    }
 
     return (
-      <section>
-        <TopPerformingEventsSlotPW eventsData={data.eventsData} />
-      </section>
+        <section>
+            <TopPerformingEventsSlotPW eventsData={result.data.trending} />
+        </section>
     )
 }

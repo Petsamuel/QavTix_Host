@@ -11,13 +11,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import EventFilterTypeBtn from "./buttons-and-inputs/EventFilterTypeBtn"
 
-interface SalePerformanceFilterProps {
+interface PerformanceFilterProps {
     value?: { min: number; max: number }
     onChange: (value: { min: number; max: number }) => void
     icon: string
 }
 
-export function SalePerformanceFilter({ value, onChange, icon }: SalePerformanceFilterProps) {
+export function PerformanceFilter({ value, onChange, icon }: PerformanceFilterProps) {
+
+    
     const [isOpen, setIsOpen] = useState(false)
     const [range, setRange] = useState<[number, number]>(
         value ? [value.min, value.max] : [0, 100]

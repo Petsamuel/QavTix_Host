@@ -1,90 +1,168 @@
-"use client";
+"use client"
 
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import PaginationControls from "../tools/PaginationControl";
-import { payoutStatusConfig } from "../resources/payout-status-config";
-import { mockPayoutTransactions } from "@/components-data/demo-data";
-import { usePagination } from "@/custom-hooks/PaginationHook";
-import Image from "next/image";
-import { Icon } from "@iconify/react";
+import { useState, useEffect, useRef, useCallback } from "react"
+import { DateRange } from "react-day-picker"
+import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
+import { Icon } from "@iconify/react"
+import { format, parseISO } from "date-fns"
+import PaginationControls from "../tools/PaginationControl"
+import { getFinancials } from "@/actions/financials"
+import { dateRangeToParams } from "@/helper-fns/dateRangeToParams"
+import { payoutStatusConfig } from "../resources/status-config"
+import TableLoader from "@/components/loaders/TableLoader"
 
-export default function PayoutHistoryTable() {
 
-    const { currentItems, endIndex, startIndex, hasNextPage, hasPreviousPage, nextPage, previousPage, currentPage, totalPages } = usePagination(mockPayoutTransactions,5)
+interface Props {
+    initialData:    WithdrawalHistoryPaginated
+    externalDate:   DateRange | null
+    onCards:        (cards: FinancialCards) => void
+    onCardsError:   () => void
+    onCardsLoading: (loading: boolean) => void
+    onCardsSuccess: () => void
+}
+
+export default function PayoutHistoryTable({
+    initialData,
+    externalDate,
+    onCards,
+    onCardsError,
+    onCardsLoading,
+    onCardsSuccess,
+}: Props) {
+
+    const [items,       setItems]       = useState<WithdrawalHistoryItem[]>(initialData.results)
+    const [count,       setCount]       = useState(initialData.count)
+    const [totalPages,  setTotalPages]  = useState(initialData.total_pages)
+    const [currentPage, setCurrentPage] = useState(initialData.page)
+    const [isLoading,   setIsLoading]   = useState(false)
+    const [isError,     setIsError]     = useState(false)
+
+    const isFetching    = useRef(false)
+    const initialized   = useRef(false)
+
+    // Stable date key to detect changes
+    const dateKey = [
+        externalDate?.from?.toISOString() ?? '',
+        externalDate?.to?.toISOString()   ?? '',
+    ].join('|')
+
+    const fetchData = useCallback(async (page: number, isFilterChange = false) => {
+        if (isFetching.current) return
+        isFetching.current = true
+
+        setIsLoading(true)
+        if (isFilterChange) onCardsLoading(true)
+
+        const result = await getFinancials({
+            ...dateRangeToParams(externalDate),
+            page,
+        })
+
+        isFetching.current = false
+        setIsLoading(false)
+        if (isFilterChange) onCardsLoading(false)
+
+        if (!result.success || !result.data) {
+            setIsError(true)
+            if (isFilterChange) onCardsError()
+            return
+        }
+
+        const { cards, withdrawal_history: wh } = result.data
+
+        setItems(wh.results)
+        setCount(wh.count)
+        setTotalPages(wh.total_pages)
+        setCurrentPage(wh.page)
+        setIsError(false)
+
+        if (isFilterChange) {
+            onCards(cards)
+            onCardsSuccess()
+        }
+    }, [dateKey])
+
+    // Re-fetch when external date changes (skip first render)
+    useEffect(() => {
+        if (!initialized.current) {
+            initialized.current = true
+            return
+        }
+        fetchData(1, true)
+    }, [dateKey])
+
+    const fetchPage = (page: number) => {
+        if (page < 1 || page > totalPages) return
+        setCurrentPage(page)
+        fetchData(page)
+    }
+
+    // Loading
+    if (isLoading) return <TableLoader />
+
+    // Error
+    if (isError) return (
+        <div className="flex flex-col items-center justify-center py-20 gap-2">
+            <Icon icon="lucide:wifi-off" className="w-8 h-8 text-red-400" />
+            <p className="text-sm text-brand-secondary-6">Failed to load payment history.</p>
+        </div>
+    )
+
+    // Empty
+    if (items.length === 0) return (
+        <div className="flex flex-col items-center justify-center py-20 gap-2">
+            <Icon icon="hugeicons:wallet-done-01" className="w-8 h-8 text-brand-neutral-5" />
+            <p className="text-sm text-brand-secondary-6">No payout history yet.</p>
+        </div>
+    )
 
     return (
         <div className="w-full space-y-4">
-            {/* Desktop Table */}
-            <div className="hidden md:block overflow-hidden!">
+
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full min-h-[20em]">
+                    <table className="w-full">
                         <thead className="bg-brand-neutral-3 border-b border-brand-neutral-3">
                             <tr>
-                                <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">
-                                    Payment ID
-                                </th>
-                                <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">
-                                    Bank Account
-                                </th>
-                                <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">
-                                    Amount
-                                </th>
-                                <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">
-                                    Payout Date
-                                </th>
-                                <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">
-                                    Status
-                                </th>
+                                {["Payment ID", "Bank Account", "Amount", "Payout Date", "Status"].map(h => (
+                                    <th key={h} className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">
+                                        {h}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-neutral-2">
-                            {currentItems.map((payout) => {
-                                const status = payoutStatusConfig[payout.status]
-                                
+                        <tbody className="divide-y divide-brand-neutral-2">
+                            {items.map(payout => {
+                                const status = payoutStatusConfig[payout.status] ?? { label: payout.status, color: "" }
                                 return (
-                                    <tr 
-                                        key={payout.id} 
-                                        className="hover:bg-brand-neutral-3/70 transition-colors"
-                                    >
+                                    <tr key={payout.id} className="hover:bg-brand-neutral-3/70 transition-colors">
                                         <td className="py-4 px-5">
-                                            <p className="text-xs text-brand-secondary-9">
-                                                {payout.paymentId}
+                                            <p className="text-xs text-brand-secondary-9 truncate max-w-32">
+                                                {payout.id}
                                             </p>
                                         </td>
-                                        
                                         <td className="py-4 px-5">
-                                            <div className="flex items-center gap-3">
-                                                <Image
-                                                    src={payout.bankAccount.bankLogo}
-                                                    alt={payout.bankAccount.bank}
-                                                    width={50}
-                                                    height={50}
-                                                    className="w-8 h-8 object-contain rounded-md"
-                                                />
-                                                <div className="min-w-44">
-                                                    <p className="font-bold whitespace-nowrap text-xs text-brand-secondary-9">
-                                                        {payout.bankAccount.name}
-                                                    </p>
-                                                    <p className="text-[11px] text-brand-secondary-8">
-                                                        {payout.bankAccount.bank}
-                                                    </p>
-                                                </div>
+                                            <div className="min-w-44">
+                                                <p className="font-bold text-xs text-brand-secondary-9">
+                                                    {payout.payout_account.account_name}
+                                                </p>
+                                                <p className="text-[11px] text-brand-secondary-8">
+                                                    {payout.payout_account.bank_name} · {payout.payout_account.account_number}
+                                                </p>
                                             </div>
                                         </td>
-                                        
                                         <td className="py-4 px-5">
                                             <p className="text-xs font-semibold text-brand-secondary-9 whitespace-nowrap">
-                                                ₦{payout.amount.toLocaleString()}
+                                                ₦{parseFloat(payout.amount).toLocaleString()}
                                             </p>
                                         </td>
-                                        
                                         <td className="py-4 px-5">
                                             <p className="text-xs text-brand-secondary-8 whitespace-nowrap">
-                                                {payout.payoutDate} | {payout.payoutTime}
+                                                {format(parseISO(payout.created_at), "MMM d, yyyy | h:mm a")}
                                             </p>
                                         </td>
-                                        
                                         <td className="py-4 px-5">
                                             <Badge className={cn(
                                                 "px-3 py-1 rounded-md border-[0.8px] capitalize border-neutral-4 text-xs",
@@ -101,64 +179,46 @@ export default function PayoutHistoryTable() {
                 </div>
             </div>
 
-            {/* Mobile Cards */}
+            {/* Mobile cards */}
             <div className="md:hidden space-y-3">
-                {currentItems.map((payout) => {
-                    const status = payoutStatusConfig[payout.status];
-                    
+                {items.map(payout => {
+                    const status = payoutStatusConfig[payout.status] ?? { label: payout.status, color: "" }
                     return (
-                        <div 
-                            key={payout.id} 
-                            className="border-b border-brand-neutral-5 p-4"
-                        >
-                            <div className="space-y-2">
-                                {/* Header - Payment ID and Status */}
-                                <div className="flex justify-between items-center border-b border-brand-neutral-2">
-                                    <span className="text-xs font-bold text-brand-secondary-9">
-                                        Payment ID: <span className="font-normal">{payout.paymentId}</span>
-                                    </span>
-                                    <span className="text-xs text-brand-neutral-7">Status</span>
-                                </div>
+                        <div key={payout.id} className="border-b border-brand-neutral-5 p-4 space-y-2">
 
-                                {/* Bank Account Info */}
-                                <div className="flex justify-between items-center">
-                                    <div className="flex items-center gap-3">
-                                        <Image
-                                            src={payout.bankAccount.bankLogo}
-                                            alt={payout.bankAccount.bank}
-                                            width={50}
-                                            height={50}
-                                            className="w-8 h-8 object-contain rounded-md"
-                                        />
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-bold text-xs text-brand-secondary-9 mb-1">
-                                                {payout.bankAccount.name}
-                                            </p>
-                                            <p className="text-xs text-brand-secondary-8">
-                                                {payout.bankAccount.bank}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <Badge className={cn(
-                                        "px-2 py-1 rounded-sm text-[11px] border-[0.8px] capitalize border-neutral-4",
-                                        status.color
-                                    )}>
-                                        {status.label}
-                                    </Badge>
-                                </div>
+                            {/* Payment ID + status */}
+                            <div className="flex justify-between items-center border-b border-brand-neutral-2 pb-2">
+                                <span className="text-xs text-brand-secondary-9 truncate max-w-40">
+                                    <span className="font-bold">ID: </span>{payout.id}
+                                </span>
+                                <Badge className={cn(
+                                    "px-2 py-0.5 rounded-sm text-[11px] border-[0.8px] capitalize border-neutral-4",
+                                    status.color
+                                )}>
+                                    {status.label}
+                                </Badge>
+                            </div>
 
-                                {/* Amount and Date */}
-                                <div className="flex justify-between items-center border-t border-brand-neutral-2">
-                                    <div className="flex gap-1 text-xs text-brand-secondary-9">
-                                        <Icon icon="hugeicons:sale-tag-02" width="18" height="18" className="text-brand-primary-6" />
-                                        <p className="font-bold">Amount: <span className="font-normal">₦{payout.amount.toLocaleString()}</span></p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-brand-secondary-9 text-[10px]">
-                                            {payout.payoutDate}{payout.payoutTime}
-                                        </p>
-                                    </div>
+                            {/* Bank info */}
+                            <div>
+                                <p className="font-bold text-xs text-brand-secondary-9">
+                                    {payout.payout_account.account_name}
+                                </p>
+                                <p className="text-xs text-brand-secondary-8">
+                                    {payout.payout_account.bank_name} · {payout.payout_account.account_number}
+                                </p>
+                            </div>
+
+                            {/* Amount + date */}
+                            <div className="flex justify-between items-center border-t border-brand-neutral-2 pt-2">
+                                <div className="flex gap-1 items-center text-xs text-brand-secondary-9">
+                                    <Icon icon="hugeicons:sale-tag-02" className="w-4 h-4 text-brand-primary-6" />
+                                    <span className="font-bold">Amount: </span>
+                                    <span>₦{parseFloat(payout.amount).toLocaleString()}</span>
                                 </div>
+                                <p className="text-[10px] text-brand-secondary-8">
+                                    {format(parseISO(payout.created_at), "MMM d, yyyy")}
+                                </p>
                             </div>
                         </div>
                     )
@@ -166,17 +226,17 @@ export default function PayoutHistoryTable() {
             </div>
 
             {/* Pagination */}
-
             <PaginationControls
-                endIndex={endIndex}
-                startIndex={startIndex}
-                totalItems={mockPayoutTransactions.length}
-                hasNextPage={hasNextPage}
-                hasPreviousPage={hasPreviousPage}
-                onNextPage={nextPage}
-                onPreviousPage={previousPage}
                 currentPage={currentPage}
+                isLoadingMore={isLoading}
                 totalPages={totalPages}
+                totalItems={count}
+                startIndex={(currentPage - 1) * 10 + 1}
+                endIndex={Math.min(currentPage * 10, count)}
+                hasNextPage={currentPage < totalPages}
+                hasPreviousPage={currentPage > 1}
+                onNextPage={() => fetchPage(currentPage + 1)}
+                onPreviousPage={() => fetchPage(currentPage - 1)}
             />
         </div>
     )

@@ -12,6 +12,9 @@ export type FilterKey =
   | 'purchaseDate'
   | 'performance'
   | 'sortBy'
+  | 'priceRange'
+  | 'dateRangePreset'
+  | 'event'
 
 
 export const ALL_FILTERS = {
@@ -30,6 +33,11 @@ export const ALL_FILTERS = {
     label: 'Ticket Type',
     icon: 'hugeicons:ticket-02'
   },
+  priceRange: {
+    value: 'priceRange',
+    label: 'Price Range',
+    icon: "hugeicons:dollar-square"
+  },
   dateRange: {
     value: 'dateRange',
     label: 'Date Range',
@@ -38,6 +46,11 @@ export const ALL_FILTERS = {
   purchaseDate: {
     value: 'purchaseDate',
     label: 'Purchase Date',
+    icon: 'solar:calendar-linear'
+  },
+  dateRangePreset: {
+    value: 'dateRangePreset',
+    label: 'Date Preset',
     icon: 'solar:calendar-linear'
   },
   performance: {
@@ -49,6 +62,11 @@ export const ALL_FILTERS = {
     value: 'sortBy',
     label: 'Sort By',
     icon: 'hugeicons:sliders-horizontal'
+  },
+  event: {
+    value: 'event',
+    label: 'Event',
+    icon: ''
   }
 } as const satisfies Record<FilterKey, TableDataDisplayFilter>
 
@@ -61,7 +79,7 @@ export type TabListItem = {
 export const DashboardUpcomingEventsFilters = {
   filterOptions: [
     ALL_FILTERS.categories,
-    ALL_FILTERS.status,
+    ALL_FILTERS.performance,
     ALL_FILTERS.dateRange,
   ] as const,
 
@@ -73,8 +91,7 @@ export const DashboardUpcomingEventsFilters = {
 
 export const DashboardConsumerListFilters = {
   filterOptions: [
-    ALL_FILTERS.ticketType,
-    ALL_FILTERS.purchaseDate
+    {...ALL_FILTERS.dateRange, label: "Purchase Date"}
   ] as const,
   tabList: [] as const
 }

@@ -1,8 +1,11 @@
 "use client"
 
+import { changePassword } from "@/actions/settings"
 import PasswordInput from "@/components/custom-utils/inputs/PasswordInput"
 import PasswordStrengthIndicator from "@/components/custom-utils/security/PasswordStrengthIndicator"
 import { space_grotesk } from "@/lib/fonts"
+import { useAppDispatch } from "@/lib/redux/hooks"
+import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { cn } from "@/lib/utils"
 import { passwordSchema, PasswordSchema } from "@/schemas/security.schema"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -14,15 +17,32 @@ export default function SecurityPage() {
         register,
         handleSubmit,
         watch,
+        reset,
         formState: { errors, isSubmitting },
     } = useForm<PasswordSchema>({
         resolver: zodResolver(passwordSchema),
     })
 
-    const onSubmit : SubmitHandler<PasswordSchema> = (data) => {
-        console.log("hello")
-    }
+    const dispatch = useAppDispatch()
 
+    const onSubmit: SubmitHandler<PasswordSchema> = async (data) => {
+        const result = await changePassword(data.currentPassword, data.newPassword)
+
+        if (result.success) {
+            reset()
+            dispatch(showAlert({
+                variant:     "success",
+                title:       "Password updated",
+                description: "Your password has been changed successfully.",
+            }))
+        } else {
+            dispatch(showAlert({
+                variant:     "destructive",
+                title:       "Password update failed",
+                description: result.message ?? "Please check your current password and try again.",
+            }))
+        }
+    }
     const newPassword = watch("newPassword")
 
     return (

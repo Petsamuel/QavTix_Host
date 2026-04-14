@@ -1,60 +1,55 @@
 'use client'
 
-import { useState } from 'react'
-import { cn } from '@/lib/utils'
-import RecentActivityTab from '../slots/activity/ActivityTabContent'
-import NotificationsTab from '../slots/activity/NotificationTabContent'
+import Link from 'next/link'
+import { Icon } from '@iconify/react'
 import TopPerformingEventCard from '../slots/top-performing-events/TopPerformingEventItem'
-import { mockPerformingEvents } from '@/components-data/demo-data'
-
-
-type TabType = 'topPerformingEvents' | 'otherTab'
 
 interface TopPerformingEventsSlotPWProps {
-    eventsData: TopPerformingEvent[]
+    eventsData: TrendingTicket[]
 }
 
-export default function TopPerformingEventsSlotPW({
-    eventsData
-}: TopPerformingEventsSlotPWProps) {
+const PREVIEW_COUNT = 4
 
-
-    const [activeTab, setActiveTab] = useState<TabType>('topPerformingEvents')
+export default function TopPerformingEventsSlotPW({ eventsData }: TopPerformingEventsSlotPWProps) {
+    const preview = eventsData.slice(0, PREVIEW_COUNT)
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-brand-neutral-2 overflow-hidden w-full">
             <div className="border-b border-brand-neutral-3">
-                <div className="flex">
-                    <button
-                        onClick={() => setActiveTab('topPerformingEvents')}
-                        className={cn(
-                        "flex-1 px-6 py-4 text-sm md:text-[13px] font-bold transition-colors relative",
-                        activeTab === 'topPerformingEvents'
-                            ? "text-brand-primary-6"
-                            : "text-brand-neutral-6 hover:text-brand-neutral-8"
-                        )}
-                    >
+                <div className="px-6 py-4">
+                    <h2 className="text-sm md:text-[13px] font-bold text-brand-primary-6">
                         Top Performing Events
-                        {activeTab === 'topPerformingEvents' && (
-                            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary-6" />
-                        )}
-                    </button>
+                    </h2>
                 </div>
             </div>
 
-            {/* Tab Content */}
             <div className="py-4 space-y-3 w-full px-4">
-                {
-                    activeTab === 'topPerformingEvents' &&
-                    mockPerformingEvents.map((event, index) => (
-                        <TopPerformingEventCard 
-                            key={event.id} 
-                            event={event} 
-                            rank={index + 1} 
+                {preview.length > 0 ? (
+                    preview.map((event, index) => (
+                        <TopPerformingEventCard
+                            key={event.ticket_id}
+                            event={event}
+                            rank={index + 1}
                         />
                     ))
-                }
+                ) : (
+                    <div className="py-12 text-center text-sm text-brand-neutral-6">
+                        No top performing events yet.
+                    </div>
+                )}
             </div>
+
+            {eventsData.length > PREVIEW_COUNT && (
+                <div className="px-4 pb-4">
+                    <Link
+                        href="/dashboard/events"
+                        className="text-xs flex items-center gap-1 text-brand-primary-6 hover:text-brand-primary-7 font-bold transition-colors"
+                    >
+                        <span>View Full Report</span>
+                        <Icon icon="humbleicons:arrow-right" width="20" height="20" />
+                    </Link>
+                </div>
+            )}
         </div>
     )
 }

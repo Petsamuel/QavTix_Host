@@ -1,12 +1,12 @@
+import { SuccessModalVariant } from '@/components/modals/resources/success-modal-variant';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-type SuccessVariant = 'delete' | 'success';
 
 interface SuccessModalState {
     isOpen: boolean;
     title: string;
     description: string;
-    variant: SuccessVariant;
+    variant: SuccessModalVariant;
     autoClose?: boolean;
     autoCloseDelay?: number;
 }
@@ -27,7 +27,7 @@ export const successModalSlice = createSlice({
         openSuccessModal: (state, action: PayloadAction<{
             title: string;
             description: string;
-            variant?: SuccessVariant;
+            variant?: SuccessModalVariant;
             autoClose?: boolean;
             autoCloseDelay?: number;
         }>) => {
@@ -35,7 +35,7 @@ export const successModalSlice = createSlice({
             state.title = action.payload.title;
             state.description = action.payload.description;
             state.variant = action.payload.variant || 'success';
-            state.autoClose = action.payload.autoClose ?? false;
+            state.autoClose = action.payload.autoClose || false;
             state.autoCloseDelay = action.payload.autoCloseDelay || 3000;
         },
         closeSuccessModal: (state) => {

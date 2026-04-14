@@ -1,11 +1,34 @@
-import CustomersProfilePagContentWrapper from "@/components/page-wrappers/CustomerProfilePageContentWrapper";
-import { delay } from "@/helper-fns/delay";
+import { getCustomerProfile } from "@/actions/customers"
+import CustomersProfilePagContentWrapper from "@/components/page-wrappers/CustomerProfilePageContentWrapper"
+import { notFound } from "next/navigation"
 
-export default async function CustomerProfilePage(){
+interface Props {
+    params: Promise<{ customer_id: string }>
+}
 
-    await delay(5000)
+export default async function CustomerProfilePage({ params }: Props) {
+
+    const userID = parseInt((await params).customer_id)
+
+    const result = await getCustomerProfile({ user_id: userID })
+
+    if (!result.success || !result.data) return notFound()
+
+    const orderHistorySlice = {
+        results:     result.data.order_history.results,
+        count:       result.data.order_history.count,
+        next:        result.data.order_history.next ? 1 : null,
+        previous:    result.data.order_history.previous ? 1 : null,
+        total_pages: Math.ceil(result.data.order_history.count / 10),
+    }
 
     return (
-        <CustomersProfilePagContentWrapper />
+        <CustomersProfilePagContentWrapper
+            userID={userID}
+            profile={result.data.profile}
+            cards={result.data.cards}
+            initialChart={result.data.revenue_chart}
+            initialOrders={orderHistorySlice}
+        />
     )
 }
