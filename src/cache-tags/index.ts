@@ -1,6 +1,7 @@
 export const CACHE_TAGS = {
     DASHBOARD_OVERVIEW: "dashboard-overview",
     UPCOMING_EVENTS:    "upcoming-events",
+    EVENTS: "events",
     DASHBOARD_FEED: "dashboard-feed",
     CUSTOMERS: "customers",
     CUSTOMER: "customer-profile",

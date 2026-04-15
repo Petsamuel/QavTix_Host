@@ -10,24 +10,17 @@ import {
 } from "react"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
-import { getUserLocation } from "@/actions/getters"
 import { extractAccessCode } from "@/helper-fns/extractAccessCode"
 import { PLATFORM_CURRENCY } from "@/components-data/currencies"
-import {
-    initializeHostSubscription,
-    verifyHostSubscription,
-    initializeAttendeeSubscription,
-    verifyAttendeeSubscription,
-} from "@/actions/subscriptions"
-import { useCurrencyConversion } from "@/lib/custom-hooks/useCurrencyConversion"
-import { CONTACT_LINKS } from "@/components-data/navigation/contact-and-socials"
+import { useCurrencyConversion } from "./useCurrencyConversion"
+import { CONTACT_LINKS } from "@/enums/navigation"
+import { getUserLocation, initializeHostSubscription, verifyHostSubscription } from "@/actions/settings"
+
 
 type BillingCycle   = "monthly" | "annual"
-type AccountType    = "host" | "attendee"
 type CheckoutStatus = "idle" | "processing" | "success" | "error"
 
 interface PricingCheckoutState {
-    accountType:      AccountType
     selectedPlan:     PricingPlan | null
     successPlan:      PricingPlan | null   // THE PLAN THAT COMPLETED PAYMENT SUCCESSFULLY
     billingCycle:     BillingCycle
@@ -52,16 +45,14 @@ const PricingCheckoutContext = createContext<PricingCheckoutContextType | undefi
 
 interface Props {
     children:    ReactNode
-    accountType: AccountType
 }
 
-export function PricingCheckoutProvider({ children, accountType }: Props) {
+export function PricingCheckoutProvider({ children }: Props) {
 
     const dispatch = useAppDispatch()
 
-    const { currency } = useAppSelector(store => store.settings)
-    const { user }     = useAppSelector(store => store.auth)
-    const currencyCode = currency?.code ?? PLATFORM_CURRENCY
+    const { user }     = useAppSelector(store => store.authUser)
+    const currencyCode = user?.currency || PLATFORM_CURRENCY
 
     const [selectedPlan,     setSelectedPlan]     = useState<PricingPlan | null>(null)
     const [successPlan,      setSuccessPlan]      = useState<PricingPlan | null>(null)
@@ -126,16 +117,10 @@ export function PricingCheckoutProvider({ children, accountType }: Props) {
         try {
             const { country } = await getUserLocation()
 
-            const init = accountType === "host"
-                ? await initializeHostSubscription({
+            const init = await initializeHostSubscription({
                     plan_slug:     plan.id,
                     billing_cycle: billingCycle,
                     country,
-                    currency:      currencyCode,
-                })
-                : await initializeAttendeeSubscription({
-                    plan_slug:     plan.id,
-                    billing_cycle: billingCycle,
                     currency:      currencyCode,
                 })
 
@@ -157,15 +142,9 @@ export function PricingCheckoutProvider({ children, accountType }: Props) {
             handler.resumeTransaction(accessCode, {
 
                 onSuccess: async (transaction: { reference: string }) => {
-                    const verify = accountType === "host"
-                        ? await verifyHostSubscription({
+                    const verify =  await verifyHostSubscription({
                             reference: transaction.reference,
                             save_card: true,
-                            country,
-                        })
-                        : await verifyAttendeeSubscription({
-                            reference: transaction.reference,
-                            save_card: false,
                             country,
                         })
 
@@ -208,10 +187,9 @@ export function PricingCheckoutProvider({ children, accountType }: Props) {
             }))
         }
 
-    }, [accountType, billingCycle, currencyCode, dispatch, user])
+    }, [billingCycle, currencyCode, dispatch, user])
 
     const value = useMemo<PricingCheckoutContextType>(() => ({
-        accountType,
         selectedPlan,
         successPlan,
         billingCycle,
@@ -227,7 +205,7 @@ export function PricingCheckoutProvider({ children, accountType }: Props) {
         subscribe,
         resetSuccess,
     }), [
-        accountType, selectedPlan, successPlan, billingCycle, status,
+        selectedPlan, successPlan, billingCycle, status,
         processingPlanId, currencyCode, isRatesLoading, convertedPrice,
         effectivePrice, selectPlan, clearSelectedPlan, subscribe, resetSuccess,
     ])

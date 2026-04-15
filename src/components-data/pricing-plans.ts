@@ -93,6 +93,7 @@ export const hostPricingData: PricingData = {
                 'Custom integrations & workflows',
             ],
             buttonText:    'Contact sales',
+            highlighted: true,
             buttonVariant: 'secondary',
         },
     ],

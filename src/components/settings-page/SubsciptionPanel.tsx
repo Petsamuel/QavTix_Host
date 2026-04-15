@@ -13,16 +13,18 @@ import { useRouter } from "next/navigation"
 import { renewSubscription, toggleAutoRenew } from "@/actions/settings"
 import { hostPricingData } from "@/components-data/pricing-plans"
 import { usePricingCheckout } from "@/custom-hooks/PricingCheckoutContext"
+import PricingCard from "../cards/PricingCard"
+import ActionButton1 from "../custom-utils/buttons/ActionBtn1"
 
 
 
 const PLAN_ORDER: PlanSlug[] = ["standard", "pro", "enterprise"]
 
 const PLAN_STATUS_STYLES: Record<SubscriptionStatus, string> = {
-    active:    "bg-green-50  text-green-700  border-green-200",
-    trialing:  "bg-blue-50   text-blue-700   border-blue-200",
+    active:    "bg-green-50/50  text-green-700  border-green-200",
+    trialing:  "bg-blue-50/50   text-blue-700   border-blue-200",
     cancelled: "bg-neutral-100 text-neutral-500 border-neutral-200",
-    expired:   "bg-red-50    text-red-600    border-red-200",
+    expired:   "bg-red-50/50    text-red-600    border-red-200",
 }
 
 const PLAN_STATUS_LABEL: Record<SubscriptionStatus, string> = {
@@ -68,37 +70,42 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
     const currentPricingPlan = hostPricingData.plans.find(p => p.id === currentPlanSlug)
         ?? hostPricingData.plans[0]
 
-    // Auto-renew toggle
     const handleAutoRenewToggle = useCallback(async () => {
-        if (isTogglingAR || !data) return
-        const newValue = !data.auto_renew
+        if (isTogglingAR || !data) return;
+        
+        const previousValue = data.auto_renew;
+        const newValue = !previousValue;
+        
         setIsTogglingAR(true)
-
         // Optimistic update
         setData(prev => prev ? { ...prev, auto_renew: newValue } : prev)
 
-        const result = await toggleAutoRenew(newValue)
-        setIsTogglingAR(false)
+        try {
+            const result = await toggleAutoRenew(newValue)
+            
+            if (!result.success) {
+                throw new Error(result.message)
+            }
 
-        if (!result.success) {
-            // Revert on failure
-            setData(prev => prev ? { ...prev, auto_renew: !newValue } : prev)
             dispatch(showAlert({
-                variant:     "destructive",
-                title:       "Could not update auto-renewal",
-                description: result.message ?? "Please try again.",
-            }))
-        } else {
-            dispatch(showAlert({
-                variant:     "default",
-                title:       "Auto-renewal updated",
-                description: newValue
-                    ? "Your subscription will automatically renew."
-                    : "Auto-renewal has been disabled.",
+                variant: "default",
+                title: "Auto-renewal updated",
+                description: newValue ? "Enabled." : "Disabled.",
             }))
             router.refresh()
+        } catch (error: any) {
+            // Revert on failure
+            setData(prev => prev ? { ...prev, auto_renew: previousValue } : prev)
+            dispatch(showAlert({
+                variant: "destructive",
+                title: "Update failed",
+                description: error.message ?? "Please try again.",
+            }))
+        } finally {
+            setIsTogglingAR(false)
         }
     }, [data, isTogglingAR, dispatch, router])
+
 
     // Renew
     const handleRenew = useCallback(async () => {
@@ -118,14 +125,14 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
         if (result.success) router.refresh()
     }, [isRenewing, dispatch, router])
 
-    // Upgrade──
+    // Upgrad
     const handleUpgrade = useCallback(() => {
         const nextPlan = hostPricingData.plans[currentPlanIndex + 1]
         if (!nextPlan) return
         subscribe(nextPlan)
     }, [currentPlanIndex, subscribe])
 
-    // Cancel — opens password modal──
+    // Cancel — opens password moda
     const handleCancel = useCallback(() => {
         dispatch(openPasswordModal("cancel_plan"))
     }, [dispatch])
@@ -165,7 +172,7 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
         <main className="w-full pt-8 pb-16">
             <div className="space-y-12 max-w-4xl">
 
-                {/* ── Auto-Renewal─ */}
+                {/* Auto-Renewal */}
                 <section className="space-y-6">
                     <header>
                         <h3 className="text-base font-bold text-brand-secondary-9">
@@ -191,7 +198,7 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                     </div>
                 </section>
 
-                {/* ── Plan Status─ */}
+                {/* Plan Status */}
                 <section className="space-y-6">
                     <header>
                         <div className="flex items-center gap-3">
@@ -212,89 +219,14 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                     <div className="w-full border-t-[1.5px] border-dashed border-brand-secondary-2" />
 
                     {/* Plan card + features */}
-                    <div className="flex flex-col lg:flex-row gap-6">
-
-                        {/* Pricing card — just the card shell, no feature list */}
-                        <div className="w-full lg:w-72 shrink-0">
-                            <div className={cn(
-                                "rounded-[32px] p-[1.6px]",
-                                currentPricingPlan.highlighted
-                                    ? "bg-linear-to-br from-[#0052CC] via-[#FF7A21] to-[#6B7280]"
-                                    : "border border-neutral-5 rounded-[32px]"
-                            )}>
-                                <div className="h-full p-3 bg-white rounded-[30px]">
-                                    <div className={cn(
-                                        "rounded-xl p-4 flex flex-col gap-4",
-                                        currentPricingPlan.highlighted
-                                            ? "bg-linear-to-br from-accent-6/20 to-secondary-6/20"
-                                            : "bg-transparent"
-                                    )}>
-                                        <span className={cn(
-                                            "text-sm font-medium w-fit px-3 py-1 rounded-full",
-                                            currentPricingPlan.highlighted
-                                                ? "bg-primary-1 text-secondary-9"
-                                                : "bg-neutral-2 text-neutral-8"
-                                        )}>
-                                            {data.plan.name}
-                                        </span>
-
-                                        <div>
-                                            <div className="flex items-baseline gap-1.5 flex-wrap">
-                                                <span className="text-2xl font-bold text-secondary-9">
-                                                    ₦{Number(
-                                                        data.billing_cycle === "annual"
-                                                            ? data.plan.annual_price
-                                                            : data.plan.monthly_price
-                                                    ).toLocaleString()}
-                                                </span>
-                                                <span className="text-sm text-neutral-7">
-                                                    / {data.billing_cycle}
-                                                </span>
-
-                                                {/* Billing cycle badge */}
-                                                <span className="flex items-center gap-0.5 text-[10px] font-medium rounded-full overflow-hidden border border-neutral-4">
-                                                    <span className={cn(
-                                                        "px-2 py-0.5",
-                                                        data.billing_cycle === "monthly"
-                                                            ? "bg-brand-accent-6 text-white"
-                                                            : "text-neutral-6"
-                                                    )}>
-                                                        Monthly
-                                                    </span>
-                                                    <span className={cn(
-                                                        "px-2 py-0.5",
-                                                        data.billing_cycle === "annual"
-                                                            ? "bg-brand-accent-6 text-white"
-                                                            : "text-neutral-6"
-                                                    )}>
-                                                        Yearly
-                                                    </span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <p className="text-sm text-neutral-7 mt-4 mb-6 px-1">
-                                        {currentPricingPlan.description}
-                                    </p>
-
-                                    {/* Upgrade CTA inside card */}
-                                    {canUpgrade && (
-                                        <button
-                                            onClick={handleUpgrade}
-                                            className="w-full py-4 rounded-4xl text-sm font-medium bg-primary-6 hover:bg-primary-7 text-white transition-all"
-                                        >
-                                            Upgrade
-                                        </button>
-                                    )}
-
-                                    {isHighestPlan && isActive && (
-                                        <div className="w-full py-3 rounded-4xl text-sm font-medium text-center bg-neutral-2 text-neutral-6">
-                                            Highest Plan
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                    <div className="flex flex-col md:flex-row gap-6">
+                        <div className="md:w-[20em]">
+                            <PricingCard 
+                                plan={currentPricingPlan} 
+                                index={currentPlanIndex} 
+                                canUpgrade={canUpgrade}
+                                onUpgrade={handleUpgrade}
+                            />
                         </div>
 
                         {/* Feature list */}
@@ -304,9 +236,9 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                                     <li key={i} className="flex items-start gap-2.5 py-2 break-inside-avoid">
                                         <Icon
                                             icon="hugeicons:checkmark-circle-03"
-                                            className="w-5 h-5 text-neutral-5 shrink-0 mt-0.5"
+                                            className="w-5 h-5 text-brand-neutral-5 shrink-0 mt-0.5"
                                         />
-                                        <span className="text-sm text-secondary-9 font-medium">
+                                        <span className="text-xs text-brand-secondary-9 font-medium">
                                             {feature}
                                         </span>
                                     </li>
@@ -315,43 +247,30 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                         </div>
                     </div>
                 </section>
+            </div>
+            {/* Actions */}
+            <div className="flex items-center gap-4 flex-wrap mt-8">
+                <ActionButton1
+                    buttonText="Renew Subscription"
+                    action={handleRenew}
+                    isLoading={isRenewing}
+                    isDisabled={!canRenew}
+                    icon="stash:arrow-right"
+                    iconPosition="right"
+                    className="px-8 py-4 text-sm! font-semibold hover:bg-brand-primary-2 disabled:opacity-50!"
+                />
 
-                {/* ── Actions─ */}
-                <div className="flex items-center gap-4 flex-wrap">
-                    {canRenew && (
-                        <button
-                            onClick={handleRenew}
-                            disabled={isRenewing}
-                            className={cn(
-                                "flex items-center gap-2 px-8 py-4 rounded-full text-sm font-semibold transition-all",
-                                "bg-brand-primary-1 text-brand-primary-6 hover:bg-brand-primary-2",
-                                "disabled:opacity-60 disabled:cursor-not-allowed"
-                            )}
-                        >
-                            {isRenewing ? (
-                                <Icon icon="eos-icons:three-dots-loading" className="w-5 h-5" />
-                            ) : (
-                                <>
-                                    <span>Renew Subscription</span>
-                                    <Icon icon="stash:arrow-right" className="w-5 h-5" />
-                                </>
-                            )}
-                        </button>
-                    )}
-
-                    {isActive && (
-                        <button
-                            onClick={handleCancel}
-                            className={cn(
-                                "px-8 py-4 rounded-full text-sm font-semibold transition-all",
-                                "border border-neutral-4 text-neutral-7 hover:border-red-400 hover:text-red-500",
-                            )}
-                        >
-                            Cancel Subscription
-                        </button>
-                    )}
-                </div>
-
+                {isActive && (
+                    <button
+                        onClick={handleCancel}
+                        className={cn(
+                            "px-8 py-4 rounded-full text-sm font-semibold transition-all",
+                            "border border-brand-neutral-8 text-brand-neutral-8 hover:border-red-400 hover:text-red-500",
+                        )}
+                    >
+                        Cancel Subscription
+                    </button>
+                )}
             </div>
         </main>
     )

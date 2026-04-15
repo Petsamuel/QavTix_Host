@@ -1,5 +1,6 @@
 export const DASHBOARD_OVERVIEW_ENDPOINT = "host/dashboard/overview/"
 export const HOST_UPCOMING_EVENTS_ENDPOINT = "host/events/management"
+export const EVENTS_ENDPOINT = "host/events/management"
 export const DASHBOARD_FEED_ENDPOINT = "host/dashboard/feed/"
 
 export const CUSTOMERS_ENDPOINT = "host/customers"
@@ -17,13 +18,16 @@ export const CHECKIN_ATTENDEES_ENDPOINT = "host/checkin/attendees/"
 export const CHECKIN_SCAN_ENDPOINT = "host/checkin/scan/"
 
 
+export const HOST_PLAN_CHECKOUT_ENDPOINT = "payments/plans/subscribe/"
+export const HOST_PLAN_CHECKOUT_VERIFY_ENDPOINT = "payments/plans/complete/"
+
 
 export const ADD_PAYMENT_CARD = "payments/cards/initiate/"
 export const ADD_PAYMENT_CARD_CONFIRM = "payments/cards/confirm/"
 
-export const GET_SUBSCRIPTION_ENDPOINT    = "host/subscriptions/status/"
+export const GET_SUBSCRIPTION_ENDPOINT    = "host/subscription/status/"
 export const TOGGLE_AUTO_RENEW_ENDPOINT   = "host/auto-renew/toggle/"
-export const RENEW_SUBSCRIPTION_ENDPOINT  = "host/subscriptions/renew/"
+export const RENEW_SUBSCRIPTION_ENDPOINT  = "host/subscription/renew/"
 export const CANCEL_SUBSCRIPTION_ENDPOINT = "payments/plans/cancel/"
 
 

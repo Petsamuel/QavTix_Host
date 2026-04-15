@@ -222,3 +222,43 @@ export function mapCheckInMetricsCards(cards: CheckInCards, currency: string) : 
         },
     ]
 }
+
+
+
+
+export function mapEventsCards(cards: EventCards): MetricCardData[] {
+    return [
+        {
+            id:          "live",
+            value:       String(cards.live),
+            label:       "Live Events",
+            description: "Currently published & active",
+            icon:        "hugeicons:calendar-02",
+            iconColor:   "text-[#359160]",
+        },
+        {
+            id:          "draft",
+            value:       String(cards.draft),
+            label:       "Drafts",
+            description: "Unpublished events",
+            icon:        "hugeicons:pencil-edit-01",
+            iconColor:   "text-brand-accent-5",
+        },
+        {
+            id:          "ended",
+            value:       String(cards.ended),
+            label:       "Ended",
+            description: "Past events",
+            icon:        "mingcute:sandglass-line",
+            iconColor:   "text-brand-accent-4",
+        },
+        {
+            id:          "sold-out",
+            value:       String(cards.sold_out),
+            label:       "Sold Out",
+            description: "Fully booked events",
+            icon:        "hugeicons:ticket-02",
+            iconColor:   "text-brand-primary-4",
+        },
+    ]
+}

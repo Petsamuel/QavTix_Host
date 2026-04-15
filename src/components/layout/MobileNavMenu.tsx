@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAVIGATION_LINKS } from "@/enums/navigation";
+import { NAVIGATION_LINKS, SETTINGS_SUB_LINKS } from "@/enums/navigation";
 import { cn } from "@/lib/utils";
 import Logo from "./Logo";
 import AuthUserDetails from "./AuthUserDetails";
 import { useEffect } from "react";
+import NeedHelpButton from "../custom-utils/buttons/NeedHelpButton";
 
 interface MobileNavMenuProps {
     isOpen: boolean;
@@ -17,6 +18,8 @@ interface MobileNavMenuProps {
 
 export default function MobileNavMenu({ isOpen, onClose }: MobileNavMenuProps) {
     const pathName = usePathname()
+
+    const isSettingsActive = pathName?.startsWith(NAVIGATION_LINKS.SETTINGS.href)
 
     const isActiveRoute = (route: string) => {
         if (!pathName) return false;
@@ -75,14 +78,16 @@ export default function MobileNavMenu({ isOpen, onClose }: MobileNavMenuProps) {
                             <ul className="flex flex-col gap-3">
                                 {Object.values(NAVIGATION_LINKS).map((v) => {
                                     const isActive = isActiveRoute(v.href);
+                                    const isSettingsLink = v.href === NAVIGATION_LINKS.SETTINGS.href;
+
                                     return (
                                         <li key={v.href}>
                                             <Link
-                                                href={v.href}
+                                                href={isSettingsLink ? SETTINGS_SUB_LINKS[0].href : v.href}
                                                 onClick={onClose}
                                                 className={cn(
                                                     "relative flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 text-[13px]",
-                                                    isActive 
+                                                    isActive || (isSettingsLink && isSettingsActive)
                                                         ? "bg-brand-accent-4 text-white font-bold" 
                                                         : "text-brand-secondary-9 hover:bg-brand-accent-3/50"
                                                 )}
@@ -90,20 +95,55 @@ export default function MobileNavMenu({ isOpen, onClose }: MobileNavMenuProps) {
                                                 <Icon icon={v.icon} className="size-5" />
                                                 <span>{v.label}</span>
                                                 
-                                                {isActive && (
-                                                    <Icon 
-                                                        icon="basil:caret-right-outline" 
-                                                        className="absolute right-3 size-5" 
-                                                    />
-                                                )}
+                                                <Icon 
+                                                    icon="basil:caret-right-outline" 
+                                                    className={cn(
+                                                        "absolute right-3 size-5 transition-transform duration-300",
+                                                        (isSettingsLink && isSettingsActive) && "rotate-90",
+                                                        (!isSettingsLink && !isActive) && "hidden"
+                                                    )} 
+                                                />
                                             </Link>
+
+                                            {isSettingsLink && (
+                                                <div className={cn(
+                                                    "grid transition-all duration-300 ease-in-out overflow-hidden",
+                                                    isSettingsActive ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"
+                                                )}>
+                                                    <ul className="relative ml-3 flex flex-col min-h-0">
+                                                        <div className="absolute left-0 top-0 h-[88%] my-auto bottom-0 w-px bg-brand-neutral-5" />
+
+                                                        {SETTINGS_SUB_LINKS.map((sub) => {
+                                                            const isSubActive = pathName === sub.href;
+                                                            return (
+                                                                <li key={sub.href} className="relative flex items-center">
+                                                                    <div className="absolute -left-[3.5px] z-10 size-2 rounded-full border border-brand-secondary-3/50 bg-brand-secondary-2" />
+                                                                    <Link
+                                                                        href={sub.href}
+                                                                        onClick={onClose}
+                                                                        className={cn(
+                                                                            "flex-1 py-3 ml-3 pl-3 text-[13px] transition-colors",
+                                                                            isSubActive
+                                                                                ? "text-brand-accent-4 bg-brand-accent-3/30 font-semibold rounded-md"
+                                                                                : "text-brand-secondary-7 hover:text-brand-accent-4"
+                                                                        )}
+                                                                    >
+                                                                        {sub.label}
+                                                                    </Link>
+                                                                </li>
+                                                            )
+                                                        })}
+                                                    </ul>
+                                                </div>
+                                            )}
                                         </li>
                                     );
                                 })}
                             </ul>
                         </div>
 
-                        <div className="pt-6 border-t border-brand-accent-3/30">
+                        <div className="pt-6 flex flex-col gap-4 border-t border-brand-accent-3/30">
+                            <NeedHelpButton />
                             <AuthUserDetails />
                         </div>
                     </motion.div>

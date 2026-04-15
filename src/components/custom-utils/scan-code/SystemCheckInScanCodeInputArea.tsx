@@ -7,6 +7,7 @@ import Image from "next/image"
 import QRScannerDialog from "./QRScannerDialog"
 import { scanCheckIn } from "@/actions/checkin"
 import { formatDateTime } from "@/helper-fns/date-utils"
+import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 
 type ScanState = "idle" | "scanning" | "success" | "duplicate" | "invalid" | "error"
 
@@ -34,6 +35,8 @@ export default function SystemCheckInScanCodeInputArea() {
 
     const stateConfig = SCAN_STATE_CONFIG[scanState]
 
+    const { trigger } = useRevalidate("checkin")
+
     const processToken = async (t: string) => {
         if (!t.trim()) return
 
@@ -50,7 +53,10 @@ export default function SystemCheckInScanCodeInputArea() {
         const data = result.data!
         setScanResult(data)
 
-        if (data.status === "checked_in")  setScanState("success")
+        if (data.status === "checked_in") {
+            setScanState("success")
+            trigger()
+        } 
         if (data.status === "duplicate")   setScanState("duplicate")
         if (data.status === "invalid")     setScanState("invalid")
     }

@@ -12,4 +12,4 @@ interface FilterValues {
     event?: string | null
 }
 
-type RevalidateTarget = "financials" | "marketing" | "upcoming-events" | "customers"
+type RevalidateTarget = "financials" | "marketing" | "upcoming-events" | "customers" | "checkin" | "events"

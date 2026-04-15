@@ -66,8 +66,6 @@ export default function PasswordModal() {
                     title:          "Deletion Complete",
                     description:    "Your account has been permanently removed. Thank you for being with us.",
                     variant:        "account_deleted",
-                    autoClose:      true,
-                    autoCloseDelay: 6000,
                 }))
                 setTimeout(async () => {
                     await logOut()
@@ -91,8 +89,6 @@ export default function PasswordModal() {
                     title:       "Plan Cancelled",
                     description: "Your subscription has been cancelled. You'll retain access until the end of your billing period.",
                     variant:     "success",
-                    autoClose:   true,
-                    autoCloseDelay: 6000,
                 }))
             } else {
                 dispatch(showAlert({
@@ -108,6 +104,8 @@ export default function PasswordModal() {
             console.warn("[PasswordModal] Unknown actionType:", actionType)
             setIsProcessing(false)
         }
+
+        window.location.reload()
     }
 
     return (
@@ -121,7 +119,7 @@ export default function PasswordModal() {
                 <DialogTitle className="text-xl font-bold text-brand-secondary-9">
                     Enter Password
                 </DialogTitle>
-                <DialogDescription className="text-sm text-brand-secondary-5 mt-1">
+                <DialogDescription className="text-sm text-brand-secondary-5">
                     Enter your password to confirm
                 </DialogDescription>
             </DialogHeader>

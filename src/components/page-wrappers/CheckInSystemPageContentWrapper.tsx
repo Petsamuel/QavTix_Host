@@ -65,6 +65,7 @@ export default function CheckInSystemPageContentWrapper({ initialMetrics, initia
                 staticParams: {},
             }],
             activeTab: "attendees",
+            revalidateTarget: "checkin"
         },
         mergedFilters,
     )

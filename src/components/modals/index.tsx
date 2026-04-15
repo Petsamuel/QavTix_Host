@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { popPopupAlert, triggerPopupAlert } from "@/lib/redux/slices/popupAlertSlice";
 import { payoutPopupAlert, POPUP_MESSAGE_ALERT_CONFIG, verificationPendingPopupAlert } from "./resources/popup-message-alert-config";
 import CustomGlobalAlert from "../custom-utils/alerts/CustomGlobalAlert";
+import PasswordModal from "./PasswordConfirmationModal";
 
 export default function PopUpsRenderer(){
 
@@ -44,6 +45,7 @@ export default function PopUpsRenderer(){
             <PopUpMessageAlertModal />
             <SuccessModal />
             <ConfirmationModal />
+            <PasswordModal />
         </>
     )
 }

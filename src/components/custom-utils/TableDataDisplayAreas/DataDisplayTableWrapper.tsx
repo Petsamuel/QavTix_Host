@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 import SearchTableInput1 from "./tools/SearchTableInput"
 import { Dispatch, ReactNode, SetStateAction } from "react";
 import DataCountIndicator from "./tools/DataCountIndicator";
-import { DashboardUpcomingEventsFilters, MarketingToolsFilter, SystemCheckInDataTableFilters, TableDataDisplayFilter } from "./resources/avaliable-filters";
+import { DashboardUpcomingEventsFilters, MarketingToolsFilter, MyEventsPageFilters, SystemCheckInDataTableFilters, TableDataDisplayFilter } from "./resources/avaliable-filters";
 import ActiveFilterChips from "./filters/ActiveFilterChip";
 import { FilterRenderer } from "./filters/FilterRenderer";
 
@@ -10,12 +10,13 @@ import { FilterRenderer } from "./filters/FilterRenderer";
 interface DataDisplayTableWrapperProps {
     tabs?: typeof DashboardUpcomingEventsFilters.tabList | 
     typeof MarketingToolsFilter.tabList |
-    typeof SystemCheckInDataTableFilters.tabList
+    typeof SystemCheckInDataTableFilters.tabList |
+    typeof MyEventsPageFilters.tabList 
 
     activeTab?:         string
     setActiveTab?:      Dispatch<SetStateAction<string>>
     filters?:           Partial<FilterValues>
-    categories?:         Category[]
+    categories?:        Category[]
     setFilters?:        Dispatch<SetStateAction<Partial<FilterValues>>>
     filterOptions?:     readonly TableDataDisplayFilter[]
     showSearch?:        boolean

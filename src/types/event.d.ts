@@ -1,28 +1,3 @@
-interface TicketTier {
-  id: string
-  name: string
-  price: number
-  originalPrice: number
-  currency: string
-  description?: string
-  features?: string[]
-  available: boolean
-  soldOut?: boolean
-}
-
-interface Discount {
-    type: 'coupon' | 'membership'
-    code?: string
-    percentage?: number
-    amount?: number
-    description?: string
-}
-
-interface CheckoutTicket extends TicketTier {
-    quantity: number
-}
-
-
 interface PriceRange {
     min: number
     max: number
@@ -39,48 +14,80 @@ interface Location {
     state: string
 }
 
-
-
-type IEventStatus = "selling-fast" | "sold-out" | "new" | "near-capacity" | "low-sales" | "starts-soon"
-
-interface IEvent {
-    id: string
-    image: string
-    status?: IEventStatus
-    category: string
-    host: string
-    title: string
-    date: string //DateString
-    location: string
-    price: string
-    originalPrice?: string
-    href: string
-    attendees: Attendee[]
+interface EventImage {
+    image_url: string | null
+    video_url: string | null
 }
 
-interface FeaturedEvent {
-    id: number
-    image: string
-    title: string
+type EventStatus      = "active" | "draft" | "ended" | "sold-out" | "cancelled" | "banned"
+type EventPerformance = "fully_booked" | "almost_full" | "moderate_sales" | "low_sales" | "no_sales"
+
+interface OrganizerEvent {
+    id:                      string
+    status:                  EventStatus
+    title:                   string
+    category:                string
+    event_image:             EventImage
+    start_datetime:          string
+    event_location:          string
+    tickets_sold_percentage: number
+    tickets_total_revenue:   number
+    tickets_listed:          number
+    tickets_sold:            number
+    views_count:             number
+    saves_count:             number
+    performance:             EventPerformance
+}
+
+interface EventCards {
+    live:     number
+    draft:    number
+    ended:    number
+    sold_out: number
+}
+
+// Paginated response shape (data envelope)
+interface EventsData {
+    count:       number
+    total_pages: number
+    page:        number
+    next:        number | null
+    previous:    number | null
+    cards:       EventCards
+    results:     OrganizerEvent[]
+}
+
+interface GetEventsParams {
+    category?:    number
+    end_date?:    string
+    ordering?:    string
+    page?:        number
+    performance?: EventPerformance
+    search?:      string
+    start_date?:  string
+    status?:      EventStatus
+}
+
+interface GetEventsResult {
+    success:  boolean
+    data?:    EventsData
+    message?: string
 }
 
 
-interface TopPerformingEvent extends Partial<IEvent> {
-    conversionRate: number
-    ticketsSold: number
-    totalTickets: number
-    revenueGenerated: number
-    currency: string
+type BulkEventActionId =
+    | "bulk-delete"
+    | "bulk-cancel"
+    | "bulk-unpublish"
+    | "bulk-send-update"
+    | "bulk-download"
+
+interface BulkEventAction {
+    id:       BulkEventActionId
+    label:    string
+    icon:     string
+    variant?: "default" | "danger"
 }
-
-
-interface EventTableData extends IEvent {
-    ticketsSold: number
-    totalTickets: number
-    revenue: number
-    time: string
-}
-
 
 
 
