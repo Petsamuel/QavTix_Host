@@ -1,7 +1,7 @@
 "use server"
 
 import { CACHE_TAGS } from "@/cache-tags"
-import { CUSTOMERS_ENDPOINT } from "@/endpoints"
+import { CUSTOMER_DETAILS_ENDPOINT, CUSTOMER_LIST_DOWNLOAD_ENDPOINT, CUSTOMERS_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { cookies } from "next/headers"
 
@@ -69,7 +69,7 @@ export async function getCustomerProfile(
         const { user_id, ...rest } = params
 
         const url = new URL(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/host/customers/${user_id}/`
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMER_DETAILS_ENDPOINT.replace("[user_id]", user_id?.toString() || "")}`
         )
 
         const entries: [string, string | number | undefined][] = [
@@ -107,5 +107,46 @@ export async function getCustomerProfile(
     } catch (err) {
         console.error("[getCustomerProfile] error:", err)
         return { success: false, message: "Failed to load customer profile." }
+    }
+}
+
+
+
+export async function getAttendeesExport(): Promise<{ 
+    success: boolean; 
+    message?: string;
+    blob?: Blob;
+}> {
+    try {
+        const token = await getToken()
+        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMER_LIST_DOWNLOAD_ENDPOINT}`
+
+        const res = await fetch(url, {
+            headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+        })
+
+        if (!res.ok) {
+            const json = await res.json().catch(() => ({}))
+            return { 
+                success: false, 
+                message: handleApiError(json) || "Failed to export attendees" 
+            }
+        }
+
+        const blob = await res.blob()
+
+        return { 
+            success: true, 
+            blob 
+        }
+
+    } catch (err) {
+        console.error("[getAttendeesExport] error:", err)
+        return { 
+            success: false, 
+            message: "Failed to download attendee list." 
+        }
     }
 }

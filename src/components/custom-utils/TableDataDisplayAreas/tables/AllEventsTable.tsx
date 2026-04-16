@@ -4,12 +4,12 @@ import { Icon }            from "@iconify/react"
 import EventInfo           from "../../event/EventInfo"
 import { Checkbox }        from "@/components/ui/checkbox"
 import { Dispatch, SetStateAction } from "react"
-import { myEventsStatusConfig }     from "../resources/status-config"
 import EventsItemDropdown  from "../../dropdown/ItemActionDropdown"
-import { liveEventActions } from "../../dropdown/resources/events-actions"
 import { formatDateTime }   from "@/helper-fns/date-utils"
 import TableLoader          from "@/components/loaders/TableLoader"
 import EmptyTicketsState    from "../empty-state"
+import { buildEndedEventActions, buildLiveEventActions } from "../../dropdown/resources/events-actions"
+import { useRouter } from "next/navigation"
 
 interface AllEventsTableProps {
     items:             OrganizerEvent[]
@@ -40,6 +40,8 @@ export default function AllEventsTable({
     count, currentPage, totalPages, fetchPage,
     selectedEvents, setSelectedEvents,
 }: AllEventsTableProps) {
+
+    const router = useRouter()
 
     const isAllSelected =
         items.length > 0 && items.every(e => selectedEvents.includes(e.id))
@@ -98,7 +100,7 @@ export default function AllEventsTable({
                                 <th className="text-left p-4 text-sm font-semibold text-brand-secondary-8 whitespace-nowrap">Location</th>
                                 <th className="text-left p-4 text-sm font-semibold text-brand-secondary-8 whitespace-nowrap">Tickets Sold</th>
                                 <th className="text-left p-4 text-sm font-semibold text-brand-secondary-8 whitespace-nowrap">Revenue</th>
-                                <th className="w-12 p-4" />
+                                <th className="p-4" />
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-brand-neutral-2 bg-white">
@@ -124,7 +126,7 @@ export default function AllEventsTable({
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <EventInfo variant="desktop" category={event.category} image={event.event_image.image_url ?? ""} title={event.title} />
+                                            <EventInfo variant="desktop" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
                                         </td>
                                         <td className="p-4">
                                             <p className="text-xs text-brand-secondary-9 whitespace-nowrap">{formatDateTime(event.start_datetime)}</p>
@@ -146,7 +148,21 @@ export default function AllEventsTable({
                                             </p>
                                         </td>
                                         <td className="p-4" onClick={e => e.stopPropagation()}>
-                                            <EventsItemDropdown actions={liveEventActions} />
+                                            {
+                                                event.status === "draft" ?
+                                                <p className="text-[10px]">See action on draft tab</p>
+                                                :
+                                                <EventsItemDropdown 
+                                                    eventID={event.id}
+                                                    eventName={event.title}
+                                                    actions={
+                                                        event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                        buildLiveEventActions(event.id, event.is_featured, router)
+                                                        :
+                                                        buildEndedEventActions(event.id, router)
+                                                    } 
+                                                />
+                                            }
                                         </td>
                                     </tr>
                                 )
@@ -174,10 +190,24 @@ export default function AllEventsTable({
                                     </div>
                                     <div className="flex items-center gap-1"><span className="font-bold">Saves:</span><span>{event.saves_count}</span></div>
                                     <div className="flex items-center gap-1"><span className="font-bold">Views:</span><span>{event.views_count}</span></div>
-                                    <EventsItemDropdown actions={liveEventActions} />
+                                    {
+                                        event.status === "draft" ?
+                                        null
+                                        :
+                                        <EventsItemDropdown 
+                                            eventID={event.id}
+                                            eventName={event.title}
+                                            actions={
+                                                event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                buildLiveEventActions(event.id, event.is_featured, router)
+                                                :
+                                                buildEndedEventActions(event.id, router)
+                                            } 
+                                        />
+                                    }
                                 </div>
                                 <div className="flex items-start justify-between gap-3">
-                                    <EventInfo variant="mobile" category={event.category} image={event.event_image.image_url ?? ""} title={event.title} />
+                                    <EventInfo variant="mobile" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
                                     <div className="flex flex-col text-xs text-brand-secondary-9">
                                         <span className="font-bold">Date & Time</span>
                                         <span>{formatDateTime(event.start_datetime)}</span>

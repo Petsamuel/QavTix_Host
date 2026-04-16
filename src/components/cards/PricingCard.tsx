@@ -7,7 +7,7 @@ import { Icon } from "@iconify/react"
 import { motion, Variants } from "framer-motion"
 import { useRef, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { usePricingCheckout } from "@/custom-hooks/PricingCheckoutContext"
+import { usePricingCheckout } from "@/contexts/checkout/PricingCheckoutContext"
 
 
 interface PricingCardProps {
@@ -86,7 +86,7 @@ export default function PricingCard({ plan, index, onUpgrade, canUpgrade }: Pric
     const isFree   = plan.price === 0 && !isCustom
 
     // THIS CARD IS THE ONE ACTIVELY RUNNING THE PAYSTACK FLOW
-    const isThisCardProcessing = processingPlanId === plan.id
+    const isThisCardProcessing = !!processingPlanId
 
     // ALL OTHER CARDS ARE DISABLED WHILE ANY PAYMENT IS IN FLIGHT
     const isAnyProcessing = status === "processing"
@@ -167,9 +167,7 @@ export default function PricingCard({ plan, index, onUpgrade, canUpgrade }: Pric
         >
             <div className={cn(
                 "rounded-[32px] p-[1.6px] transition-all",
-                plan.highlighted
-                    ? "bg-linear-to-br from-[#0052CC] via-[#FF7A21] to-[#6B7280]"
-                    : "bg-white",
+                 "bg-linear-to-br from-[#0052CC] via-[#FF7A21] to-[#6B7280]",
                 !isDisabled && "hover:scale-105 ease-linear duration-200"
             )}>
                 <div className={cn(

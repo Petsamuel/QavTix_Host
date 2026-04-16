@@ -40,6 +40,7 @@ export default function ActionButton1({
                 hover:bg-brand-primary-7
                 active:bg-brand-primary-8
                 disabled:bg-brand-primary-5
+                disabled:opacity-60
                 disabled:cursor-not-allowed
                 text-white
                 py-3.5

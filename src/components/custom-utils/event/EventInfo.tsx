@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface EventInfoProps {
   image: string;
@@ -28,12 +29,17 @@ export default function EventInfo({
                     isDesktop ? "size-10" : "w-10 aspect-square rounded-md"
                 )}
             >
-                <Image 
-                    src={image} 
-                    alt={title} 
-                    fill 
-                    className="object-cover" 
-                />
+                {
+                    !image ?
+                    <Skeleton className="w-full h-full bg-brand-neutral-4" />
+                    :
+                    <Image 
+                        src={image} 
+                        alt={title} 
+                        fill 
+                        className="object-cover" 
+                    />
+                }
             </div>
 
             {/* Text Content */}

@@ -1,6 +1,6 @@
 "use server"
 
-import { ADD_PAYMENT_CARD, ADD_PAYMENT_CARD_CONFIRM, PAYMENT_METHODS_ENDPOINT } from "@/endpoints"
+import { ADD_PAYMENT_CARD, ADD_PAYMENT_CARD_CONFIRM, FEATURED_PLAN_INITIATE_ENDPOINT, FEATURED_PLAN_VERIFY_ENDPOINT, PAYMENT_METHODS_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
 import { updateTag } from "next/cache"
@@ -122,5 +122,73 @@ export async function deletePaymentMethod(methodId: number): Promise<MutateResul
         console.log("[deletePaymentMethod] status:", error?.response?.status)
         console.log("[deletePaymentMethod] body:", JSON.stringify(error?.response?.data))
         return { success: false, message: handleApiError(error?.response?.data) }
+    }
+}
+
+
+
+interface InitializeFeaturedResult {
+    success: boolean
+    checkout_url?: string
+    flow?: "popup" | "free" | "saved_card"
+    message?: string
+}
+
+
+export async function initializeFeaturedPayment(payload: {
+    event_id:  string
+    plan_slug: string
+    country:   string
+    currency:  string
+}): Promise<InitializeFeaturedResult> {
+    try {
+        const axiosInstance = await getServerAxios()
+
+        const { data } = await axiosInstance.post(FEATURED_PLAN_INITIATE_ENDPOINT, payload)
+        console.log(data)
+
+        // The flow can be 'free' (using quota), 'popup' (needs Paystack), or 'saved_card'
+        const flow = data?.flow || "popup"
+        const checkout_url = data?.checkout_url ?? data?.data?.checkout_url
+
+        return { 
+            success: true, 
+            flow, 
+            checkout_url,
+            message: data?.message 
+        }
+
+    } catch (error: any) {
+        console.error("[initializeFeaturedPayment] error:", error?.response?.data || error)
+        return {
+            success: false,
+            message: handleApiError(error?.response?.data) ?? "Could not initialize promotion."
+        }
+    }
+}
+
+
+export async function verifyFeaturedPayment(payload: {
+    reference: string
+    event_id:  string
+    country:   string
+}): Promise<{ success: boolean; message?: string; data?: any }> {
+    try {
+        const axiosInstance = await getServerAxios()
+
+        const { data } = await axiosInstance.post(FEATURED_PLAN_VERIFY_ENDPOINT, payload)
+
+        return { 
+            success: true, 
+            message: data?.message ?? "Event successfully promoted!",
+            data: data?.data ?? data 
+        }
+
+    } catch (error: any) {
+        console.error("[verifyFeaturedPayment] error:", error?.response?.data || error)
+        return {
+            success: false,
+            message: error?.response?.data?.message ?? "Verification failed."
+        }
     }
 }

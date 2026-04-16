@@ -2,7 +2,7 @@
 
 import { Icon }  from "@iconify/react"
 import { cn }    from "@/lib/utils"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 
 const LIVE_BULK_ACTIONS: BulkEventAction[] = [
@@ -25,7 +25,6 @@ const CANCELLED_BULK_ACTIONS: BulkEventAction[] = [
 
 const ALL_BULK_ACTIONS: BulkEventAction[] = [
     { id: "bulk-download",    label: "Download Attendees",icon: "hugeicons:download-01"      },
-    { id: "bulk-send-update", label: "Send Update",       icon: "lucide:mail"                },
     { id: "bulk-cancel",      label: "Cancel Events",     icon: "iconoir:cancel", variant: "danger" },
     { id: "bulk-delete",      label: "Delete",            icon: "hugeicons:delete-02", variant: "danger" },
 ]
@@ -48,6 +47,7 @@ interface EventsBulkActionsBarProps {
     onClearSelection: () => void
 }
 
+
 export default function EventsBulkActionsBar({
     selectedCount,
     tab,
@@ -58,11 +58,23 @@ export default function EventsBulkActionsBar({
     const [loadingAction, setLoadingAction] = useState<BulkEventActionId | null>(null)
     const actions = getBulkActionsForTab(tab)
 
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (selectedCount > 0 && containerRef.current) {
+            containerRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            })
+        }
+    }, [selectedCount])
+
     if (selectedCount === 0 || actions.length === 0) return null
 
     const handleAction = async (action: BulkEventAction) => {
         if (loadingAction) return
         setLoadingAction(action.id)
+
         try {
             await onAction(action.id)
         } finally {
@@ -71,7 +83,10 @@ export default function EventsBulkActionsBar({
     }
 
     return (
-        <div className="flex items-center gap-3 flex-wrap px-4 md:px-5 py-3 bg-brand-primary-1 border border-brand-primary-3 rounded-xl mb-4 animate-in slide-in-from-top-2 duration-200">
+        <div 
+            ref={containerRef}
+            className="flex items-center gap-3 flex-wrap px-4 md:px-5 py-3 bg-brand-primary-1 border border-brand-primary-3 rounded-xl mb-4 animate-in slide-in-from-top-2 duration-200"
+        >
             {/* Selection count badge */}
             <div className="flex items-center gap-2 mr-2">
                 <span className="flex items-center justify-center w-6 h-6 rounded-full bg-brand-primary-6 text-white text-xs font-bold">
@@ -87,7 +102,7 @@ export default function EventsBulkActionsBar({
 
             <div className="flex items-center gap-2 flex-wrap">
                 {actions.map((action) => {
-                    const isLoading  = loadingAction === action.id
+                    const isLoading = loadingAction === action.id
                     const isDisabled = loadingAction !== null && !isLoading
 
                     return (
@@ -100,13 +115,14 @@ export default function EventsBulkActionsBar({
                                 action.variant === "danger"
                                     ? "border-red-200 text-red-600 bg-white hover:bg-red-50"
                                     : "border-brand-neutral-4 text-brand-secondary-8 bg-white hover:bg-brand-neutral-2",
-                                isDisabled && "opacity-40 cursor-not-allowed",
+                                isDisabled && "opacity-40 cursor-not-allowed"
                             )}
                         >
-                            {isLoading
-                                ? <Icon icon="eos-icons:three-dots-loading" className="size-4" />
-                                : <Icon icon={action.icon} className="size-3.5" />
-                            }
+                            {isLoading ? (
+                                <Icon icon="eos-icons:three-dots-loading" className="size-4" />
+                            ) : (
+                                <Icon icon={action.icon} className="size-3.5" />
+                            )}
                             {action.label}
                         </button>
                     )

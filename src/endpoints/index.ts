@@ -3,14 +3,29 @@ export const HOST_UPCOMING_EVENTS_ENDPOINT = "host/events/management"
 export const EVENTS_ENDPOINT = "host/events/management"
 export const DASHBOARD_FEED_ENDPOINT = "host/dashboard/feed/"
 
+export const CATEGORIES_ENDPOINT = "public/categories"
+
 export const CUSTOMERS_ENDPOINT = "host/customers"
 export const CUSTOMER_DETAILS_ENDPOINT = "host/customers/[user_id]"
+export const CUSTOMER_LIST_DOWNLOAD_ENDPOINT = "host/customers/export/"
 
 export const FINANCIALS_ENDPOINT = "host/financial/overview"
 export const PAYOUT_LIST_ENDPOINT = "host/payouts/list"
 export const REMOVE_PAYOUT_ENDPOINT = "host/payouts/remove/[payout_id]/"
 export const PAYOUT_ADD_ENDPOINT = "host/payouts/add/"
 export const WITHDRAWAL_ENDPOINT = "host/withdraw/"
+
+
+export const EVENT_DELETE = "host/events/delete/[event_id]"
+export const EVENT_UPDATE = "host/events/[event_id]/update"
+
+export const SALES_ANALYTICS_CARDS_ENDPOINT = "host/sales/cards"
+export const SALES_ANALYTICS_GRAPHS_ENDPOINT = "host/sales/graphs"
+
+
+
+export const FEATURED_PLAN_VERIFY_ENDPOINT = "payments/featured/complete/"
+export const FEATURED_PLAN_INITIATE_ENDPOINT = "payments/featured/initiate/"
 
 
 export const CHECKIN_OVERVIEW_ENDPOINT = "host/checkin/overview"

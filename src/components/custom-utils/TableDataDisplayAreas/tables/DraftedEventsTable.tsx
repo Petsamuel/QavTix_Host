@@ -19,14 +19,15 @@ interface DraftedEventsTableProps {
     currentPage:   number
     totalPages:    number
     fetchPage:     (page: number) => void
-    onDelete:      (id: string) => Promise<void>
+    onDelete:      (id: string, name?: string) => void
+    onPublish?:    (id: string, name?: string) => void
     deletingId:    string | null
 }
 
 export default function DraftedEventsTable({
     items, isLoading, isLoadingMore, isEmpty, isError, search,
     count, currentPage, totalPages, fetchPage,
-    onDelete, deletingId,
+    onDelete, onPublish, deletingId,
 }: DraftedEventsTableProps) {
 
     const status = draftStatusConfig["unpublished" as keyof typeof draftStatusConfig]
@@ -85,7 +86,7 @@ export default function DraftedEventsTable({
                                             </div>
                                         </td>
                                         <td className="py-4 px-5">
-                                            <EventInfo variant="desktop" category={event.category} image={event.event_image.image_url ?? ""} title={event.title} />
+                                            <EventInfo variant="desktop" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
                                         </td>
                                         <td className="py-4 px-5">
                                             <p className="text-xs text-brand-secondary-9 whitespace-nowrap">{formatDateTime(event.start_datetime)}</p>
@@ -93,20 +94,34 @@ export default function DraftedEventsTable({
                                         <td className="py-4 px-5">
                                             <p className="text-[11px] text-brand-secondary-6 max-w-[15em]">{event.event_location}</p>
                                         </td>
-                                        <td className="py-4 px-5 text-center">
-                                            <Link
-                                                href={`/dashboard/events/edit/${event.id}`}
-                                                className="inline-flex items-center gap-1 text-xs font-semibold text-brand-primary-6 hover:text-brand-primary-7 transition-colors"
-                                            >
-                                                Continue Editing
-                                                <Icon icon="lucide:arrow-right" className="w-4 h-4" />
-                                            </Link>
+                                        <td className="py-4 px-5">
+                                            <div className="flex items-center justify-center gap-3">
+                                                <Link
+                                                    href={`/dashboard/events/edit/${event.id}`}
+                                                    className="inline-flex items-center gap-1 text-xs font-semibold text-brand-primary-6 hover:text-brand-primary-7 transition-colors"
+                                                >
+                                                    Continue Editing
+                                                    <Icon icon="lucide:arrow-right" className="w-4 h-4" />
+                                                </Link>
+                                                {onPublish && (
+                                                    <button
+                                                        onClick={() => onPublish(event.id, event.title)}
+                                                        className="inline-flex items-center gap-1 text-xs font-semibold text-green-600 hover:text-green-700 transition-colors"
+                                                    >
+                                                        <Icon icon="lucide:globe" className="w-4 h-4" />
+                                                        Publish
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="py-4 px-4">
                                             <button
-                                                onClick={() => onDelete(event.id)}
+                                                onClick={() => onDelete(event.id, event.title)}
                                                 disabled={isDeleting}
-                                                className={cn("p-2 bg-red-50 hover:bg-red-100 rounded-full transition-colors", isDeleting && "opacity-50 cursor-not-allowed")}
+                                                className={cn(
+                                                    "p-2 bg-red-50 hover:bg-red-100 rounded-full transition-colors",
+                                                    isDeleting && "opacity-50 cursor-not-allowed"
+                                                )}
                                             >
                                                 {isDeleting
                                                     ? <Icon icon="eos-icons:three-dots-loading" className="size-4 text-red-600" />
@@ -134,19 +149,33 @@ export default function DraftedEventsTable({
                                         <Icon icon={status.icon} className={cn("w-2 h-2", status.color)} />
                                         <span className={cn("font-medium", status.color)}>{status.label}</span>
                                     </div>
-                                    <button
-                                        onClick={() => onDelete(event.id)}
-                                        disabled={isDeleting}
-                                        className={cn("p-2 bg-red-50 hover:bg-red-100 rounded-full transition-colors", isDeleting && "opacity-50 cursor-not-allowed")}
-                                    >
-                                        {isDeleting
-                                            ? <Icon icon="eos-icons:three-dots-loading" className="w-4 h-4 text-red-600" />
-                                            : <Icon icon="streamline-ultimate:bin-1"     className="w-4 h-4 text-red-600" />
-                                        }
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        {onPublish && (
+                                            <button
+                                                onClick={() => onPublish(event.id, event.title)}
+                                                className="inline-flex items-center gap-1 text-xs font-semibold text-green-600 hover:text-green-700 transition-colors"
+                                            >
+                                                <Icon icon="lucide:globe" className="w-3.5 h-3.5" />
+                                                Publish
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => onDelete(event.id, event.title)}
+                                            disabled={isDeleting}
+                                            className={cn(
+                                                "p-2 bg-red-50 hover:bg-red-100 rounded-full transition-colors",
+                                                isDeleting && "opacity-50 cursor-not-allowed"
+                                            )}
+                                        >
+                                            {isDeleting
+                                                ? <Icon icon="eos-icons:three-dots-loading" className="w-4 h-4 text-red-600" />
+                                                : <Icon icon="streamline-ultimate:bin-1"     className="w-4 h-4 text-red-600" />
+                                            }
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="flex items-start justify-between gap-3">
-                                    <EventInfo variant="mobile" category={event.category} image={event.event_image.image_url ?? ""} title={event.title} />
+                                    <EventInfo variant="mobile" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
                                     <div className="flex flex-col text-xs text-brand-secondary-9">
                                         <span className="font-bold">Date & Time</span>
                                         <span>{formatDateTime(event.start_datetime)}</span>

@@ -7,7 +7,7 @@ export function buildCustomerActions(
 ): ItemAction[] {
     return [
         {
-            id:    "view-profile",
+            id:    "view-profile" as const,
             label: "View Customer Profile",
             icon:  "hugeicons:face-id",
             onClick: () => router.push(CUSTOMERS_PROFILE.href.replace("[profile_id]", customerId.toString())),

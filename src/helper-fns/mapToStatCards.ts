@@ -1,5 +1,3 @@
-import { buildMetricsFromConfig } from "./buildMetricsConfig"
-import { customerProfileMetricsConfig } from "@/components/cards/resources/metrics-config"
 import { formatPrice } from "./formatPrice"
 import { format, parseISO } from "date-fns"
 
@@ -259,6 +257,76 @@ export function mapEventsCards(cards: EventCards): MetricCardData[] {
             description: "Fully booked events",
             icon:        "hugeicons:ticket-02",
             iconColor:   "text-brand-primary-4",
+        },
+    ]
+}
+
+
+export function mapSalesAnalyticsCards(
+    cards:    SalesAnalyticsCardsData,
+    currency: string,
+): MetricCardData[] {
+    const fmtChange = (val: number) =>
+        val > 0 ? `+${val.toLocaleString()}%` :
+        val < 0 ? `${val.toLocaleString()}%`  : "0%"
+
+    return [
+        {
+            id:          "total-revenue",
+            value:       formatPrice(parseFloat(cards.total_revenue), currency),
+            label:       "Total Revenue",
+            description: `${fmtChange(parseFloat(cards.total_revenue_change))} change`,
+            icon:        "/images/vectors/dollar-in.svg",
+            iconColor:   "text-[#359160]",
+        },
+        {
+            id:          "tickets-sold",
+            value:       cards.tickets_sold.toLocaleString(),
+            label:       "Tickets Sold",
+            description: "Units sold across events",
+            icon:        "/images/vectors/ticket.svg",
+            iconColor:   "text-brand-accent-5",
+        },
+        {
+            id:          "conversion-rate",
+            value:       `${cards.conversion_rate.toFixed(2)}%`,
+            label:       "Conversion Rate",
+            description: `${fmtChange(cards.conversion_change)} vs last period`,
+            icon:        "/images/vectors/conversion.svg",
+            iconColor:   "text-brand-primary-4",
+        },
+        {
+            id:          "aov",
+            value:       formatPrice(parseFloat(cards.average_order_value), currency),
+            label:       "Avg. Order Value",
+            description: `${fmtChange(cards.aov_change)} vs last period`,
+            icon:        "/images/vectors/average-order.svg",
+            iconColor:   "text-[#914613]",
+        },
+        // ── Row 2 ────────────────────────────────────────────────────────────
+        {
+            id:          "page-views",
+            value:       cards.page_views.toLocaleString(),
+            label:       "Page Views",
+            description: "Traffic coming in.",
+            icon:        "hugeicons:eye",
+            iconColor:   "text-brand-accent-9",
+        },
+        {
+            id:          "refunds",
+            value:       cards.refunds.toLocaleString(),
+            label:       "Refunds",
+            description: "Money going back.",
+            icon:        "hugeicons:return-request",
+            iconColor:   "text-red-500",
+        },
+        {
+            id:          "repeat-buyers",
+            value:       cards.repeat_buyers.toLocaleString(),
+            label:       "Repeat Buyers",
+            description: "Customers returning.",
+            icon:        "uil:repeat",
+            iconColor:   "text-blue-600",
         },
     ]
 }

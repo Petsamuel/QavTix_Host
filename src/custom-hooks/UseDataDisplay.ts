@@ -68,6 +68,7 @@ const buildFilterParams = (filters: Partial<FilterValues>): Record<string, strin
     if (filters.status)                                                 params.status      = filters.status
     if (filters.ticketType?.length)                                     params.ticket_type = filters.ticketType
     if (filters.performance != null)                                    params.performance = String(filters.performance)
+    if (filters.sortBy)                                                 params.ordering    = filters.sortBy
     if (filters.dateRangePreset)                                        params.date_range  = filters.dateRangePreset
     if (filters.event)                                                  params.event       = filters.event
     return params
@@ -84,6 +85,7 @@ const hasActiveFilters = (filters: Partial<FilterValues>): boolean =>
         filters.ticketType?.length  ||
         filters.performance != null ||
         filters.dateRangePreset     ||
+        filters.sortBy              ||
         filters.event
     )
 
@@ -128,6 +130,7 @@ const useTabState = <T>(
         String(filters.priceRange?.max      ?? ''),
         String(filters.performance          ?? ''),
         filters.dateRangePreset             ?? '',
+        filters.sortBy                      ?? '',
         filters.event                       ?? '',
     ].join('|')
 
@@ -160,7 +163,7 @@ const useTabState = <T>(
         if (result.cards !== undefined) {
             configRef.current.onCards?.(result.cards)
         }
-
+        
         const newItems = result.results as T[]
 
         if (newItems.length === 0 && !append) {

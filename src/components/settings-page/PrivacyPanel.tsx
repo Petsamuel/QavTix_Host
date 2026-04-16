@@ -129,7 +129,7 @@ export default function PrivacyPanel({ initialSettings }: Props) {
                         buttonText={isDownloading ? "Requesting..." : "Download Data"}
                         buttonType="button"
                         icon={isDownloading ? "eos-icons:three-dots-loading" : "hugeicons:download-01"}
-                        className="h-12! rounded-md font-semibold"
+                        className="h-12! rounded-md font-semibold text-sm!"
                         iconPosition="left"
                         isLoading={isDownloading}
                     />
@@ -148,7 +148,7 @@ export default function PrivacyPanel({ initialSettings }: Props) {
                         buttonText="Delete Account"
                         buttonType="button"
                         icon="formkit:trash"
-                        className="h-12! rounded-md font-semibold bg-red-600 active:bg-red-400 focus:ring-2 focus:ring-red-400 focus:outline-0 hover:bg-red-500"
+                        className="h-12! rounded-md font-semibold text-sm! bg-red-600 active:bg-red-400 focus:ring-2 focus:ring-red-400 focus:outline-0 hover:bg-red-500"
                         iconPosition="left"
                     />
                 </section>

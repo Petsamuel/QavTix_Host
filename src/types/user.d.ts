@@ -29,6 +29,7 @@ type AuthUser = {
     payout_available:    boolean
     verified_badge:      boolean
     subscription:        boolean
+    plan_type:           string
     can_activate_free_trial: boolean
     currency:            string
 }

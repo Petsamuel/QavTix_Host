@@ -1,11 +1,8 @@
 import { cn } from "@/lib/utils"
 import AnalyticsMetricsCard from "./AnalyticsMetricsCard"
-import { salesAnalyticsMetricsConfig } from "./resources/metrics-config"
-
-type MetricsData = typeof salesAnalyticsMetricsConfig[number] & { value: string }
 
 interface MetricsCardsConatinerProps {
-    metrics: MetricsData[]
+    metrics: MetricCardData[]
     className?: string
 }
 

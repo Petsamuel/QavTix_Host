@@ -5,10 +5,11 @@ import EventInfo           from "../../event/EventInfo"
 import { Checkbox }        from "@/components/ui/checkbox"
 import { Dispatch, SetStateAction } from "react"
 import EventsItemDropdown  from "../../dropdown/ItemActionDropdown"
-import { endedEventActions } from "../../dropdown/resources/events-actions"
 import { formatDateTime }    from "@/helper-fns/date-utils"
 import TableLoader           from "@/components/loaders/TableLoader"
 import EmptyTicketsState     from "../empty-state"
+import { buildEndedEventActions, buildLiveEventActions } from "../../dropdown/resources/events-actions"
+import { useRouter } from "next/navigation"
 
 interface EndedCancelledTableProps {
     items:             OrganizerEvent[]
@@ -32,6 +33,7 @@ function EndedCancelledTable({
     selectedEvents, setSelectedEvents, variant,
 }: EndedCancelledTableProps) {
 
+    const router = useRouter()
     const isEnded   = variant === "ended"
     const badgeCls  = isEnded ? "text-red-600" : "text-brand-secondary-7"
     const badgeText = isEnded ? "Ended" : "Cancelled"
@@ -121,7 +123,7 @@ function EndedCancelledTable({
                                             </div>
                                         </td>
                                         <td className="py-4 px-5">
-                                            <EventInfo variant="desktop" category={event.category} image={event.event_image.image_url ?? ""} title={event.title} />
+                                            <EventInfo variant="desktop" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
                                         </td>
                                         <td className="py-4 px-5">
                                             <p className="text-xs text-brand-secondary-9 whitespace-nowrap">{formatDateTime(event.start_datetime)}</p>
@@ -137,13 +139,27 @@ function EndedCancelledTable({
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="py-4 px-5">
+                                        <td className="py-4 px-5 text-center">
                                             <p className="text-xs font-bold text-brand-secondary-9 whitespace-nowrap">
                                                 {event.tickets_total_revenue.toLocaleString()}
                                             </p>
                                         </td>
                                         <td className="py-4 px-4" onClick={e => e.stopPropagation()}>
-                                            <EventsItemDropdown actions={endedEventActions} />
+                                            {
+                                                event.status === "draft" ?
+                                                <p className="text-[10px]">See action on draft tab</p>
+                                                :
+                                                <EventsItemDropdown 
+                                                    eventID={event.id}
+                                                    eventName={event.title}
+                                                    actions={
+                                                        event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                        buildLiveEventActions(event.id, event.is_featured, router)
+                                                        :
+                                                        buildEndedEventActions(event.id, router)
+                                                    } 
+                                                />
+                                            }
                                         </td>
                                     </tr>
                                 )
@@ -176,10 +192,24 @@ function EndedCancelledTable({
                                     </div>
                                     <div className="flex items-center gap-1"><span className="font-bold">Saves:</span><span>{event.saves_count}</span></div>
                                     <div className="flex items-center gap-1"><span className="font-bold">Views:</span><span>{event.views_count}</span></div>
-                                    <EventsItemDropdown actions={endedEventActions} />
+                                    {
+                                        event.status === "draft" ?
+                                        <p className="text-[10px]">See action on draft tab</p>
+                                        :
+                                        <EventsItemDropdown 
+                                            eventID={event.id}
+                                            eventName={event.title}
+                                            actions={
+                                                event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                buildLiveEventActions(event.id, event.is_featured, router)
+                                                :
+                                                buildEndedEventActions(event.id, router)
+                                            } 
+                                        />
+                                    }
                                 </div>
                                 <div className="flex items-start justify-between gap-3">
-                                    <EventInfo variant="mobile" category={event.category} image={event.event_image.image_url ?? ""} title={event.title} />
+                                    <EventInfo variant="mobile" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
                                     <div className="flex flex-col text-xs text-brand-secondary-9">
                                         <span className="font-bold">Date & Time</span>
                                         <span>{formatDateTime(event.start_datetime)}</span>

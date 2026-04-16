@@ -68,6 +68,7 @@ export const CREATE_EVENT = {
 
 
 export const EXPLORE_EVENT_LINK = `${process.env.NEXT_PUBLIC_APP_DOMAIN}/events` as const;
+export const EVENT_DETAILS_LINK = `${process.env.NEXT_PUBLIC_APP_DOMAIN}/events/details/[event_id]/` as const;
 export const FAQ_PAGE = `${process.env.NEXT_PUBLIC_APP_DOMAIN}/faq/` as const;
 
 export const CONTACT_LINKS = {

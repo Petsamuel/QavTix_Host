@@ -12,8 +12,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { extractAccessCode } from "@/helper-fns/extractAccessCode"
 import { PLATFORM_CURRENCY } from "@/components-data/currencies"
-import { useCurrencyConversion } from "./useCurrencyConversion"
-import { CONTACT_LINKS } from "@/enums/navigation"
+import { useCurrencyConversion } from "../../custom-hooks/useCurrencyConversion"
 import { getUserLocation, initializeHostSubscription, verifyHostSubscription } from "@/actions/settings"
 
 
@@ -89,23 +88,6 @@ export function PricingCheckoutProvider({ children }: Props) {
             dispatch(showAlert({
                 title:       "You're on the free plan",
                 description: "No payment required. Start right away.",
-            }))
-            return
-        }
-
-        // ENTERPRISE — OPEN PRE-FILLED EMAIL TO SALES
-        if (plan.currency === "Custom") {
-            const subject = "Inquiry for Custom Enterprise Plan"
-            const body =
-                `Hello QavTix Team,\n\nI am interested in your Custom Enterprise plan.\n\nMy details:\n- Name: ${user?.full_name || "[Your Full Name]"}\n- Email: ${user?.email || "[Your Email]"}\n- Organization: [Your Organization Name]\n- Number of users/attendees: [Approximate number]\n\nPlease contact me to discuss a custom plan.\n\nThank you.`
-            window.open(
-                `mailto:${CONTACT_LINKS.LAGOS.EMAIL.href}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
-                "_blank"
-            )
-            dispatch(showAlert({
-                title:       "Contact Sales Team",
-                description: "We've opened your email client with a pre-filled message.",
-                variant:     "default",
             }))
             return
         }

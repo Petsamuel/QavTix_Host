@@ -10,6 +10,7 @@ interface FilterValues {
     dateRangePreset?: "day" | "week" | "month" | null
     priceRange?: PriceRange | null
     event?: string | null
+    sortBy?: string | null
 }
 
 type RevalidateTarget = "financials" | "marketing" | "upcoming-events" | "customers" | "checkin" | "events"

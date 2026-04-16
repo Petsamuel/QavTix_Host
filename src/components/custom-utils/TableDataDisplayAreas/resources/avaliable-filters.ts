@@ -150,7 +150,6 @@ export const DashboardEventsFilters = {
 export const MyEventsPageFilters = {
   filterOptions: [
     ALL_FILTERS.categories,
-    ALL_FILTERS.status,
     ALL_FILTERS.dateRange,
     ALL_FILTERS.performance,
     ALL_FILTERS.sortBy,

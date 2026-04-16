@@ -6,10 +6,11 @@ import { Checkbox }        from "@/components/ui/checkbox"
 import { Dispatch, SetStateAction } from "react"
 import { liveEventsStatusConfig }   from "../resources/status-config"
 import EventsItemDropdown  from "../../dropdown/ItemActionDropdown"
-import { liveEventActions } from "../../dropdown/resources/events-actions"
 import { formatDateTime }   from "@/helper-fns/date-utils"
 import TableLoader          from "@/components/loaders/TableLoader"
 import EmptyTicketsState    from "../empty-state"
+import { buildEndedEventActions, buildLiveEventActions } from "../../dropdown/resources/events-actions"
+import { useRouter } from "next/navigation"
 
 
 interface MyLiveEventsTableProps {
@@ -41,6 +42,8 @@ export default function MyLiveEventsTable({
     selectedEvents,
     setSelectedEvents,
 }: MyLiveEventsTableProps) {
+
+    const router = useRouter()
 
     const isAllSelected =
         items.length > 0 && items.every(e => selectedEvents.includes(e.id))
@@ -135,7 +138,7 @@ export default function MyLiveEventsTable({
                                             <EventInfo
                                                 variant="desktop"
                                                 category={event.category}
-                                                image={event.event_image.image_url ?? ""}
+                                                image={event.event_image?.image_url ?? ""}
                                                 title={event.title}
                                             />
                                         </td>
@@ -163,7 +166,21 @@ export default function MyLiveEventsTable({
                                             </p>
                                         </td>
                                         <td className="py-4 px-4" onClick={e => e.stopPropagation()}>
-                                            <EventsItemDropdown actions={liveEventActions} />
+                                            {
+                                                event.status === "draft" ?
+                                                <p className="text-[10px]">See action on draft tab</p>
+                                                :
+                                                <EventsItemDropdown
+                                                    eventName={event.title}
+                                                    eventID={event.id} 
+                                                    actions={
+                                                        event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                        buildLiveEventActions(event.id, event.is_featured, router)
+                                                        :
+                                                        buildEndedEventActions(event.id, router)
+                                                    } 
+                                                />
+                                            }
                                         </td>
                                     </tr>
                                 )
@@ -202,13 +219,27 @@ export default function MyLiveEventsTable({
                                         <span className="font-bold">Views:</span>
                                         <span>{event.views_count}</span>
                                     </div>
-                                    <EventsItemDropdown actions={liveEventActions} />
+                                    {
+                                        event.status === "draft" ?
+                                        null
+                                        :
+                                        <EventsItemDropdown
+                                            eventName={event.title}
+                                            eventID={event.id} 
+                                            actions={
+                                                event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                buildLiveEventActions(event.id, event.is_featured, router)
+                                                :
+                                                buildEndedEventActions(event.id, router)
+                                            } 
+                                        />
+                                    }
                                 </div>
                                 <div className="flex items-start justify-between gap-3">
                                     <EventInfo
                                         variant="mobile"
                                         category={event.category}
-                                        image={event.event_image.image_url ?? ""}
+                                        image={event.event_image?.image_url ?? ""}
                                         title={event.title}
                                     />
                                     <div className="flex flex-col text-xs text-brand-secondary-9">

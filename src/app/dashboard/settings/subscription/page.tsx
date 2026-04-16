@@ -1,6 +1,6 @@
 import { getSubscription } from "@/actions/settings"
 import SubscriptionPanel from "@/components/settings-page/SubsciptionPanel"
-import { PricingCheckoutProvider } from "@/custom-hooks/PricingCheckoutContext"
+import { PricingCheckoutProvider } from "@/contexts/checkout/PricingCheckoutContext"
 
 
 export default async function SubscriptionPage() {

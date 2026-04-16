@@ -232,7 +232,7 @@ export async function initializeHostSubscription(payload: {
     try {
         const axiosInstance = await getServerAxios()
 
-        const { data } = await axiosInstance.post(HOST_PLAN_CHECKOUT_ENDPOINT, payload)
+        const { data } = await axiosInstance.post(HOST_PLAN_CHECKOUT_ENDPOINT, {...payload, currency: "NGN" })
 
         const checkout_url = data?.checkout_url ?? data?.data?.checkout_url
 

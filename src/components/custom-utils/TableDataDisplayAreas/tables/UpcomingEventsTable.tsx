@@ -85,9 +85,9 @@ export default function UpcomingEventsTable({
                                     <td className="py-4 px-4">
                                         <div className="flex items-center gap-3">
                                             <div className="relative w-10 aspect-square rounded-md overflow-hidden shrink-0 bg-brand-neutral-2">
-                                                {event.event_image.image_url ? (
+                                                {event.event_image?.image_url ? (
                                                     <Image
-                                                        src={event.event_image.image_url}
+                                                        src={event.event_image?.image_url}
                                                         alt={event.title}
                                                         fill
                                                         className="object-cover"
@@ -174,9 +174,9 @@ export default function UpcomingEventsTable({
                             <div className="flex justify-between items-start gap-4 w-full">
                                 <div className="flex items-center gap-3">
                                     <div className="relative w-10 aspect-square rounded-md overflow-hidden shrink-0 bg-brand-neutral-2">
-                                        {event.event_image.image_url ? (
+                                        {event.event_image?.image_url ? (
                                             <Image
-                                                src={event.event_image.image_url}
+                                                src={event.event_image?.image_url}
                                                 alt={event.title}
                                                 fill
                                                 className="object-cover"

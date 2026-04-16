@@ -1,11 +1,23 @@
-import SalesAnalyticsPageContentWrapper from "@/components/page-wrappers/SalesAnalyticsPageContentWrapper";
-import { delay } from "@/helper-fns/delay";
+import { getSalesAnalyticsCards, getSalesAnalyticsGraphs } from "@/actions/sales-n-analytics"
+import SalesAnalyticsPageContentWrapper from "@/components/page-wrappers/SalesAnalyticsPageContentWrapper"
 
-export default async function SalesAndAnalyticsPage(){
+export default async function SalesAndAnalyticsPage() {
+    const [cardsResult, graphsResult] = await Promise.all([
+        getSalesAnalyticsCards(),
+        getSalesAnalyticsGraphs(),
+    ])
 
-    await delay(5000)
+    if (!cardsResult.success || !cardsResult.data) {
+        throw new Error("Failed to load sales analytics cards")
+    }
+    if (!graphsResult.success || !graphsResult.data) {
+        throw new Error("Failed to load sales analytics graphs")
+    }
 
     return (
-        <SalesAnalyticsPageContentWrapper />
+        <SalesAnalyticsPageContentWrapper
+            initialCards={cardsResult.data}
+            initialGraphs={graphsResult.data}
+        />
     )
 }

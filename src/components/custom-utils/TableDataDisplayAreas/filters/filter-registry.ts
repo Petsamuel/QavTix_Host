@@ -8,6 +8,7 @@ import { PerformanceFilter } from "./PerformanceFilter"
 import DateRangePresetFilter from "./DateRangePresetFilter"
 import { PurchaseDateFilter } from "./PurchaseDateFilter"
 import { EventFilter } from "./EventFilter"
+import { SortByFilter } from "./SortByFilter"
 
 type FilterComponentProps<T> = {
   value: T
@@ -17,6 +18,7 @@ type FilterComponentProps<T> = {
   categories?: Category[]
   event?: string | null
   label?: string
+  sortBy?: string
   statusOptions?: StatusOption[]
 }
 
@@ -49,6 +51,10 @@ export const filterRegistry: Partial<Record<FilterKey, FilterRegistryEntry<any>>
   performance: {
     component: PerformanceFilter,
     stateKey: 'performance'
+  },
+  sortBy: {
+    component: SortByFilter,
+    stateKey: "sortBy"
   },
   purchaseDate: {
     component: PurchaseDateFilter,

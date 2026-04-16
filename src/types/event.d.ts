@@ -37,6 +37,7 @@ interface OrganizerEvent {
     views_count:             number
     saves_count:             number
     performance:             EventPerformance
+    is_featured:             boolean
 }
 
 interface EventCards {
