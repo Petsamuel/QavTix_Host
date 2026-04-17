@@ -8,6 +8,7 @@ import { getNiceTicks, formatYTick } from "@/helper-fns/chartFormatters"
 import ChartLoader from "../loaders/ChartLoader"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { formatPrice } from "@/helper-fns/formatPrice"
+import LockedChartOverlay from "./LockedChartOverlay"
 
 
 interface ChartDataPoint {
@@ -19,6 +20,7 @@ interface ChartDataPoint {
 interface SalesRevenueGrowthChartProps {
     data:      RevenueChartPoint[]
     isPending: boolean
+    locked?:   boolean
 }
 
 const CustomTooltip = ({ active, payload, currency }: any) => {
@@ -34,11 +36,7 @@ const CustomTooltip = ({ active, payload, currency }: any) => {
     )
 }
 
-
-export default function SalesRevenueGrowthChart({
-    data,
-    isPending,
-}: SalesRevenueGrowthChartProps) {
+export default function SalesRevenueGrowthChart({ data, isPending, locked }: SalesRevenueGrowthChartProps) {
     const { user }   = useAppSelector(store => store.authUser)
     const currency   = user?.currency || ""
 
@@ -52,7 +50,7 @@ export default function SalesRevenueGrowthChart({
     const { ticks, yMax } = getNiceTicks(maxValue)
 
     return (
-        <div className="w-full bg-white rounded-2xl p-6 shadow-sm border border-brand-neutral-2">
+        <div className="w-full bg-white rounded-2xl p-6 shadow-sm border border-brand-neutral-2 relative overflow-hidden">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8 border-b border-b-neutral-5 pb-3">
                 <h2 className="text-xs text-brand-secondary-5">Revenue Growth Chart</h2>
             </div>
@@ -63,11 +61,7 @@ export default function SalesRevenueGrowthChart({
                 <div className="w-full overflow-x-auto">
                     <div className="min-w-150 h-153">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
-                                data={chartData}
-                                margin={{ top: 10, bottom: 30 }}
-                                barCategoryGap="45%"
-                            >
+                            <BarChart data={chartData} margin={{ top: 10, bottom: 30 }} barCategoryGap="45%">
                                 <CartesianGrid
                                     strokeDasharray="4px"
                                     vertical={false}
@@ -111,6 +105,8 @@ export default function SalesRevenueGrowthChart({
                     </div>
                 </div>
             )}
+
+            {locked && <LockedChartOverlay />}
         </div>
     )
 }

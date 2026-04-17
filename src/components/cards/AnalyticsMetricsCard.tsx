@@ -14,7 +14,7 @@ export default function AnalyticsMetricsCard({ data, className }: MetricCardProp
 
     return (
         <div className={cn(
-            'shadow-[0px_5.8px_23.17px_0px_#3326AE14] flex flex-col justify-center max-h-32 xl:h-28 bg-white rounded-lg border border-brand-neutral-2 px-2 py-5 hover:scale-103 transition-transform duration-300 ease-in-out',
+            'shadow-[0px_5.8px_23.17px_0px_#3326AE14] flex flex-col justify-center max-h-32 xl:h-28 bg-white rounded-lg border border-brand-neutral-2 px-3 py-5 hover:scale-103 transition-transform duration-300 ease-in-out',
             className
         )}>
             <div className="">
@@ -32,11 +32,11 @@ export default function AnalyticsMetricsCard({ data, className }: MetricCardProp
                         className="select-none pointer-events-none size-9 md:size-10"
                     />
                 </div>
-                <div className="flex justify-between items-center gap-2 md:gap-3">
-                    <p className="text-xs font-medium text-brand-secondary-8">
+                <div className="flex w-full justify-between items-center gap-3">
+                    <p className="text-xs whitespace-nowrap font-medium text-brand-secondary-8">
                         {data.label}
                     </p>
-                    <p className="text-[11px] md:text-xs text-brand-neutral-6">
+                    <p className={cn("text-[11px]", data.change && data?.change > 0 ? "text-green-600" : data.change && data?.change < 0 ? "text-red-600" : "text-brand-neutral-6")}>
                         {data.description}
                     </p>
                 </div>

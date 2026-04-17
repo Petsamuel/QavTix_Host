@@ -9,7 +9,7 @@ interface MetricsCardsConatinerProps {
 export default function AnalyticsMetricsCardsContainer({ metrics, className }: MetricsCardsConatinerProps) {
     return (
         <div className={cn(
-            'grid grid-cols-1 xsm:grid-cols-2 lg:grid-cols-4 gap-4',
+            'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4',
             className
         )}>
             {metrics.map((metric) => (

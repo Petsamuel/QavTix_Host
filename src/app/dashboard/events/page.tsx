@@ -1,6 +1,15 @@
 import { getEvents } from "@/actions/event"
 import { getCategories } from "@/actions/filters"
 import EventsPageContentWrapper from "@/components/page-wrappers/EventsPageContentWrapper"
+import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+    ...hostSiteMetadata,
+    title: HOST_PAGE_METADATA.MY_EVENTS.title,
+    description: HOST_PAGE_METADATA.MY_EVENTS.description,
+}
+
 
 export default async function EventsPage() {
     const [allRes, liveRes, draftRes, endedRes, cancelledRes, categoryResult] = await Promise.all([

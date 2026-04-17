@@ -32,6 +32,11 @@ export default function ActiveFilterChips({ filters, categories, setFilters, cla
         chips.push({ key: 'status', value: filters.status, label: filters.status })
     }
 
+
+    if (filters.purchaseDate) {
+        chips.push({ key: 'purchaseDate', value: filters.purchaseDate.toLocaleDateString(), label: filters.purchaseDate.toLocaleDateString() })
+    }
+
     // ticketType — array of strings
     if (filters.ticketType?.length) {
         filters.ticketType.forEach(type => {
@@ -59,6 +64,7 @@ export default function ActiveFilterChips({ filters, categories, setFilters, cla
             ticketType: [],
             priceRange: undefined,
             dateRange:  undefined,
+            purchaseDate: null
         }))
     }
 

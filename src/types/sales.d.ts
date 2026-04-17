@@ -106,3 +106,41 @@ interface SalesAnalyticsGraphsResult {
     data?:    SalesAnalyticsGraphsData
     message?: string
 }
+
+
+
+interface EventSummary {
+    id: string;
+    name: string;
+    image: string;
+    category: string;
+}
+
+type PaymentStatus = "completed" | "pending" | "failed" | "refunded" | "successful" | "cancelled";
+
+interface Transaction {
+    payment_id: string;
+    purchased_by: {
+        full_name: string;
+        email: string;
+        profile_picture: string | null;
+    };
+    event: EventSummary;
+    purchase_date: string; // ISO 8601 Date string
+    quantity: number;
+    amount: string;
+    status: PaymentStatus;
+}
+
+
+interface SalesAnalyticsTransactionsResult {
+    success:  boolean
+    data?: {
+        results:     Transaction[]
+        count:       number
+        next:        string | null
+        previous:    string | null
+        total_pages?: number
+    }
+    message?: string
+}

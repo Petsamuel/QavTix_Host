@@ -8,9 +8,10 @@ import { ShoppingCart, Wallet, Rocket } from "lucide-react"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { formatPrice } from "@/helper-fns/formatPrice"
 import GeographicBreakdownChartLoader from "../loaders/GeographicBreakdownChartLoader"
+import LockedChartOverlay from "./LockedChartOverlay"
+
 
 // Placeholder bars shown when there is no real location data.
-// They give the chart a populated look so the card is never scanty.
 const PLACEHOLDER_BARS = [
     { location: "—", tickets: 45 },
     { location: "—", tickets: 70 },
@@ -27,9 +28,10 @@ const PLACEHOLDER_BARS = [
 interface GeographicBreakdownChartProps {
     data:      GeoBreakdownData | null
     isPending: boolean
+    locked?:   boolean
 }
 
-export default function GeographicBreakdownChart({ data, isPending }: GeographicBreakdownChartProps) {
+export default function GeographicBreakdownChart({ data, isPending, locked }: GeographicBreakdownChartProps) {
     if (isPending) return <GeographicBreakdownChartLoader />
 
     const { user }  = useAppSelector(store => store.authUser)
@@ -39,15 +41,13 @@ export default function GeographicBreakdownChart({ data, isPending }: Geographic
     const best      = data?.best_location
     const hasData   = locations.length > 0
 
-    // Use real data if available, fall back to placeholders
     const chartData = hasData
         ? locations.map(l => ({ location: l.city, tickets: l.tickets }))
         : PLACEHOLDER_BARS
 
-    // Progress percentages — relative to max across all locations
-    const maxTickets = hasData ? Math.max(...locations.map(l => l.tickets),         1) : 1
-    const maxRevenue = hasData ? Math.max(...locations.map(l => parseFloat(l.revenue)), 1) : 1
-    const maxClicks  = hasData ? Math.max(...locations.map(l => l.clicks),          1) : 1
+    const maxTickets = hasData ? Math.max(...locations.map(l => l.tickets),               1) : 1
+    const maxRevenue = hasData ? Math.max(...locations.map(l => parseFloat(l.revenue)),   1) : 1
+    const maxClicks  = hasData ? Math.max(...locations.map(l => l.clicks),                1) : 1
 
     const bestTickets = best?.tickets             ?? 0
     const bestRevenue = parseFloat(best?.revenue  ?? "0")
@@ -58,7 +58,7 @@ export default function GeographicBreakdownChart({ data, isPending }: Geographic
     const clicksPct  = hasData ? Math.round((bestClicks  / maxClicks)  * 100) : 0
 
     return (
-        <div className="w-full bg-white rounded-[32px] p-8 shadow-sm border border-neutral-50">
+        <div className="w-full bg-white rounded-[32px] p-8 shadow-sm border border-neutral-50 relative overflow-hidden">
             <h2 className="text-brand-secondary-5 text-xs mb-6">Geographic Breakdown</h2>
 
             {/* Blue gradient chart card */}
@@ -67,10 +67,7 @@ export default function GeographicBreakdownChart({ data, isPending }: Geographic
 
                 <div className="h-60 min-w-150 mt-4">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                            data={chartData}
-                            margin={{ top: 20, right: 0, left: -30, bottom: 0 }}
-                        >
+                        <BarChart data={chartData} margin={{ top: 20, right: 0, left: -30, bottom: 0 }}>
                             <XAxis
                                 dataKey="location"
                                 axisLine={false}
@@ -161,6 +158,8 @@ export default function GeographicBreakdownChart({ data, isPending }: Geographic
                     </div>
                 </div>
             </div>
+
+            {locked && <LockedChartOverlay />}
         </div>
     )
 }

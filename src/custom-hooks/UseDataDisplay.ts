@@ -58,11 +58,13 @@ export interface TabState<T> {
     refresh: () => void
 }
 
-const buildFilterParams = (filters: Partial<FilterValues>): Record<string, string | string[]> => {
+const buildFilterParams = (filters: Partial<FilterValues>): Record<string, string | string[]> => {   
     const params: Record<string, string | string[]> = {}
     if (filters.categories?.length)                                     params.category    = filters.categories
     if (filters.dateRange?.from)                                        params.start_date  = format(new Date(filters.dateRange.from), 'yyyy-MM-dd')
     if (filters.dateRange?.to)                                          params.end_date    = format(new Date(filters.dateRange.to),   'yyyy-MM-dd')
+    if (filters.purchaseDate)                                           params.start_date  = format(filters.purchaseDate,   'yyyy-MM-dd')
+    if (filters.purchaseDate)                                           params.end_date  =   format(filters.purchaseDate,   'yyyy-MM-dd')
     if (filters.priceRange?.min != null && filters.priceRange.min > 0)  params.min_price   = String(filters.priceRange.min)
     if (filters.priceRange?.max != null)                                params.max_price   = String(filters.priceRange.max)
     if (filters.status)                                                 params.status      = filters.status
@@ -86,6 +88,7 @@ const hasActiveFilters = (filters: Partial<FilterValues>): boolean =>
         filters.performance != null ||
         filters.dateRangePreset     ||
         filters.sortBy              ||
+        filters.purchaseDate        ||
         filters.event
     )
 
@@ -131,6 +134,7 @@ const useTabState = <T>(
         String(filters.performance          ?? ''),
         filters.dateRangePreset             ?? '',
         filters.sortBy                      ?? '',
+        filters.purchaseDate?.toString()    ?? '',
         filters.event                       ?? '',
     ].join('|')
 

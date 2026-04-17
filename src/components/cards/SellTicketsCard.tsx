@@ -1,6 +1,41 @@
-import { Icon } from "@iconify/react";
+'use client'
+
+import { Icon } from "@iconify/react"
+import { useState } from "react"
+import { startFreeTrial } from "@/actions/payment"
+import { useAppDispatch } from "@/lib/redux/hooks"
+import { showAlert } from "@/lib/redux/slices/alertSlice"
 
 export default function SellTicketsCard() {
+
+    const [isProcessing, setIsProcessing] = useState(false)
+    const dispatch = useAppDispatch()
+
+    const handleStartFreeTrial = async () => {
+        setIsProcessing(true)
+
+        const result = await startFreeTrial()
+
+        if (result.success) {
+            dispatch(showAlert({
+                variant: "success",
+                title: "Free Trial Activated!",
+                description: result.message || "You now have 14 days of full access.",
+            }))
+
+            // hard refresh 
+            window.location.reload()
+        } else {
+            dispatch(showAlert({
+                variant: "destructive",
+                title: "Failed to Start Trial",
+                description: result.message || "Something went wrong. Please try again.",
+            }))
+        }
+
+        setIsProcessing(false)
+    }
+
     return (
         <div className="max-w-full w-full rounded-2xl bg-brand-accent-2 py-4 px-3 flex flex-col gap-4">
 
@@ -14,12 +49,23 @@ export default function SellTicketsCard() {
             </div>
 
             <p className="text-xs text-brand-neutral-8">
-                Everything you need to manage and grow your events -{" "}
+                Everything you need to manage and grow your events —{" "}
                 <strong className="font-bold">Free for 14 days</strong>
             </p>
 
-            <button className="w-full rounded-lg bg-brand-accent-4 hover:bg-brand-accent-5 active:scale-[0.98] transition-all duration-150 py-3 text-white text-sm font-semibold">
-                Get Started for Free
+            <button 
+                onClick={handleStartFreeTrial}
+                disabled={isProcessing}
+                className="w-full rounded-lg bg-brand-accent-4 hover:bg-brand-accent-5 active:scale-[0.98] transition-all duration-150 py-3 text-white text-sm font-semibold disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+                {isProcessing ? (
+                    <>
+                        Activating
+                        <Icon icon="eos-icons:three-dots-loading" className="size-5" />
+                    </>
+                ) : (
+                    "Get Started for Free"
+                )}
             </button>
 
         </div>

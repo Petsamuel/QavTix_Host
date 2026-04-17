@@ -45,7 +45,6 @@ export const step1Schema = z.object({
     city: z.string().optional(),
     postalCode: z.string().optional(),
     onlineLink: z.url("Please enter a valid URL").optional().or(z.literal("")),
-
 })
 .refine((data) => {
     // Only validate if single event type
@@ -169,39 +168,35 @@ export const step2Schema = z.object({
 
 
 // [Tickets & Pricing Schema]
-
 const promoCodeSchema = z.object({
-    codeWord: z.string().min(1, "Required"),
-    discountAmount: z.coerce.number(), // Coerce turns input strings into numbers
-    maximumUsers: z.coerce.number(),
-    validTill: z.string(),
+    codeWord:       z.string().min(1, "Code is required"),
+    discountAmount: z.coerce.number("Invalid discount amount").min(0, "Discount must be 0 or greater"),
+    maximumUsers:   z.coerce.number("Invalid user count").min(1, "At least 1 user allowed"),
+    validTill:      z.string().min(1, "Valid until date is required"),
 })
 
 const ticketTypeSchema = z.object({
-    id: z.string(),
-    ticketType: z.string().min(1, "Required"),
-    description: z.string().optional(),
-    price: z.coerce.number().min(0),
-    currency: z.string(),
-    quantity: z.coerce.number().min(1),
-    perPersonMax: z.coerce.number().optional(),
-    promoCode: promoCodeSchema.optional(),
+    id:           z.string(),
+    ticketType:   z.string().min(1, "Ticket type is required"),
+    description:  z.string().optional(),
+    price:        z.coerce.number("Invalid price").min(0, "Price must be 0 or greater"),
+    currency:     z.string().min(1, "Currency is required"),
+    quantity:     z.coerce.number("Invalid quantity").min(1, "Quantity must be at least 1"),
+    perPersonMax: z.coerce.number("Invalid max per person").min(1).optional(),
+    promoCode:    promoCodeSchema.optional(),
 })
+
+export type TicketType = z.infer<typeof ticketTypeSchema>;
 
 export const step3Schema = z.object({
-    ticketTypes: z.array(ticketTypeSchema).min(1),
+    ticketTypes:            z.array(ticketTypeSchema).min(1, "At least one ticket type is required"),
     salesPeriod: z.object({
-        startDateTime: z.string(),
-        endDateTime: z.string(),
+        startDateTime: z.string().min(1, "Start date is required"),
+        endDateTime:   z.string().min(1, "End date is required"),
     }),
-    refundPolicy: z.enum(['no_refund', 'partial', 'full', 'custom']),
-    customRefundPercentage: z.coerce.number().min(1).max(100).optional(),
+    refundPolicy:           z.enum(['no', 'partial', 'full', 'custom']),
+    customRefundPercentage: z.coerce.number("Invalid input").min(1).max(100).default(0).optional(),
 })
-
-
-
-
-
 
 // [Settings Schema]
 
@@ -219,7 +214,7 @@ export const step4Schema = z.object({
     checkInSettings: z.object({
         qrCodeEnabled: z.boolean(),
         ageRestriction: z.boolean(),
-        minimumAge: z.number().min(1).max(100).optional(),
+        minimumAge: z.coerce.number("Invalid input").min(18, "Minimum age must be at least 18").default(18).optional(),
     }),
     
     emailNotifications: z.object({
@@ -233,7 +228,7 @@ export const step4Schema = z.object({
     
     affiliateProgram: z.object({
         enabled: z.boolean(),
-        percentageCommission: z.number()
+        percentageCommission: z.coerce.number("Invalid input")
             .min(1)
             .max(50)
             .optional(),
@@ -286,9 +281,12 @@ export const completeEventSchema = z.object({
     }),
 })
 
+
+
+
 // Type exports
 export type Step1FormData = z.infer<typeof step1Schema>;
 export type Step2FormData = z.infer<typeof step2Schema>;
-export type Step3FormData = z.infer<typeof step3Schema>;
+export type Step3FormData = z.output<typeof step3Schema>;
 export type Step4FormData = z.infer<typeof step4Schema>;
 export type CompleteEventFormData = z.infer<typeof completeEventSchema>;

@@ -66,6 +66,11 @@ export const CREATE_EVENT = {
     label: "Create Event"
 } as const;
 
+export const EDIT_DRAFT_EVENT = {
+    href: `${NAVIGATION_LINKS.MY_EVENTS.href}/edit-draft/[event_id]`,
+    label: "Edit Draft Event"
+} as const;
+
 
 export const EXPLORE_EVENT_LINK = `${process.env.NEXT_PUBLIC_APP_DOMAIN}/events` as const;
 export const EVENT_DETAILS_LINK = `${process.env.NEXT_PUBLIC_APP_DOMAIN}/events/details/[event_id]/` as const;

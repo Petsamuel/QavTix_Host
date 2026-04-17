@@ -5,4 +5,5 @@ interface MetricCardData {
     description: string
     icon: string
     iconColor: string
+    change?: number
 }

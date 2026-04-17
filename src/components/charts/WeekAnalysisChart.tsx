@@ -5,95 +5,148 @@ import {
     CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts"
 import WeekAnalysisChartLoader from "../loaders/WeekAnalysisChartLoader"
+import LockedChartOverlay from "./LockedChartOverlay"
 
-interface WeekAnalysisChartProps {
-    data:      WeekAnalysisData | null
-    isPending: boolean
+interface WeekDay {
+    day: string
+    date: string
+    morning: number
+    afternoon: number
+    evening: number
+    total: number
 }
 
-export default function WeekAnalysisChart({ data, isPending }: WeekAnalysisChartProps) {
+interface WeekAnalysisData {
+    change_vs_last_week: number
+    label: string
+    days: WeekDay[]
+}
+
+interface WeekAnalysisChartProps {
+    data: WeekAnalysisData | null
+    isPending: boolean
+    locked?: boolean
+}
+
+export default function WeekAnalysisChart({ data, isPending, locked }: WeekAnalysisChartProps) {
+
     if (isPending) return <WeekAnalysisChartLoader />
 
-    const change      = data?.change_vs_last_week ?? 0
-    const isPositive  = change > 0
+    const change = data?.change_vs_last_week ?? 0
+    const isPositive = change > 0
     const changeLabel = change === 0
-        ? "0% vs last week"
+        ? "No change vs last week"
         : `${isPositive ? "↑" : "↓"} ${Math.abs(change).toFixed(1)}% vs last week`
 
+    // Use real values directly
     const chartData = (data?.days ?? []).map(d => ({
-        day:     d.day,
-        morning: d.morning,
-        noon:    d.afternoon,
-        evening: d.evening,
+        day: d.day,
+        morning: d.morning || 0,
+        afternoon: d.afternoon || 0,
+        evening: d.evening || 0,
     }))
 
-    const isEmpty = !data || chartData.every(d => d.morning === 0 && d.noon === 0 && d.evening === 0)
+    const hasNoData = !data || chartData.every(d => d.morning === 0 && d.afternoon === 0 && d.evening === 0)
+
+    const maxValue = Math.max(...chartData.map(d => Math.max(d.morning, d.afternoon, d.evening)), 5)
 
     return (
-        <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-sm border border-neutral-100">
+        <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-sm border border-neutral-100 relative overflow-hidden">
             <div className="flex justify-between items-start mb-8">
                 <div>
-                    <h2 className="text-sm font-bold text-brand-secondary-9">Week-Based Analysis:</h2>
+                    <h2 className="text-base font-bold text-brand-secondary-9">Week-Based Analysis</h2>
                     <p className="text-xs text-brand-secondary-5">Report from the last 7 days</p>
                     {data?.label && (
-                        <p className="text-xs text-brand-secondary-5 mt-2.5 font-medium">
-                            {data.label}
-                        </p>
+                        <p className="text-[11px] text-brand-secondary-5 mt-2">{data.label}</p>
                     )}
                 </div>
+
                 {data && (
-                    <div className={`flex items-center gap-1 font-bold text-xs ${isPositive ? "text-emerald-500" : "text-rose-500"}`}>
+                    <div className={`flex items-center gap-1 font-semibold text-xs shrink-0 ${isPositive ? "text-emerald-500" : "text-rose-500"}`}>
                         <span>{changeLabel}</span>
                     </div>
                 )}
             </div>
 
-            {isEmpty ? (
-                <div className="h-50 w-full flex items-center justify-center text-xs text-brand-neutral-5">
-                    No data for this period
+            {hasNoData ? (
+                <div className="h-64 flex items-center justify-center text-xs text-slate-400 font-medium">
+                    No sales data for this period
                 </div>
             ) : (
-                <div className="h-50 w-full overflow-x-auto">
-                    <div className="min-w-75 h-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                                <XAxis
-                                    dataKey="day"
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: "#CBD5E1", fontSize: 10 }}
-                                    dy={10}
-                                />
-                                <YAxis
-                                    axisLine={false}
-                                    tickLine={false}
-                                    ticks={[0, 20, 40, 60]}
-                                    tickFormatter={(val) =>
-                                        val === 0  ? "0"     :
-                                        val === 20 ? "Morn." :
-                                        val === 40 ? "Noon"  : "Eve."
-                                    }
-                                    tick={{ fill: "#94A3B8", fontSize: 10 }}
-                                />
-                                <Tooltip
-                                    cursor={{ stroke: "#E2E8F0", strokeWidth: 1 }}
-                                    contentStyle={{
-                                        fontSize: "10px",
-                                        borderRadius: "8px",
-                                        border: "1px solid #E2E8F0",
-                                        backgroundColor: "#fff",
-                                    }}
-                                />
-                                <Line type="monotone" dataKey="evening" stroke="#FFD8BE" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-                                <Line type="monotone" dataKey="noon"    stroke="#D1D5DB" strokeWidth={2} dot={false} />
-                                <Line type="monotone" dataKey="morning" stroke="#2563EB" strokeWidth={2} dot={false} />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
+                <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart 
+                            data={chartData} 
+                            margin={{ top: 20, right: 20, left: -10, bottom: 30 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+
+                            <XAxis
+                                dataKey="day"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: "#94A3B8", fontSize: 12, fontWeight: 500 }}
+                                dy={12}
+                            />
+
+                            <YAxis
+                                axisLine={false}
+                                tickLine={false}
+                                domain={[0, Math.ceil(maxValue * 1.2)]}
+                                tick={{ fill: "#64748B", fontSize: 12, fontWeight: 500 }}
+                                width={45}
+                            />
+
+                            <Tooltip
+                                cursor={{ stroke: "#E2E8F0", strokeWidth: 2 }}
+                                contentStyle={{
+                                    fontSize: "13px",
+                                    borderRadius: "10px",
+                                    border: "none",
+                                    boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                                    padding: "10px 12px"
+                                }}
+                                formatter={(value: number | undefined, name: string | undefined) => [
+                                    value,
+                                    name === "afternoon" ? "Afternoon" : (name || "").charAt(0).toUpperCase() + (name || "").slice(1)
+                                ]}
+                            />
+
+                            {/* Morning - Blue */}
+                            <Line 
+                                type="monotone" 
+                                dataKey="morning" 
+                                stroke="#3B82F6" 
+                                strokeWidth={3.5} 
+                                dot={false}
+                                activeDot={{ r: 5, fill: "#3B82F6", stroke: "#fff", strokeWidth: 2 }}
+                            />
+
+                            {/* Afternoon - Slate */}
+                            <Line 
+                                type="monotone" 
+                                dataKey="afternoon" 
+                                stroke="#64748B" 
+                                strokeWidth={3.5} 
+                                dot={false}
+                                activeDot={{ r: 5, fill: "#64748B", stroke: "#fff", strokeWidth: 2 }}
+                            />
+
+                            {/* Evening - Orange */}
+                            <Line 
+                                type="monotone" 
+                                dataKey="evening" 
+                                stroke="#F59E0B" 
+                                strokeWidth={3.5} 
+                                dot={false}
+                                activeDot={{ r: 5, fill: "#F59E0B", stroke: "#fff", strokeWidth: 2 }}
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
                 </div>
             )}
-            <p className="text-[10px] text-slate-300 font-bold mt-2">Time</p>
+
+            {locked && <LockedChartOverlay />}
         </div>
     )
 }

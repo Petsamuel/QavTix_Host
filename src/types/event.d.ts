@@ -112,6 +112,7 @@ interface EventTicket {
 }
 
 type DatePreset = 'day' | 'week' | 'month'
+type ChartPreset = 'year' | 'week' | 'month'
 
 interface StatusOption {
     value:  string
@@ -189,4 +190,102 @@ interface GetUpcomingEventsResult {
     success:  boolean
     data?:    UpcomingEventsData
     message?: string
+}
+
+
+
+
+
+interface EventLocation {
+    venue_name: string
+    address: string
+    country: string
+    state: string
+    city: string
+    postal_code: string
+}
+
+interface EventSocialLink {
+    url: string
+}
+
+interface EventTicketPromoCode {
+    code: string
+    discount_percentage: number
+    maximum_users: number
+    valid_till: string          // ISO date string
+}
+
+interface EventTicket {
+    ticket_type: string
+    description?: string
+    price: string               // string because of decimal
+    quantity: number
+    per_person_max?: number
+    currency: string
+    sales_start: string
+    sales_end: string
+    promo_codes: EventTicketPromoCode[]
+}
+
+interface EventMedia {
+    image_url: string
+    video_url?: string
+    is_featured: boolean
+}
+
+interface UserTicketSummary {
+    has_multiple: boolean
+    total: number
+    tickets: Array<{
+        issued_ticket_id: number
+        ticket_type: string
+        status: "active" | "cancelled"
+        status_display: string
+    }>
+}
+
+interface EventDetails {
+    id: string
+    title: string
+    category: number 
+    tags: string[]
+    event_type: "single" | "recurring"
+    start_datetime: string
+    end_datetime: string
+    location_type: "physical" | "online" | "tba"
+    short_description: string
+    full_description: string
+    currency: string
+    organizer_display_name: string
+    organizer_description?: string
+    organizer_id?: string
+    public_email: string
+    phone_number?: string
+    refund_policy: "no" | "partial" | "full" | "custom"
+    refund_percentage?: number
+    qr_enabled: boolean
+    age_restriction: boolean
+    // Email notification settings
+    order_confirmation: boolean
+    ticket_delivery: boolean
+    reminders: boolean
+    post_event_emails: boolean
+    customize_sender_name: boolean
+    // Affiliate
+    affiliate_enabled: boolean
+    commission_percentage?: string
+    affiliate_start?: string
+    affiliate_end?: string
+
+    event_location: EventLocation
+    social_links: EventSocialLink[]
+    tickets: EventTicket[]
+    event_status: string
+    media: EventMedia[]            
+    attendees_count?: number
+    is_following?: boolean
+    online_link?: string
+    is_favorite?: boolean
+    user_ticket_summary?: UserTicketSummary
 }

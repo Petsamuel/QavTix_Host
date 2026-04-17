@@ -1,7 +1,7 @@
 "use server"
 
 import { CACHE_TAGS }            from "@/cache-tags"
-import { EVENT_DELETE, EVENT_UPDATE, EVENTS_ENDPOINT, CUSTOMER_LIST_DOWNLOAD_ENDPOINT } from "@/endpoints"
+import { EVENT_DELETE, EVENT_UPDATE, EVENTS_ENDPOINT, CUSTOMER_LIST_DOWNLOAD_ENDPOINT, EVENT_DETAILS_ENDPOINT } from "@/endpoints"
 import { handleApiError }        from "@/helper-fns/handleApiErrors"
 import { cookies }               from "next/headers"
 
@@ -66,6 +66,44 @@ export async function getEvents(
     }
 }
 
+
+
+interface GetEventDetailsResult {
+    success:  boolean
+    data?:    EventDetails
+    message?: string
+}
+
+export async function getEventDetails(eventID: string): Promise<GetEventDetailsResult> {
+    try {
+        const cookiesStore = await cookies()
+        const token        = cookiesStore.get("access_token")?.value
+
+        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_DETAILS_ENDPOINT.replace("[event_id]", eventID)}`
+        const res = await fetch(url, {
+            cache:   "no-store",
+            headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+            next:    { tags: [CACHE_TAGS.EVENT_DETAILS] },
+        })
+
+        const json = await res.json()
+
+        if (!res.ok) {
+            console.log("[getEventDetails] status:", res.status, JSON.stringify(json))
+            return { success: false, message: handleApiError(json) }
+        }
+
+        return { success: true, data: json.data ?? json }
+
+    } catch (err) {
+        console.log("[getEventDetails] error:", err)
+        return { success: false, message: "Failed to load event details." }
+    }
+}
+
+
+
+
 // Single Delete 
 
 export async function deleteEvent(
@@ -85,8 +123,7 @@ export async function deleteEvent(
 
         if (!res.ok) {
             // Some DELETE endpoints return empty body on success; guard against that
-            const text = await res.text()
-            const json = text ? JSON.parse(text) : {}
+            const json = await res.json()
             return { success: false, message: handleApiError(json) }
         }
 
@@ -114,7 +151,38 @@ export async function updateEventStatus(
             {
                 method:  "PATCH",
                 headers: authHeaders(token),
-                body:    JSON.stringify({ status }),
+                body:    JSON.stringify({ event_status: status }),
+            }
+        )
+
+        if (!res.ok) {
+            const json = await res.json().catch(() => ({}))
+            return { success: false, message: handleApiError(json) }
+        }
+
+        const label = status === "active" ? "published" : "unpublished"
+        return { success: true, message: `Event ${label} successfully.` }
+    } catch (err) {
+        console.error("[updateEventStatus] error:", err)
+        return { success: false, message: "Failed to update event." }
+    }
+}
+
+
+
+export async function cancelEvent(
+    { eventId }: { eventId: string }
+): Promise<ActionResult> {
+    try {
+        const token    = await getToken()
+        const endpoint = EVENT_UPDATE.replace("[event_id]", eventId)
+
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`,
+            {
+                method:  "PATCH",
+                headers: authHeaders(token),
+                body:    JSON.stringify({ event_status: "cancelled" }),
             }
         )
 
@@ -199,7 +267,7 @@ export async function bulkCancelEvents(
                     {
                         method:  "PATCH",
                         headers: authHeaders(token),
-                        body:    JSON.stringify({ status: "cancelled" }),
+                        body:    JSON.stringify({ event_status: "cancelled" }),
                     }
                 )
             })
@@ -248,7 +316,7 @@ export async function bulkUnpublishEvents(
                     {
                         method:  "PATCH",
                         headers: authHeaders(token),
-                        body:    JSON.stringify({ status: "draft" }),
+                        body:    JSON.stringify({ event_status: "draft" }),
                     }
                 )
             })

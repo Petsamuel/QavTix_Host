@@ -1,21 +1,19 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { DateRange } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Icon } from "@iconify/react"
 import { format, parseISO } from "date-fns"
 import PaginationControls from "../tools/PaginationControl"
 import { getFinancials } from "@/actions/financials"
-import { dateRangeToParams } from "@/helper-fns/dateRangeToParams"
 import { payoutStatusConfig } from "../resources/status-config"
 import TableLoader from "@/components/loaders/TableLoader"
 
 
 interface Props {
     initialData:    WithdrawalHistoryPaginated
-    externalDate:   DateRange | null
+    externalDate:   DatePreset | null
     onCards:        (cards: FinancialCards) => void
     onCardsError:   () => void
     onCardsLoading: (loading: boolean) => void
@@ -39,13 +37,9 @@ export default function PayoutHistoryTable({
     const [isError,     setIsError]     = useState(false)
 
     const isFetching    = useRef(false)
-    const initialized   = useRef(false)
 
-    // Stable date key to detect changes
-    const dateKey = [
-        externalDate?.from?.toISOString() ?? '',
-        externalDate?.to?.toISOString()   ?? '',
-    ].join('|')
+    const lastFetchedKey = useRef(externalDate) 
+    const initialized = useRef(false)
 
     const fetchData = useCallback(async (page: number, isFilterChange = false) => {
         if (isFetching.current) return
@@ -55,7 +49,7 @@ export default function PayoutHistoryTable({
         if (isFilterChange) onCardsLoading(true)
 
         const result = await getFinancials({
-            ...dateRangeToParams(externalDate),
+            date_range: externalDate || undefined,
             page,
         })
 
@@ -76,12 +70,13 @@ export default function PayoutHistoryTable({
         setTotalPages(wh.total_pages)
         setCurrentPage(wh.page)
         setIsError(false)
+        lastFetchedKey.current = externalDate
 
         if (isFilterChange) {
             onCards(cards)
             onCardsSuccess()
         }
-    }, [dateKey])
+    }, [externalDate])
 
     // Re-fetch when external date changes (skip first render)
     useEffect(() => {
@@ -89,8 +84,13 @@ export default function PayoutHistoryTable({
             initialized.current = true
             return
         }
+
+        if (externalDate !== lastFetchedKey.current) {
+            lastFetchedKey.current = externalDate
+            fetchData(1, true)
+        }
         fetchData(1, true)
-    }, [dateKey])
+    }, [externalDate, fetchData])
 
     const fetchPage = (page: number) => {
         if (page < 1 || page > totalPages) return

@@ -278,6 +278,7 @@ export function mapSalesAnalyticsCards(
             description: `${fmtChange(parseFloat(cards.total_revenue_change))} change`,
             icon:        "/images/vectors/dollar-in.svg",
             iconColor:   "text-[#359160]",
+            change:       parseFloat(cards.total_revenue_change)
         },
         {
             id:          "tickets-sold",
@@ -294,6 +295,7 @@ export function mapSalesAnalyticsCards(
             description: `${fmtChange(cards.conversion_change)} vs last period`,
             icon:        "/images/vectors/conversion.svg",
             iconColor:   "text-brand-primary-4",
+            change:       Number(cards.conversion_change)
         },
         {
             id:          "aov",
@@ -302,6 +304,7 @@ export function mapSalesAnalyticsCards(
             description: `${fmtChange(cards.aov_change)} vs last period`,
             icon:        "/images/vectors/average-order.svg",
             iconColor:   "text-[#914613]",
+            change:       Number(cards.aov_change)
         },
         // ── Row 2 ────────────────────────────────────────────────────────────
         {

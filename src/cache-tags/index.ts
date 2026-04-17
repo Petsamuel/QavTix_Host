@@ -11,6 +11,8 @@ export const CACHE_TAGS = {
     CHECKIN: "checkin",
     SUBSCRIPTION: "sub",
 
+    EVENT_DETAILS: "event-details",
+
      // Settings
     PAYMENT_METHODS:  "payment_methods",
     NOTIFICATION_SETTINGS: "notification_settings",

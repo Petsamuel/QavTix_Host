@@ -11,6 +11,16 @@ import { passwordSchema, PasswordSchema } from "@/schemas/security.schema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Icon } from "@iconify/react"
 import { SubmitHandler, useForm } from "react-hook-form"
+import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+    ...hostSiteMetadata,
+    title: HOST_PAGE_METADATA.SECURITY.title,
+    description: HOST_PAGE_METADATA.SECURITY.description,
+}
+
+
 
 export default function SecurityPage() {
     const {

@@ -25,7 +25,7 @@ export default function DateRangePresetFilter({
     value,
     onChange,
     icon,
-    label = 'Date Range',
+    label = 'Date Preset',
 }: DateRangePresetFilterProps) {
 
     const [isOpen,    setIsOpen]    = useState(false)

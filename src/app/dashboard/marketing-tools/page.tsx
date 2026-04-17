@@ -1,5 +1,14 @@
 import { getPromoCodes, getAffiliateLinks, getEmailCampaigns } from "@/actions/marketing"
 import MarketingToolsPageContentWrapper from "@/components/page-wrappers/MarketingToolsPageContentWrapper"
+import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+    ...hostSiteMetadata,
+    title: HOST_PAGE_METADATA.MARKETING_TOOLS.title,
+    description: HOST_PAGE_METADATA.MARKETING_TOOLS.description,
+}
+
 
 export default async function MarketingToolsPage() {
     const [promoResult, affiliateResult, campaignResult] = await Promise.all([

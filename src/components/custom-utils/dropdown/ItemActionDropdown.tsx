@@ -12,6 +12,10 @@ import DownloadAttendeesModal from "@/components/modals/DownloadAttendeesModal"
 import AddToFeaturedModal from "@/components/modals/AddToFeaturedEventsModal"
 import { FeatureCheckoutProvider } from "@/contexts/checkout/FeatureCheckoutProvider"
 import FeaturedSuccessModal from "@/components/modals/FeaturedSuccessModal"
+import { useAppDispatch } from "@/lib/redux/hooks"
+import { showAlert } from "@/lib/redux/slices/alertSlice"
+import { cancelEvent, deleteEvent, updateEventStatus } from "@/actions/event"
+import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 
 export type ItemAction = {
     id:       LiveEventActionID | EndedEventActionID | "view-profile"
@@ -22,47 +26,100 @@ export type ItemAction = {
 }
 
 interface ItemActionDropdownProps {
-    actions:   ItemAction[]
-    disabled?: boolean
-    eventID?: string
+    actions:    ItemAction[]
+    disabled?:  boolean
+    eventID?:   string
     eventName?: string
+    onRefresh?: () => void   // optional — call this after a mutating action
 }
 
-export default function ItemActionDropdown({ actions, disabled = false, eventID, eventName }: ItemActionDropdownProps) {
+export default function ItemActionDropdown({ 
+    actions, 
+    disabled = false, 
+    eventID, 
+    eventName,
+    onRefresh,
+}: ItemActionDropdownProps) {
 
-    const [loadingAction, setLoadingAction] = useState<string | null>(null)
-    const [isOpen, setIsOpen]        = useState(false)
-    const [showShareModal, setShowShareModal] = useState(false)
-    const [eventUrl, setEventUrl] = useState("")
-    const [openEmail, setOpenEmail] = useState(false)
-    const [openDownloadModal, setOpenDownloadModal] = useState(false)
+    const dispatch = useAppDispatch()
+    const { trigger: triggerRevalidation } = useRevalidate("events")
+
+    const [loadingAction,          setLoadingAction]          = useState<string | null>(null)
+    const [isOpen,                 setIsOpen]                 = useState(false)
+    const [showShareModal,         setShowShareModal]         = useState(false)
+    const [eventUrl,               setEventUrl]               = useState("")
+    const [openEmail,              setOpenEmail]              = useState(false)
+    const [openDownloadModal,      setOpenDownloadModal]      = useState(false)
     const [openAddToFeaturedModal, setOpenAddToFeaturedModal] = useState(false)
-
 
     const handleAction = async (action: ItemAction) => {
         if (loadingAction) return
         setLoadingAction(action.id)
+
         try {
-            if (action.id === "share"){
+            // ── Modal-based actions (open modal, don't close dropdown yet) ──────
+            if (action.id === "share") {
                 setEventUrl(EVENT_DETAILS_LINK.replace("[event_id]", eventID || ""))
                 setShowShareModal(true)
                 return
-            } 
-            else if (action.id === "send-update"){
+            }
+
+            if (action.id === "send-update") {
                 setOpenEmail(true)
                 return
             }
-            else if (action.id === "download"){
+
+            if (action.id === "download") {
                 setOpenDownloadModal(true)
                 return
             }
-            else if (action.id === "feature" && eventID){
+
+            if (action.id === "feature" && eventID) {
                 setOpenAddToFeaturedModal(true)
+                return
+            }
+
+            if (action.id === "cancel" && eventID) {
+                const result = await cancelEvent({ eventId: eventID })
+                if (result.success) {
+                    dispatch(showAlert({ title: "Event Cancelled", description: result.message, variant: "success" }))
+                    onRefresh?.()
+                    triggerRevalidation()
+                } else {
+                    dispatch(showAlert({ title: "Cancel Failed", description: result.message, variant: "destructive" }))
+                }
+                return
+            }
+
+            if (action.id === "unpublish" && eventID) {
+                const result = await updateEventStatus({ eventId: eventID, status: "draft" })
+                if (result.success) {
+                    dispatch(showAlert({ title: "Event Unpublished", description: result.message, variant: "success" }))
+                    onRefresh?.()
+                    triggerRevalidation()
+                } else {
+                    dispatch(showAlert({ title: "Unpublish Failed", description: result.message, variant: "destructive" }))
+                }
+                return
+            }
+
+            if (action.id === "delete" && eventID) {
+                const result = await deleteEvent({ eventId: eventID })
+                if (result.success) {
+                    dispatch(showAlert({ title: "Event Deleted", description: result.message, variant: "success" }))
+                    onRefresh?.()
+                    triggerRevalidation()
+                } else {
+                    dispatch(showAlert({ title: "Delete Failed", description: result.message, variant: "destructive" }))
+                }
+                return
             }
 
             await action.onClick?.()
+
         } catch (err) {
             console.error(`Action "${action.label}" failed:`, err)
+            dispatch(showAlert({ title: "Something went wrong", description: "Please try again.", variant: "destructive" }))
         } finally {
             setLoadingAction(null)
             setIsOpen(false)
@@ -121,22 +178,19 @@ export default function ItemActionDropdown({ actions, disabled = false, eventID,
                 </DropdownMenuContent>
             </DropdownMenu>
 
-
             <ShareEventModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} shareUrl={eventUrl} />
-            <EmailTemplateEditor 
+            <EmailTemplateEditor
                 open={openEmail && !!eventID}
-                setOpen={(setOpenEmail)}
+                setOpen={setOpenEmail}
                 eventID={eventID}
                 campaignName={eventName}
                 mode="campaign"
                 onClose={() => setOpenEmail(false)}
             />
-
             <DownloadAttendeesModal isOpen={openDownloadModal} onClose={() => setOpenDownloadModal(false)} />
-            
             <FeatureCheckoutProvider>
                 <AddToFeaturedModal eventId={eventID || ""} isOpen={openAddToFeaturedModal} onClose={() => setOpenAddToFeaturedModal(false)} />
-                <FeaturedSuccessModal eventSlug={eventID} onClose={() => setOpenAddToFeaturedModal(false)}  />
+                <FeaturedSuccessModal eventSlug={eventID} onClose={() => setOpenAddToFeaturedModal(false)} />
             </FeatureCheckoutProvider>
         </>
     )

@@ -1,5 +1,6 @@
 export const DASHBOARD_OVERVIEW_ENDPOINT = "host/dashboard/overview/"
 export const HOST_UPCOMING_EVENTS_ENDPOINT = "host/events/management"
+export const EVENT_DETAILS_ENDPOINT = "public/event/[event_id]"
 export const EVENTS_ENDPOINT = "host/events/management"
 export const DASHBOARD_FEED_ENDPOINT = "host/dashboard/feed/"
 
@@ -16,16 +17,19 @@ export const PAYOUT_ADD_ENDPOINT = "host/payouts/add/"
 export const WITHDRAWAL_ENDPOINT = "host/withdraw/"
 
 
-export const EVENT_DELETE = "host/events/delete/[event_id]"
-export const EVENT_UPDATE = "host/events/[event_id]/update"
+export const EVENT_DELETE = "host/events/delete/[event_id]/"
+export const EVENT_CREATE = "host/events/create/"
+export const EVENT_UPDATE = "host/events/[event_id]/update/"
 
 export const SALES_ANALYTICS_CARDS_ENDPOINT = "host/sales/cards"
 export const SALES_ANALYTICS_GRAPHS_ENDPOINT = "host/sales/graphs"
+export const SALES_ANALYTICS_TRANSACTIONS_ENDPOINT = "host/sales/transactions"
 
 
 
 export const FEATURED_PLAN_VERIFY_ENDPOINT = "payments/featured/complete/"
 export const FEATURED_PLAN_INITIATE_ENDPOINT = "payments/featured/initiate/"
+export const FREE_TRIAL_ENDPOINT = "payments/plans/free-trial/"
 
 
 export const CHECKIN_OVERVIEW_ENDPOINT = "host/checkin/overview"

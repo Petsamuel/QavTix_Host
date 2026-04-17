@@ -2,6 +2,8 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import SalesBreakdownChartLoader from "../loaders/SalesBreakdownChartLoader"
+import LockedChartOverlay from "./LockedChartOverlay"
+
 
 const COLORS = ["#00388D", "#2F70D9", "#FF914D", "#22C55E", "#A855F7", "#EAB308"]
 
@@ -21,9 +23,10 @@ const CustomTooltip = ({ active, payload }: any) => {
 interface SalesBreakdownChartProps {
     overall:   SalesBreakdownItem[]
     isPending: boolean
+    locked?:   boolean
 }
 
-export default function SalesBreakdownChart({ overall, isPending }: SalesBreakdownChartProps) {
+export default function SalesBreakdownChart({ overall, isPending, locked }: SalesBreakdownChartProps) {
     if (isPending) return <SalesBreakdownChartLoader />
 
     const chartData = overall.map((item, i) => ({
@@ -32,10 +35,10 @@ export default function SalesBreakdownChart({ overall, isPending }: SalesBreakdo
     }))
 
     return (
-        <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-[0px_5.8px_23.17px_0px_#3326AE14] border border-neutral-100">
+        <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-[0px_5.8px_23.17px_0px_#3326AE14] border border-neutral-100 relative overflow-hidden">
             <div className="mb-2">
-                <h2 className="text-sm font-bold text-brand-secondary-9">Sales Breakdown</h2>
-                <p className="text-sm text-brand-secondary-5">Sales by Ticket Type</p>
+                <h2 className="text-sm font-bold text-brand-secondary-9">Real-Time Sales Insights</h2>
+                <p className="text-xs text-brand-secondary-5">Sales by Ticket Type</p>
             </div>
 
             {overall.length === 0 ? (
@@ -70,10 +73,7 @@ export default function SalesBreakdownChart({ overall, isPending }: SalesBreakdo
                         {chartData.map((item) => (
                             <div key={item.ticket_type} className="flex flex-col items-center">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <div
-                                        className="size-2 rounded-full"
-                                        style={{ backgroundColor: item.color }}
-                                    />
+                                    <div className="size-2 rounded-full" style={{ backgroundColor: item.color }} />
                                     <span className="text-[10px] text-slate-400 whitespace-nowrap truncate max-w-16">
                                         {item.ticket_type}
                                     </span>
@@ -86,6 +86,8 @@ export default function SalesBreakdownChart({ overall, isPending }: SalesBreakdo
                     </div>
                 </>
             )}
+
+            {locked && <LockedChartOverlay />}
         </div>
     )
 }

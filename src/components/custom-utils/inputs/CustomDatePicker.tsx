@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from "react"
+import { useState } from "react" // Import useState
 import { format } from "date-fns"
 import { Calendar as CalendarIcon, LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -17,6 +18,7 @@ interface CustomDatePickerProps {
   onChange: (date?: string) => void
   error?: string
   placeholder?: string
+  disabled?: boolean
   icon?: LucideIcon
   className?: string
 }
@@ -26,10 +28,12 @@ export default function CustomDatePicker({
   value,
   onChange,
   error,
+  disabled = false,
   placeholder = "DD/MM/YYYY",
   icon: Icon = CalendarIcon,
   className
 }: CustomDatePickerProps) {
+    const [open, setOpen] = useState(false)
     const dateValue = value ? new Date(value) : undefined
 
     return (
@@ -38,10 +42,11 @@ export default function CustomDatePicker({
                 {label}
             </label>
             
-            <Popover>
+            <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <button
                         type="button"
+                        disabled={disabled}
                         className={cn(
                         "w-full h-14 px-4 flex items-center justify-between text-xs rounded-lg transition-all outline-none bg-white",
                         error
@@ -60,7 +65,11 @@ export default function CustomDatePicker({
                     <Calendar
                         mode="single"
                         selected={dateValue}
-                        onSelect={(date) => onChange(date?.toISOString())}
+                        disabled={disabled}
+                        onSelect={(date) => {
+                            onChange(date?.toISOString())
+                            setOpen(false) 
+                        }}
                     />
                 </PopoverContent>
             </Popover>

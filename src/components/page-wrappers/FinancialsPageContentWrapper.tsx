@@ -16,6 +16,7 @@ import MetricsContainerLoader from "../loaders/MetricsContainerLoader"
 import { useOnRevalidate } from "@/custom-hooks/UseRevalidate"
 import { getFinancials, getPayoutAccounts } from "@/actions/financials"
 import FinancialPageLoader from "../loaders/FinancialPageLoader"
+import DateRangePresetFilter from "../custom-utils/TableDataDisplayAreas/filters/DateRangePresetFilter"
 
 interface Props {
     initialCards:   FinancialCards
@@ -31,7 +32,7 @@ export default function FinancialsPageContentWrapper({
     const { user } = useAppSelector(store => store.authUser)
     const currency = user?.currency || ""
 
-    const [date, setDate] = useState<DateRange | null>(null)
+    const [datePreset, setDatePreset] = useState<DatePreset | null>(null)
 
     const cardsRef           = useRef<FinancialCards>(initialCards)
     const [cards, _setCards] = useState<FinancialCards>(initialCards)
@@ -77,7 +78,7 @@ export default function FinancialsPageContentWrapper({
     return (
         <main className="pb-10">
             <div className="flex justify-between items-center gap-5 mb-5 mt-10 lg:mt-0">
-                <DateFilter value={date} onChange={setDate} />
+                <DateRangePresetFilter value={datePreset} onChange={setDatePreset} />
                 <ExportButton1 showFormatSelector />
             </div>
 
@@ -108,7 +109,7 @@ export default function FinancialsPageContentWrapper({
                     </h3>
                     <PayoutHistoryTable
                         initialData={history}
-                        externalDate={date}
+                        externalDate={datePreset}
                         onCards={setCards}
                         onCardsError={() => {
                             _setCards(cardsRef.current)

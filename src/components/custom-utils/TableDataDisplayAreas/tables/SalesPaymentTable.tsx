@@ -1,61 +1,71 @@
-import { Checkbox } from "@/components/ui/checkbox"
+"use client"
+
 import { Badge } from "@/components/ui/badge"
-import { usePagination } from "@/custom-hooks/PaginationHook"
-import { mockPayments } from "@/components-data/demo-data"
-import { Dispatch, SetStateAction } from "react"
 import { cn } from "@/lib/utils"
-import PaginationControls from "../tools/PaginationControl"
 import { formatDateTime } from "@/helper-fns/date-utils"
 import UserInfo from "../../users/UserInfo"
 import EventInfo from "../../event/EventInfo"
-
-
+import PaginationControls from "../tools/PaginationControl"
+import TableLoader from "@/components/loaders/TableLoader"
+import { Icon } from "@iconify/react"
 
 interface SalesPaymentsTableProps {
-    setSelectedPayments: Dispatch<SetStateAction<string[]>>
-    selectedPayments: string[]
+    transactions:  Transaction[]
+    isLoading:     boolean
+    isLoadingMore: boolean
+    hasNext:       boolean
+    count:         number
+    onLoadMore:    () => void
+    isEmpty:       boolean
+    isError:       boolean
+    search:        string
+    currentPage:   number
+    totalPages:    number
+    fetchPage:     (page: number) => void
 }
 
-export default function SalesPaymentsTable({ setSelectedPayments, selectedPayments }: SalesPaymentsTableProps) {
+export default function SalesPaymentsTable({
+    transactions,
+    count,
+    currentPage,
+    fetchPage, 
+    hasNext,
+    isEmpty,
+    isError,
+    isLoading,
+    isLoadingMore,
+    totalPages,
+    search
+}: SalesPaymentsTableProps) {
 
-    const pagination = usePagination(mockPayments, 5)
 
-    const isAllSelected = pagination.currentItems.length > 0 && 
-        pagination.currentItems.every(payment => selectedPayments.includes(payment.id))
+    if (isLoading) return <TableLoader />
 
-    const handleSelectAll = () => {
-        if (isAllSelected) {
-            setSelectedPayments([])
-        } else {
-            const allIds = pagination.currentItems.map(p => p.id)
-            setSelectedPayments(allIds)
-        }
-    }
+    if (isError) return (
+        <div className="flex flex-col items-center justify-center py-20 gap-2">
+            <Icon icon="lucide:wifi-off" className="w-8 h-8 text-red-400" />
+            <p className="text-sm text-brand-secondary-6">Failed to load orders.</p>
+        </div>
+    )
 
-    const handleSelectPayment = (paymentId: string) => {
-        setSelectedPayments(prev => {
-            if (prev.includes(paymentId)) {
-                return prev.filter(id => id !== paymentId)
-            } else {
-                return [...prev, paymentId]
-            }
-        })
-    }
+    if (isEmpty || transactions.length === 0) return (
+        <div className="flex flex-col items-center justify-center py-20 gap-2">
+            <Icon icon="lucide:package-open" className="w-8 h-8 text-brand-neutral-5" />
+            <p className="text-sm text-brand-secondary-6">
+                {search ? `No orders found for "${search}"` : "No orders yet."}
+            </p>
+        </div>
+    )
+
 
     return (
         <div className="w-full space-y-4">
             {/* Desktop Table */}
-            <div className="hidden md:block border border-brand-neutral-2 rounded-xl overflow-hidden!">
+            <div className="hidden md:block border border-brand-neutral-2 rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-brand-neutral-3 border-b border-brand-neutral-3">
                             <tr>
-                                <th className="w-12 py-4 px-4">
-                                    <Checkbox
-                                        checked={isAllSelected}
-                                        onCheckedChange={handleSelectAll}
-                                    />
-                                </th>
                                 <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">Payment ID</th>
                                 <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">Purchased By</th>
                                 <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">Event</th>
@@ -66,32 +76,23 @@ export default function SalesPaymentsTable({ setSelectedPayments, selectedPaymen
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-5 bg-white">
-                            {pagination.currentItems.map((payment) => {
-                                const isSelected = selectedPayments.includes(payment.id)
+                            {transactions.map((payment) => {
                                 
                                 return (
                                     <tr 
-                                        key={payment.id} 
+                                        key={payment.payment_id} 
                                         className={cn(
                                             "hover:bg-brand-accent-2/5 transition-colors cursor-pointer",
-                                            isSelected && "bg-brand-primary-1 hover:bg-brand-primary-1"
                                         )}
-                                        onClick={() => handleSelectPayment(payment.id)}
                                     >
-                                        <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
-                                            <Checkbox
-                                                checked={isSelected}
-                                                onCheckedChange={() => handleSelectPayment(payment.id)}
-                                            />
-                                        </td>
                                         <td className="py-4 px-5">
                                             <p className="text-xs text-brand-secondary-8 font-medium">{payment.payment_id}</p>
                                         </td>
                                         <td className="py-4 px-5">
-                                            <UserInfo user={payment.purchased_by} variant="desktop" />
+                                            <UserInfo user={{ email: payment.purchased_by.email, name: payment.purchased_by.full_name, id: payment.payment_id }} variant="desktop" />
                                         </td>
                                         <td className="py-4 px-5 min-w-40">
-                                            <EventInfo {...payment.event} />
+                                            <EventInfo title={payment.event.name} {...payment.event} />
                                         </td>
                                         <td className="py-4 px-5">
                                             <p className="text-xs text-brand-secondary-8 whitespace-nowrap">
@@ -111,8 +112,8 @@ export default function SalesPaymentsTable({ setSelectedPayments, selectedPaymen
                                         <td className="py-4 px-5">
                                             <Badge className={cn(
                                                 "p-1.5 rounded-md text-[11px] border-[0.8px] capitalize border-neutral-4",
-                                                payment.status === "successful" ? "text-postive-default bg-green-50" :
-                                                payment.status === "cancelled" ? "text-brand-secondary-4 bg-brand-secondary-1" : ""
+                                                payment.status === "successful" || payment.status === "completed" ? "text-postive-default bg-green-50" :
+                                                payment.status === "failed" || payment.status === "cancelled" ? "text-brand-secondary-4 bg-brand-secondary-1" : ""
                                             )}>
                                                 {payment.status}
                                             </Badge>
@@ -125,27 +126,20 @@ export default function SalesPaymentsTable({ setSelectedPayments, selectedPaymen
                 </div>
             </div>
 
-            {/* Mobile Cards */}
+            {/* Mobile Cards - unchanged as per your request */}
             <div className="md:hidden grid grid-cols-1 gap-3">
-                {pagination.currentItems.map((payment) => {
-                    const isSelected = selectedPayments.includes(payment.id)
+                {transactions.map((payment) => {
                     
                     return (
                         <div 
-                            key={payment.id} 
+                            key={payment.payment_id} 
                             className={cn(
                                 "border border-brand-neutral-3 rounded-lg p-2",
-                                isSelected && "bg-brand-primary-1 border-brand-primary-3"
                             )}
                         >
                             <div className="space-y-3">
-                                {/* First Row - Payment ID, Amount, Quantity */}
                                 <div className="flex justify-between gap-2 flex-wrap items-center text-xs text-brand-secondary-9 pb-2 border-b border-brand-neutral-2">
                                     <div className="flex items-center gap-2">
-                                        <Checkbox
-                                            checked={isSelected}
-                                            onCheckedChange={() => handleSelectPayment(payment.id)}
-                                        />
                                         <span className="font-bold">Payment ID:</span>
                                         <span className="font-normal">{payment.payment_id}</span>
                                     </div>
@@ -161,9 +155,8 @@ export default function SalesPaymentsTable({ setSelectedPayments, selectedPaymen
                                     </div>
                                 </div>
 
-                                {/* Second Row - UserInfo & Status */}
                                 <div className="flex items-center justify-between">
-                                    <UserInfo user={payment.purchased_by} variant="mobile" />
+                                    <UserInfo user={{ email: payment.purchased_by.email, name: payment.purchased_by.full_name, id: payment.payment_id }} variant="desktop" />
                                     <Badge className={cn(
                                         "p-1 text-[11px] rounded-sm border-[0.8px] capitalize border-neutral-4 shrink-0",
                                         payment.status === "successful" ? "text-postive-default bg-green-50" :
@@ -173,9 +166,8 @@ export default function SalesPaymentsTable({ setSelectedPayments, selectedPaymen
                                     </Badge>
                                 </div>
 
-                                {/* Third Row - Event Info & Purchase Date */}
                                 <div className="flex items-start justify-between gap-3 pt-2 border-t border-brand-neutral-2">
-                                    <EventInfo {...payment.event} variant="mobile" />
+                                    <EventInfo title={payment.event.name} {...payment.event} />
                                     <div className="flex flex-col text-right text-xs text-brand-secondary-9 shrink-0">
                                         <span className="font-bold">Purchase Date:</span>
                                         <span className="font-normal">
@@ -189,17 +181,18 @@ export default function SalesPaymentsTable({ setSelectedPayments, selectedPaymen
                 })}
             </div>
 
+
             <PaginationControls
-                endIndex={pagination.endIndex}
-                startIndex={pagination.startIndex}
-                totalItems={mockPayments.length}
-                className="justify-center"
-                hasNextPage={pagination.hasNextPage}
-                hasPreviousPage={pagination.hasPreviousPage}
-                onNextPage={pagination.nextPage}
-                onPreviousPage={pagination.previousPage}
-                currentPage={pagination.currentPage}
-                totalPages={pagination.totalPages}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={count}
+                startIndex={(currentPage - 1) * 10 + 1}
+                endIndex={Math.min(currentPage * 10, count)}
+                hasNextPage={currentPage < totalPages}
+                hasPreviousPage={currentPage > 1}
+                onNextPage={() => fetchPage(currentPage + 1)}
+                onPreviousPage={() => fetchPage(currentPage - 1)}
+                isLoadingMore={isLoadingMore}
             />
         </div>
     )

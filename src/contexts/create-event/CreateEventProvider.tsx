@@ -1,33 +1,65 @@
 "use client";
 
-import { EventCreationData, StepNumber } from '@/types/create-event';
+import { ApiCategory } from '@/actions/filters';
+import { CompleteEventFormData } from '@/schemas/create-event.schema';
+import { StepNumber } from '@/types/create-event';
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
 interface EventCreationContextType {
-    eventData: Partial<EventCreationData>;
-    currentStep: StepNumber;
-    completedSteps: StepNumber[];
-    updateStep: <K extends keyof EventCreationData>(
-        step: K,
-        data: EventCreationData[K]
-    ) => void;
-    setCurrentStep: (step: StepNumber) => void;
-    setEventData: React.Dispatch<React.SetStateAction<Partial<EventCreationData>>>;
-    markStepComplete: (step: StepNumber) => void;
-    resetForm: () => void;
-    canNavigateToStep: (step: StepNumber) => boolean;
+    eventData:         Partial<CompleteEventFormData>
+    currentStep:       StepNumber
+    completedSteps:    StepNumber[]
+    isEditMode:        boolean 
+    eventID?:          string  
+    updateStep:        <K extends keyof CompleteEventFormData>(step: K, data: CompleteEventFormData[K]) => void
+    setCurrentStep:    (step: StepNumber) => void
+    categories:        ApiCategory[]
+    setEventData:      React.Dispatch<React.SetStateAction<Partial<CompleteEventFormData>>>
+    markStepComplete:  (step: StepNumber) => void
+    resetForm:         () => void
+    canNavigateToStep: (step: StepNumber) => boolean
 }
+
+interface ProviderProps {
+    children:      ReactNode
+    categories:    ApiCategory[]
+    initialData?:  Partial<CompleteEventFormData>
+    eventID?:      string
+}
+
 
 const EventCreationContext = createContext<EventCreationContextType | undefined>(undefined)
 
-export function EventCreationProvider({ children }: { children: ReactNode }) {
-    const [eventData, setEventData] = useState<Partial<EventCreationData>>({})
-    const [currentStep, setCurrentStep] = useState<StepNumber>(5)
-    const [completedSteps, setCompletedSteps] = useState<StepNumber[]>([1,2,3,4])
+export function EventCreationProvider({
+    children,
+    categories,
+    initialData,
+    eventID,
+}: ProviderProps) {
 
-    const updateStep = useCallback(<K extends keyof EventCreationData>(
+    // Seed with initialData if editing, otherwise start empty
+    const [eventData, setEventData] = useState<Partial<CompleteEventFormData>>(
+        initialData ?? {}
+    )
+
+    // If editing, mark all steps that have data as complete so navigation is unlocked
+    const [completedSteps, setCompletedSteps] = useState<StepNumber[]>(() => {
+        if (!initialData) return []
+        const completed: StepNumber[] = []
+        if (initialData.basicInformation) completed.push(1)
+        if (initialData.detailsMedia)     completed.push(2)
+        if (initialData.ticketsPricing)   completed.push(3)
+        if (initialData.settings)         completed.push(4)
+        return completed
+    })
+
+    const [currentStep, setCurrentStep] = useState<StepNumber>(1)
+
+    const isEditMode = !!eventID
+
+    const updateStep = useCallback(<K extends keyof CompleteEventFormData>(
         step: K,
-        data: EventCreationData[K]
+        data: CompleteEventFormData[K]
     ) => {
         setEventData(prev => ({
             ...prev,
@@ -65,10 +97,13 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
                 eventData,
                 currentStep,
                 completedSteps,
+                isEditMode,
+                eventID,
                 updateStep,
                 setCurrentStep,
                 setEventData,
                 markStepComplete,
+                categories,
                 resetForm,
                 canNavigateToStep,
             }}

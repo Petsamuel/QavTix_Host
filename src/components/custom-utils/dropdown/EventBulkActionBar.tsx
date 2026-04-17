@@ -102,8 +102,8 @@ export default function EventsBulkActionsBar({
 
             <div className="flex items-center gap-2 flex-wrap">
                 {actions.map((action) => {
-                    const isLoading = loadingAction === action.id
-                    const isDisabled = loadingAction !== null && !isLoading
+                    const isLoading  = loadingAction === action.id
+                    const isDisabled = loadingAction !== null
 
                     return (
                         <button

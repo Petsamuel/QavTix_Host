@@ -15,7 +15,7 @@ import DateFilter from "../custom-utils/TableDataDisplayAreas/filters/DateFilter
 import { EventFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventFilter"
 import ExportButton1 from "@/lib/features/export/ExportDataBtn1"
 import {
-    analyticsMetricStatCardsConfig2,
+    analyticsMetricStatCardsConfig2
 } from "../cards/resources/metrics-config"
 import AnalyticsMetricsCardsContainer from "../cards/AnalyticsMetricsCardsContainer"
 import AnalyticsMetricStatCard2 from "../cards/AnalyticsMetricsCard2"
@@ -30,34 +30,32 @@ import GeographicBreakdownChart from "../charts/GeographicBreakdownChart"
 import { SalesAnalyticsDataTableFilters } from "../custom-utils/TableDataDisplayAreas/resources/avaliable-filters"
 import DataDisplayTableWrapper from "../custom-utils/TableDataDisplayAreas/DataDisplayTableWrapper"
 import SalesPaymentsTable from "../custom-utils/TableDataDisplayAreas/tables/SalesPaymentTable"
-
-import { format } from "date-fns"
+import { deriveChartFilter } from "@/helper-fns/dateRangeToParams"
 import { mapSalesAnalyticsCards } from "@/helper-fns/mapToStatCards"
+import { TabSlice, useDataDisplay } from "@/custom-hooks/UseDataDisplay"
+import DateRangePresetFilter from "../custom-utils/TableDataDisplayAreas/filters/DateRangePresetFilter"
+import { SALES_ANALYTICS_TRANSACTIONS_ENDPOINT } from "@/endpoints"
+import ChartPresetFilter from "../custom-utils/TableDataDisplayAreas/filters/ChartPresetFilter"
+
 
 interface Props {
     initialCards:  SalesAnalyticsCardsData
     initialGraphs: SalesAnalyticsGraphsData
+    initialTransactions: TabSlice<Transaction>
 }
 
-// If user picks a date range we default to "month"; if no date is selected we
-// stay on "month".  The year param is derived from the selected date if present.
-function deriveChartFilter(date: DateRange | null): { chart: ChartFilter; year?: number } {
-    if (!date?.from) return { chart: "month" }
-    return {
-        chart: "month",
-        year:  new Date(date.from).getFullYear(),
-    }
-}
 
 export default function SalesAnalyticsPageContentWrapper({
     initialCards,
     initialGraphs,
+    initialTransactions,
 }: Props) {
     const { user }   = useAppSelector(store => store.authUser)
     const currency   = user?.currency || ""
 
-    // External filters (drive BOTH cards + graphs) 
-    const [date,       setDate]       = useState<DateRange | null>(null)
+    // External filters (drive BOTH cards + graphs)
+    const [date,  setDate]  = useState<DatePreset | null>(null)
+    const [chartPreset, setChartPreset]  = useState<ChartPreset | null>(null)
     const [eventId,    setEventId]    = useState<string | null>(null)
 
     // Cards state with rollback 
@@ -70,7 +68,7 @@ export default function SalesAnalyticsPageContentWrapper({
         _setCards(next)
     }
 
-    // Graphs state with rollback
+    // Graphs state with rollback 
     const graphsRef            = useRef<SalesAnalyticsGraphsData>(initialGraphs)
     const [graphs, _setGraphs] = useState<SalesAnalyticsGraphsData>(initialGraphs)
     const [graphsError, setGraphsError] = useState(false)
@@ -86,21 +84,26 @@ export default function SalesAnalyticsPageContentWrapper({
 
     // Table filters (scoped to the transaction table only) 
     const { filterOptions } = SalesAnalyticsDataTableFilters
-    const [tableFilters,    setTableFilters]    = useState<Partial<FilterValues>>({})
-    const [selectedPayments, setSelectedPayments] = useState<string[]>([])
+    const [tableFilters, setTableFilters] = useState<Partial<FilterValues>>({
+        purchaseDate: null
+    })
 
-    // Fetch helpers
+    const mergedFilters: Partial<FilterValues> = {
+        dateRangePreset: date ?? undefined,
+        event: eventId ?? undefined,
+        ...tableFilters, 
+    }
 
-    const fetchCards = (nextDate: DateRange | null, nextEvent: string | null) => {
+    // Fetch helpers 
+
+    const fetchCards = (datePreset: DatePreset | null, nextEvent: string | null) => {
         startCardsTransition(async () => {
             // Map DateRange → date_range preset (crude mapping; adjust if needed)
             const params: Parameters<typeof getSalesAnalyticsCards>[0] = {}
             if (nextEvent) params.event = nextEvent
-            // If the range looks like a single day pick "day", else "month"
-            if (nextDate?.from && nextDate?.to) {
-                const diffMs   = new Date(nextDate.to).getTime() - new Date(nextDate.from).getTime()
-                const diffDays = diffMs / (1000 * 60 * 60 * 24)
-                params.date_range = diffDays <= 1 ? "day" : diffDays <= 7 ? "week" : "month"
+
+            if (datePreset){
+                params.date_range = datePreset
             }
 
             const result = await getSalesAnalyticsCards(params)
@@ -114,9 +117,9 @@ export default function SalesAnalyticsPageContentWrapper({
         })
     }
 
-    const fetchGraphs = (nextDate: DateRange | null, nextEvent: string | null) => {
+    const fetchGraphs = (chartPreset: ChartPreset | null, nextEvent: string | null) => {
         startGraphsTransition(async () => {
-            const { chart, year } = deriveChartFilter(nextDate)
+            const { chart, year } = deriveChartFilter(chartPreset)
             const params: Parameters<typeof getSalesAnalyticsGraphs>[0] = { chart }
             if (nextEvent) params.event = nextEvent
             if (year)      params.year  = year
@@ -133,18 +136,35 @@ export default function SalesAnalyticsPageContentWrapper({
     }
 
     // Handler: date changes
-    const handleDateChange = (next: DateRange | null) => {
-        setDate(next)
-        fetchCards(next, eventId)
-        fetchGraphs(next, eventId)
+    const handleDatePresetChange = (datePreset: DatePreset | null) => {
+        setDate(datePreset)
+        fetchCards(datePreset, eventId)
     }
 
-    // Handler: event changes─
+    const handleChartPresetChange = (chartPreset: ChartPreset | null) => {
+        setChartPreset(chartPreset)
+        fetchGraphs(chartPreset, eventId)
+    }
+
+    // Handler: event changes 
     const handleEventChange = (next: string | null) => {
         setEventId(next)
         fetchCards(date, next)
-        fetchGraphs(date, next)
+        fetchGraphs(chartPreset, next)
     }
+
+    const { activeTabState } = useDataDisplay<Transaction>(
+        {
+            endpoint: SALES_ANALYTICS_TRANSACTIONS_ENDPOINT,
+            tabs: [{
+                key:          "transactions",
+                initialData:  initialTransactions,
+                staticParams: {},
+            }],
+            activeTab: "transactions"
+        },
+        mergedFilters,
+    )
 
     // Derive metric card arrays 
     const row1And2Metrics = mapSalesAnalyticsCards(cards, currency)
@@ -161,21 +181,27 @@ export default function SalesAnalyticsPageContentWrapper({
     return (
         <main className="mt-6 pb-12">
 
+            {/* Top filter bar  */}
             <div className="flex justify-between items-center gap-5 mb-5 mt-10 lg:mt-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                    <DateFilter
+                    <DateRangePresetFilter
                         value={date}
-                        onChange={handleDateChange}
+                        onChange={handleDatePresetChange}
                     />
                     <EventFilter
                         value={eventId}
                         onChange={handleEventChange}
                         icon="hugeicons:calendar-02"
                     />
+                    <ChartPresetFilter
+                        value={chartPreset}
+                        onChange={handleChartPresetChange}
+                    />
                 </div>
                 <ExportButton1 showFormatSelector />
             </div>
 
+            {/* Row 1 — 4 KPI cards */}
             <div className="mb-4">
                 {isCardsLoading ? (
                     <MetricsContainerLoader />
@@ -192,36 +218,45 @@ export default function SalesAnalyticsPageContentWrapper({
                 )}
             </div>
 
+            {/* Main charts grid */}
             <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_23em] gap-6 py-10">
 
+                {/* Left col */}
                 <div className="min-w-0 space-y-6">
+                    {/* Row 2 — 3 stat cards (page views, refunds, repeat buyers) */}
                     <div className="flex flex-wrap gap-x-2 gap-y-4 md:gap-4">
                         {liveRow2Config.map(config => (
                             <AnalyticsMetricStatCard2 key={config.id} config={config} />
                         ))}
                     </div>
 
+                    {/* Revenue growth bar chart */}
                     <SalesRevenueGrowthChart
                         data={graphs.revenue_chart.data}
                         isPending={isGraphsLoading}
+                        locked={graphs.revenue_chart.locked}
                     />
                 </div>
 
+                {/* Right col */}
                 <div className="space-y-6 min-w-0">
                     <SalesBreakdownChart
                         overall={graphs.sales_breakdown.overall}
                         isPending={isGraphsLoading}
                     />
                     <WeekAnalysisChart
-                        data={graphs.week_analysis.locked ? null : graphs.week_analysis.data}
+                        data={graphs.week_analysis.data}
                         isPending={isGraphsLoading}
+                        locked={graphs.week_analysis.locked}
                     />
                 </div>
             </div>
 
+            {/* Geographic breakdown  */}
             <GeographicBreakdownChart
-                data={graphs.geo_breakdown.locked ? null : graphs.geo_breakdown.data}
+                data={graphs.geo_breakdown.data}
                 isPending={isGraphsLoading}
+                locked={graphs.geo_breakdown.locked}
             />
 
             {graphsError && (
@@ -235,16 +270,29 @@ export default function SalesAnalyticsPageContentWrapper({
                 <h3 className={cn(space_grotesk.className, "text-brand-secondary-8 font-bold text-lg mb-4")}>
                     Transaction History
                 </h3>
+
                 <DataDisplayTableWrapper
                     filters={tableFilters}
-                    setFilters={setTableFilters as Dispatch<SetStateAction<Partial<FilterValues>>>}
                     filterOptions={filterOptions}
+                    setFilters={setTableFilters as Dispatch<SetStateAction<Partial<FilterValues>>>}
                     showSearch
-                    searchPlaceholder="Search transactions..."
+                    searchPlaceholder="Search by transaction..."
+                    onSearch={activeTabState.handleSearch}
+                    isLoading={activeTabState.isLoading}
                 >
                     <SalesPaymentsTable
-                        selectedPayments={selectedPayments}
-                        setSelectedPayments={setSelectedPayments}
+                        transactions={activeTabState.items}
+                        isLoading={activeTabState.isLoading}
+                        isLoadingMore={activeTabState.isLoadingMore}
+                        hasNext={activeTabState.hasNext}
+                        count={activeTabState.count}
+                        onLoadMore={activeTabState.loadMore}
+                        isEmpty={activeTabState.isEmpty}
+                        isError={activeTabState.isError}
+                        search={activeTabState.search}
+                        currentPage={activeTabState.currentPage}
+                        totalPages={activeTabState.totalPages}
+                        fetchPage={activeTabState.fetchPage}
                     />
                 </DataDisplayTableWrapper>
             </section>

@@ -43,7 +43,7 @@ export default function CustomGlobalAlert() {
     const IconComponent = icon || variantIcons[variant as keyof typeof variantIcons]
 
     return (
-        <div className="fixed top-24 md:top-14 right-2 md:right-10 z-1000 w-fit max-w-xs px-4">
+        <div className="fixed top-10 md:top-14 right-2 md:right-10 z-1000 w-fit max-w-xs px-4">
             <Alert
                 variant={variant === 'default' ? 'default' : 'destructive'}
                 className={cn(
@@ -53,9 +53,9 @@ export default function CustomGlobalAlert() {
             >
                 {IconComponent}
                 <div className="flex-1">
-                    <AlertTitle className="font-medium">{title}</AlertTitle>
+                    <AlertTitle className="font-normal!">{title}</AlertTitle>
                     {description && (
-                        <AlertDescription className="mt-1 text-sm text-inherit">
+                        <AlertDescription className="mt-1 text-xs text-inherit">
                             {description}
                         </AlertDescription>
                     )}

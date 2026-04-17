@@ -66,7 +66,7 @@ export default function CustomFeaturePlanSelector({
                                     setIsOpen(false)
                                 }}
                                 className={cn(
-                                    "p-0 focus:bg-transparent cursor-pointer border rounded-xl mb-1 last:mb-0",
+                                    "p-0 focus:bg-transparent shadow-[0px_5.8px_23.17px_0px_#3326AE14] cursor-pointer border rounded-xl mb-1 last:mb-0",
                                     isSelected ? "bg-brand-primary-1 border-brand-primary-2 pointer-events-none" : "bg-white border-brand-neutral-2"
                                 )}
                             >

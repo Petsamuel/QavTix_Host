@@ -235,44 +235,50 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
 
     // Bulk action
 
+    const getEventById = useCallback((id: string): OrganizerEvent | undefined => {
+        // Search across all cached tab items
+        for (const key of ["all", "live", "draft", "ended", "cancelled"] as const) {
+            const found = tabStates[key].items.find(e => e.id === id)
+            if (found) return found
+        }
+        return undefined
+    }, [tabStates])
+
     const handleBulkAction = useCallback(async (actionId: BulkEventActionId) => {
         if (!selectedEvents.length) return
 
+        // Resolve full event objects for selected IDs
+        const selectedEventObjects = selectedEvents
+            .map(getEventById)
+            .filter(Boolean) as OrganizerEvent[]
+
         switch (actionId) {
 
-            case "bulk-delete": {
-                askConfirmation(
-                    {
-                        title:       "Delete Events",
-                        description: `Delete ${selectedEvents.length} selected event${selectedEvents.length > 1 ? "s" : ""}? This cannot be undone.`,
-                        confirmText: "Yes, delete all",
-                        actionType:  "BULK_DELETE_EVENTS",
-                    },
-                    async () => {
-                        const result = await bulkDeleteEvents({ eventIds: selectedEvents })
-                        if (result.success) {
-                            dispatch(showAlert({ title: "Events Deleted", description: result.message, variant: "success" }))
-                            setSelectedEvents([])
-                            state.refresh()
-                            triggerRevalidation()
-                        } else {
-                            dispatch(showAlert({ title: "Delete Failed", description: result.message, variant: "destructive" }))
-                        }
-                    }
-                )
-                break
-            }
-
             case "bulk-cancel": {
+                // Exclude already cancelled, ended, banned events
+                const eligibleIds = selectedEventObjects
+                    .filter(e => e.status !== "cancelled" && e.status !== "ended" && e.status !== "banned")
+                    .map(e => e.id)
+
+                if (!eligibleIds.length) {
+                    dispatch(showAlert({
+                        title: "Nothing to Cancel",
+                        description: "All selected events are already cancelled or ended.",
+                        variant: "destructive",
+                    }))
+                    return
+                }
+
+                const skipped = selectedEvents.length - eligibleIds.length
                 askConfirmation(
                     {
-                        title:       "Cancel Events",
-                        description: `Cancel ${selectedEvents.length} selected event${selectedEvents.length > 1 ? "s" : ""}? Attendees will be notified.`,
+                        title: "Cancel Events",
+                        description: `Cancel ${eligibleIds.length} event${eligibleIds.length > 1 ? "s" : ""}?${skipped > 0 ? ` (${skipped} already cancelled/ended will be skipped)` : ""} Attendees will be notified.`,
                         confirmText: "Yes, cancel all",
-                        actionType:  "BULK_CANCEL_EVENTS",
+                        actionType: "BULK_CANCEL_EVENTS",
                     },
                     async () => {
-                        const result = await bulkCancelEvents({ eventIds: selectedEvents })
+                        const result = await bulkCancelEvents({ eventIds: eligibleIds })
                         if (result.success) {
                             dispatch(showAlert({ title: "Events Cancelled", description: result.message, variant: "success" }))
                             setSelectedEvents([])
@@ -288,15 +294,30 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
             }
 
             case "bulk-unpublish": {
+                // Only unpublish active/live events
+                const eligibleIds = selectedEventObjects
+                    .filter(e => e.status === "active")
+                    .map(e => e.id)
+
+                if (!eligibleIds.length) {
+                    dispatch(showAlert({
+                        title: "Nothing to Unpublish",
+                        description: "None of the selected events are currently live.",
+                        variant: "destructive",
+                    }))
+                    return
+                }
+
+                const skipped = selectedEvents.length - eligibleIds.length
                 askConfirmation(
                     {
-                        title:       "Unpublish Events",
-                        description: `Move ${selectedEvents.length} event${selectedEvents.length > 1 ? "s" : ""} back to draft?`,
+                        title: "Unpublish Events",
+                        description: `Move ${eligibleIds.length} event${eligibleIds.length > 1 ? "s" : ""} back to draft?${skipped > 0 ? ` (${skipped} non-live events will be skipped)` : ""}`,
                         confirmText: "Yes, unpublish all",
-                        actionType:  "BULK_UNPUBLISH_EVENTS",
+                        actionType: "BULK_UNPUBLISH_EVENTS",
                     },
                     async () => {
-                        const result = await bulkUnpublishEvents({ eventIds: selectedEvents })
+                        const result = await bulkUnpublishEvents({ eventIds: eligibleIds })
                         if (result.success) {
                             dispatch(showAlert({ title: "Events Unpublished", description: result.message, variant: "success" }))
                             setSelectedEvents([])
@@ -310,6 +331,44 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 )
                 break
             }
+
+         case "bulk-delete": {
+            // Only draft, ended, and cancelled events can be deleted
+            const eligibleIds = selectedEventObjects
+                .filter(e => e.status === "draft" || e.status === "ended" || e.status === "cancelled")
+                .map(e => e.id)
+
+            if (!eligibleIds.length) {
+                dispatch(showAlert({
+                    title: "Nothing to Delete",
+                    description: "Only draft, ended, or cancelled events can be deleted. None of your selected events qualify.",
+                    variant: "destructive",
+                }))
+                return
+            }
+
+            const skipped = selectedEvents.length - eligibleIds.length
+            askConfirmation(
+                {
+                    title: "Delete Events",
+                    description: `Delete ${eligibleIds.length} event${eligibleIds.length > 1 ? "s" : ""}?${skipped > 0 ? ` (${skipped} active/sold-out events cannot be deleted and will be skipped)` : ""} This cannot be undone.`,
+                    confirmText: "Yes, delete all",
+                    actionType: "BULK_DELETE_EVENTS",
+                },
+                async () => {
+                    const result = await bulkDeleteEvents({ eventIds: eligibleIds })
+                    if (result.success) {
+                        dispatch(showAlert({ title: "Events Deleted", description: result.message, variant: "success" }))
+                        setSelectedEvents([])
+                        state.refresh()
+                        triggerRevalidation()
+                    } else {
+                        dispatch(showAlert({ title: "Delete Failed", description: result.message, variant: "destructive" }))
+                    }
+                }
+            )
+            break
+        }
 
             case "bulk-download": {
                 const result = await bulkDownloadAttendees({ eventIds: selectedEvents })
@@ -333,7 +392,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 break
             }
         }
-    }, [selectedEvents, state, tabStates, askConfirmation, dispatch, triggerRevalidation])
+    }, [selectedEvents, getEventById, state, tabStates, askConfirmation, dispatch, triggerRevalidation])
 
     // Derived / shared
 

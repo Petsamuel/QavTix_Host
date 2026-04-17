@@ -7,6 +7,7 @@ import { draftStatusConfig } from "../resources/status-config"
 import { formatDateTime }    from "@/helper-fns/date-utils"
 import TableLoader           from "@/components/loaders/TableLoader"
 import EmptyTicketsState     from "../empty-state"
+import { EDIT_DRAFT_EVENT } from "@/enums/navigation"
 
 interface DraftedEventsTableProps {
     items:         OrganizerEvent[]
@@ -97,7 +98,7 @@ export default function DraftedEventsTable({
                                         <td className="py-4 px-5">
                                             <div className="flex items-center justify-center gap-3">
                                                 <Link
-                                                    href={`/dashboard/events/edit/${event.id}`}
+                                                    href={EDIT_DRAFT_EVENT.href.replace("[event_id]", event.id)}
                                                     className="inline-flex items-center gap-1 text-xs font-semibold text-brand-primary-6 hover:text-brand-primary-7 transition-colors"
                                                 >
                                                     Continue Editing
@@ -189,7 +190,7 @@ export default function DraftedEventsTable({
                                 </div>
                                 <div className="pt-1">
                                     <Link
-                                        href={`/dashboard/events/edit/${event.id}`}
+                                        href={EDIT_DRAFT_EVENT.href.replace("[event_id]", event.id)}
                                         className="inline-flex items-center gap-1 text-xs font-semibold text-brand-primary-6 hover:text-brand-primary-7 transition-colors"
                                     >
                                         Continue Editing

@@ -27,6 +27,7 @@ type AuthUser = {
     show_past_events:    boolean
     verified:            boolean
     payout_available:    boolean
+    available_balance:   number
     verified_badge:      boolean
     subscription:        boolean
     plan_type:           string

@@ -13,7 +13,6 @@ import PasswordModal from "./PasswordConfirmationModal";
 export default function PopUpsRenderer(){
 
     const { user } = useAppSelector((state) => state.authUser)
-    const { alerts } = useAppSelector((state) => state.popupAlert)
     const dispatch = useAppDispatch()
 
     useEffect(() => {
@@ -21,16 +20,16 @@ export default function PopUpsRenderer(){
 
         // Verification alert logic
         if (!user.verified) {
-            dispatch(triggerPopupAlert(verificationPendingPopupAlert));
+            dispatch(triggerPopupAlert(verificationPendingPopupAlert))
         } else {
-            dispatch(popPopupAlert(verificationPendingPopupAlert));
+            dispatch(popPopupAlert(verificationPendingPopupAlert))
         }
 
         // Payout alert logic
         if (user.payout_available) {
-            dispatch(triggerPopupAlert(payoutPopupAlert));
+            dispatch(triggerPopupAlert(payoutPopupAlert))
         } else {
-            dispatch(popPopupAlert(payoutPopupAlert));
+            dispatch(popPopupAlert(payoutPopupAlert))
         }
     }, [
         user?.user_id,

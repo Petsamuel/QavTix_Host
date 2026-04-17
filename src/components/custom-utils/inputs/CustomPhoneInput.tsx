@@ -93,7 +93,7 @@ export default function PhoneNumberInput({
                         )
                     }}
 
-                    numberInputComponent={React.forwardRef<HTMLInputElement, NumberInputProps>(
+                    numberinputcomponent={React.forwardRef<HTMLInputElement, NumberInputProps>(
                         ({ country, international, withCountryCallingCode, ...rest }, ref) => {
                             const { value, onChange, ...inputProps } = rest;
                             

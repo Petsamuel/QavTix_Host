@@ -34,6 +34,7 @@ export async function fetchPaginatedData<T>(params: FetchParams): Promise<FetchR
 
         const endpoint = params.endpoint.startsWith('/') ? params.endpoint : `/${params.endpoint}`
 
+        console.log(endpoint, requestParams)
 
         const { data } = await axiosInstance.get(endpoint, { params: requestParams })
 

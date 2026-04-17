@@ -45,7 +45,7 @@ export const verificationPendingPopupAlert : PopUpMessageAlert = {
 
 export const payoutPopupAlert : PopUpMessageAlert = {
     id: "payoutPopupAlert",
-    description: "₦125,000 Ready for Withdrawal. Your earnings from last week's events are ready.",
+    description: "Payout Ready for Withdrawal. Your earnings from last week's events are ready.",
     title: "Payout Available",
     type: "verification",
     buttonText: "Check Status",

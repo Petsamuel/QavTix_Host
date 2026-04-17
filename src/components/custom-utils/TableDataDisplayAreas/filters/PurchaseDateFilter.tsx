@@ -40,7 +40,6 @@ export function PurchaseDateFilter({ value, onChange, icon }:{ value: Date | nul
                         )}
                     >
 
-                        <Icon icon="solar:calendar-outline" width="20" height="20" className='shrink-0 text-brand-neutral-8' />
                         <span className="truncate">{value ? formatDate(value, 'MM/dd/yyyy') : "Purchase Date"}</span>
                         <Icon
                             icon={icon || "fluent:chevron-down-20-filled"}

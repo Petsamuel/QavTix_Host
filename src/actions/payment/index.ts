@@ -1,6 +1,6 @@
 "use server"
 
-import { ADD_PAYMENT_CARD, ADD_PAYMENT_CARD_CONFIRM, FEATURED_PLAN_INITIATE_ENDPOINT, FEATURED_PLAN_VERIFY_ENDPOINT, PAYMENT_METHODS_ENDPOINT } from "@/endpoints"
+import { ADD_PAYMENT_CARD, ADD_PAYMENT_CARD_CONFIRM, FEATURED_PLAN_INITIATE_ENDPOINT, FEATURED_PLAN_VERIFY_ENDPOINT, FREE_TRIAL_ENDPOINT, PAYMENT_METHODS_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
 import { updateTag } from "next/cache"
@@ -145,7 +145,6 @@ export async function initializeFeaturedPayment(payload: {
         const axiosInstance = await getServerAxios()
 
         const { data } = await axiosInstance.post(FEATURED_PLAN_INITIATE_ENDPOINT, payload)
-        console.log(data)
 
         // The flow can be 'free' (using quota), 'popup' (needs Paystack), or 'saved_card'
         const flow = data?.flow || "popup"
@@ -189,6 +188,38 @@ export async function verifyFeaturedPayment(payload: {
         return {
             success: false,
             message: error?.response?.data?.message ?? "Verification failed."
+        }
+    }
+}
+
+
+
+// Start Free Trial Handler
+export async function startFreeTrial(): Promise<{
+    success: boolean
+    message?: string
+    data?: any
+}> {
+    try {
+        const axiosInstance = await getServerAxios()
+
+        const { data } = await axiosInstance.post(FREE_TRIAL_ENDPOINT)
+
+        updateTag(CACHE_TAGS.PAYMENT_METHODS)
+        updateTag(CACHE_TAGS.EVENTS)
+
+        return {
+            success: true,
+            message: data?.message || "Free trial activated successfully! You now have 14 days of full access.",
+            data: data?.data ?? data
+        }
+
+    } catch (error: any) {
+        console.error("[startFreeTrial] error:", error?.response?.data || error)
+
+        return {
+            success: false,
+            message: handleApiError(error?.response?.data) || "Failed to start free trial. Please try again."
         }
     }
 }

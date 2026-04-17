@@ -1,6 +1,15 @@
 import { getPaymentMethods } from "@/actions/payment"
 import { getPrivacySettings } from "@/actions/settings"
 import AccountSettingsContentWrapper from "@/components/page-wrappers/AccountSettingsContentWrapper"
+import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+    ...hostSiteMetadata,
+    title: HOST_PAGE_METADATA.ACCOUNT_SETTINGS.title,
+    description: HOST_PAGE_METADATA.ACCOUNT_SETTINGS.description,
+}
+
 
 
 export default async function SettingsPage() {

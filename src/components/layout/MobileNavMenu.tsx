@@ -10,6 +10,8 @@ import Logo from "./Logo";
 import AuthUserDetails from "./AuthUserDetails";
 import { useEffect } from "react";
 import NeedHelpButton from "../custom-utils/buttons/NeedHelpButton";
+import SellTicketsCard from "../cards/SellTicketsCard";
+import { useAppSelector } from "@/lib/redux/hooks";
 
 interface MobileNavMenuProps {
     isOpen: boolean;
@@ -17,6 +19,8 @@ interface MobileNavMenuProps {
 }
 
 export default function MobileNavMenu({ isOpen, onClose }: MobileNavMenuProps) {
+
+    const { isAuthenticated, user } = useAppSelector(store => store.authUser)
     const pathName = usePathname()
 
     const isSettingsActive = pathName?.startsWith(NAVIGATION_LINKS.SETTINGS.href)
@@ -141,6 +145,13 @@ export default function MobileNavMenu({ isOpen, onClose }: MobileNavMenuProps) {
                                 })}
                             </ul>
                         </div>
+
+                        {
+                            isAuthenticated && user?.can_activate_free_trial &&
+                            <div className="mt-10 mb-2">
+                                <SellTicketsCard />
+                            </div>
+                        }
 
                         <div className="pt-6 flex flex-col gap-4 border-t border-brand-accent-3/30">
                             <NeedHelpButton />

@@ -94,7 +94,7 @@ function DesktopSideNav() {
                 </ul>
             </div>
             {
-                !user?.subscription && isAuthenticated && user?.can_activate_free_trial &&
+                isAuthenticated && user?.can_activate_free_trial &&
                 <div className="mt-7 mb-2">
                     <SellTicketsCard />
                 </div>

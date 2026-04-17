@@ -1,15 +1,11 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { TicketType } from '@/schemas/create-event.schema'
 import { Icon } from '@iconify/react'
 
 interface PricingBreakdownProps {
-    ticketTypes: Array<{
-        id?: string
-        ticketType: string
-        price: string | number
-        quantity: string | number
-    }>
+    ticketTypes: TicketType[]
     totalPotentialRevenue: number
     platformFee: number
     containerClassName?: string
