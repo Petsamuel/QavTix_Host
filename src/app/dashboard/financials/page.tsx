@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.FINANCIALS.description,
 }
 
+export const dynamic = "force-dynamic"
 
 export default async function FinancialsPage() {
     const [financialsResult, accountsResult] = await Promise.all([

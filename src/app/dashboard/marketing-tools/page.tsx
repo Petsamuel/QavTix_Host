@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.MARKETING_TOOLS.description,
 }
 
+export const dynamic = "force-dynamic"
 
 export default async function MarketingToolsPage() {
     const [promoResult, affiliateResult, campaignResult] = await Promise.all([
