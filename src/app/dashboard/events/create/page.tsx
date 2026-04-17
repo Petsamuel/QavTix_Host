@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.CREATE_EVENT.description,
 }
 
+export const dynamic = 'force-dynamic';
 
 export default async function CreateEventPage(){
 

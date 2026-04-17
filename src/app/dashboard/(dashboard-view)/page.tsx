@@ -9,6 +9,8 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.DASHBOARD.description,
 }
 
+export const dynamic = 'force-dynamic';
+
 
 export default async function DashboardPage() {
     const result = await getDashboardOverview()

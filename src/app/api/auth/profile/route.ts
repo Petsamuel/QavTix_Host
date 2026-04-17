@@ -2,10 +2,20 @@ import { CACHE_TAGS } from "@/cache-tags"
 import { GET_PROFILE_ENDPOINT } from "@/endpoints"
 import { NextRequest, NextResponse } from "next/server"
 
+interface ProfileResponse {
+    data: {
+        host:              Record<string, unknown> | null
+        subscription:      Record<string, unknown> | null
+        verified_badge:    boolean
+        payout_available:  boolean
+    }
+    message: string
+}
+
 export async function GET(req: NextRequest) {
     try {
-        const accessToken = req.cookies.get("access_token")?.value
-        
+        const accessToken = req.cookies.get("host_access_token")?.value
+
         if (!accessToken) {
             return NextResponse.json(
                 { message: "Not authenticated" },
@@ -24,7 +34,7 @@ export async function GET(req: NextRequest) {
             }
         })
 
-        const json : ProfileResponse = await res.json()
+        const json: ProfileResponse = await res.json()
 
         if (!res.ok) {
             return NextResponse.json(
@@ -32,7 +42,7 @@ export async function GET(req: NextRequest) {
                 { status: res.status }
             )
         }
-        
+
         return NextResponse.json({ user: json.data }, { status: 200 })
 
     } catch {

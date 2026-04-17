@@ -1,6 +1,8 @@
 import { getCustomers } from "@/actions/customers";
 import CustomersPagePw from "@/components/page-wrappers/CustomersPagePw";
 
+export const dynamic = 'force-dynamic';
+
 export default async function CustomersPage(){
 
     const customersResult = await getCustomers()

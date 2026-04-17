@@ -9,6 +9,8 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.CHECK_IN_SYSTEM.description,
 }
 
+export const dynamic = 'force-dynamic';
+
 
 export default async function CheckInSystemPage() {
     const [metricsResult, attendeesResult] = await Promise.all([

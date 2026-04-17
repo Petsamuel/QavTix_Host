@@ -2,12 +2,12 @@
 
 import { useState } from "react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { MobileBottomSheet } from "../../dialogs/EventFilterDropdownMobileBottomSheet"
 import EventFilterTypeBtn from "./buttons-and-inputs/EventFilterTypeBtn"
 import { Icon } from "@iconify/react"
 import FilterButtonsActions1 from "./buttons-and-inputs/FilterActionButtons1"
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from '@/custom-hooks/UseMediaQuery'
+import { MobileBottomSheet } from "../../dropdown/EventFilterDropdownMobileBottomSheet"
 
 interface TicketTypeOption {
     value: string

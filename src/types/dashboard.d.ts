@@ -139,8 +139,8 @@ interface UpcomingEventsData {
     count:       number
     total_pages: number
     page:        number
-    next:        string | null
-    previous:    string | null
+    next:        number | null
+    previous:    number | null
     cards:       UpcomingEventCards
     results:     UpcomingEvent[]
 }
