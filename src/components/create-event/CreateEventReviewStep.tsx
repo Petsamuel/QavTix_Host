@@ -17,8 +17,11 @@ import { openConfirmation, resetConfirmationStatus, finishConfirmAction } from '
 import EventPublishStatusModal from './EventPublishStatusModal'
 import ShareEventModal     from '../modals/ShareEventModal'
 import { useEventCreation } from '@/contexts/create-event/CreateEventProvider'
-import { useRevalidate }   from '@/custom-hooks/UseRevalidate'
 import { publishEvent, saveEventAsDraft } from '@/actions/event/creation'
+import { useRouter } from 'next/navigation'
+import { uploadEventMedia } from '@/helper-fns/uploadEventMedia'
+
+
 
 
 export default function CreateEventReviewStep() {
@@ -26,13 +29,13 @@ export default function CreateEventReviewStep() {
     const dispatch = useAppDispatch()
     const { eventData, resetForm } = useEventCreation()
     const { goToPreviousStep }     = useStepper()
-    const { trigger: triggerRevalidation } = useRevalidate("events")
 
     const { isConfirmed, lastConfirmedAction } = useAppSelector((state) => state.confirmation)
 
     const [openScheduleLaterModal, setOpenScheduleLaterModal] = useState(false)
     const [isPublishing,           setIsPublishing]           = useState(false)
     const [isSavingDraft,          setIsSavingDraft]          = useState(false)
+    const router = useRouter()
 
     const [statusModal, setStatusModal] = useState<{
         isOpen:    boolean
@@ -81,17 +84,17 @@ export default function CreateEventReviewStep() {
         const run = async () => {
             setIsPublishing(true)
             try {
-                const result = await publishEvent({ eventData })
+                const media = await uploadEventMedia(eventData.detailsMedia)
+                const result = await publishEvent({ eventData, media })
                 if (result.success) {
+                    setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: result.eventId }) 
                     dispatch(finishConfirmAction())
                     dispatch(resetConfirmationStatus())
-                    setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: result.eventId })
-                    triggerRevalidation()
-                    resetForm()
+                    // resetForm()
                 } else {
+                    setStatusModal({ isOpen: true, type: 'FAILED', errorMsg: result.message }) 
                     dispatch(finishConfirmAction())
                     dispatch(resetConfirmationStatus())
-                    setStatusModal({ isOpen: true, type: 'FAILED', errorMsg: result.message })
                     dispatch(showAlert({
                         title:       "Publish Failed",
                         description: result.message,
@@ -110,7 +113,6 @@ export default function CreateEventReviewStep() {
                 setIsPublishing(false)
             }
         }
-
         run()
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isConfirmed, lastConfirmedAction])
@@ -122,7 +124,8 @@ export default function CreateEventReviewStep() {
 
         setIsSavingDraft(true)
         try {
-            const result = await saveEventAsDraft({ eventData, scheduledAt: `${v.date}T${v.time}` })
+            const media = await uploadEventMedia(eventData.detailsMedia)
+            const result = await saveEventAsDraft({ eventData, scheduledAt: new Date(`${v.date}T${v.time}`).toISOString(), media })
             if (result.success) {
                 dispatch(triggerPopupAlert({
                     id:          `schedule-${Date.now()}`,
@@ -134,7 +137,6 @@ export default function CreateEventReviewStep() {
                     navigateTo:  NAVIGATION_LINKS.MY_EVENTS.href,
                 }))
                 
-                triggerRevalidation()
                 resetForm()
             } else {
                 dispatch(showAlert({
@@ -299,8 +301,9 @@ export default function CreateEventReviewStep() {
                         buttonType="button"
                         className='text-sm!'
                         action={handleConfirmImmediatePublish}
+                        isLoading={isPublishing}
                         icon={isPublishing ? "lucide:loader-2" : "gravity-ui:arrow-right"}
-                        disabled={isPublishing || isSavingDraft}
+                        isDisabled={isPublishing || isSavingDraft}
                         data-testid="btn-publish-now"
                     />
                 </div>
@@ -316,12 +319,16 @@ export default function CreateEventReviewStep() {
 
             <EventPublishStatusModal
                 isOpen={statusModal.isOpen}
-                onClose={() => setStatusModal(prev => ({ ...prev, isOpen: false }))}
+                onClose={() => {
+                    setStatusModal(prev => ({ ...prev, isOpen: false }))
+                    resetForm()
+                    router.push(NAVIGATION_LINKS.DASHBOARD.href)
+                }}
                 type={statusModal.type}
+                onViewDashboard={() => router.push(NAVIGATION_LINKS.DASHBOARD.href)}
                 eventId={statusModal.eventId}
                 errorMessage={statusModal.errorMsg}
                 onShare={() => {
-                    setStatusModal(prev => ({ ...prev, isOpen: false }))
                     setIsShareModalOpen(true)
                 }}
                 onCreateAnother={() => {

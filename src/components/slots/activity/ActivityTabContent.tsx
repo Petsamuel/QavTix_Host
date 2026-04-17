@@ -61,8 +61,8 @@ export default function RecentActivityTab({ activities }: RecentActivityTabProps
                     ))
                 ) : (
                     <div className="py-12 text-center">
-                        <Icon icon="hugeicons:clock-01" className="w-12 h-12 text-brand-neutral-4 mx-auto mb-3" />
-                        <p className="text-sm text-brand-neutral-6">No recent activity</p>
+                        <Icon icon="hugeicons:clock-01" className="w-12 h-12 text-brand-neutral-6 mx-auto mb-3" />
+                        <p className="text-sm text-brand-neutral-7">No recent activity</p>
                     </div>
                 )}
             </div>

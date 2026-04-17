@@ -5,7 +5,7 @@ import { cookies } from "next/headers"
 
 export async function getServerAxios() {
     const appCookies = await cookies()
-    const accessToken = appCookies.get("access_token")?.value
+    const accessToken = appCookies.get("host_access_token")?.value
 
     return axios.create({
         baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,

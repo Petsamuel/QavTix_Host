@@ -43,7 +43,7 @@ export async function getUserLocation(): Promise<{ city: string; country: string
 export async function getPrivacySettings(): Promise<PrivacyResult> {
     try {
         const cookieStore = await cookies()
-        const accessToken = cookieStore.get("access_token")?.value
+        const accessToken = cookieStore.get("host_access_token")?.value
 
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${GET_PRIVACY_SETTINGS_ENDPOINT}`,
@@ -103,8 +103,8 @@ export async function deleteAccount(): Promise<{ success: boolean; message?: str
         await axiosInstance.delete(DELETE_ACCOUNT_ENDPOINT)
 
         const cookieStore = await cookies()
-        cookieStore.delete("access_token")
-        cookieStore.delete("refresh_token")
+        cookieStore.delete("host_access_token")
+        cookieStore.delete("host_refresh_token")
 
         return { success: true }
     } catch (error: any) {
@@ -145,7 +145,7 @@ export async function changePassword(
 
 async function getToken(): Promise<string | undefined> {
     const cookieStore = await cookies()
-    return cookieStore.get("access_token")?.value
+    return cookieStore.get("host_access_token")?.value
 }
 
 export async function getSubscription(): Promise<GetSubscriptionResult> {

@@ -21,6 +21,7 @@ interface CustomDatePickerProps {
   disabled?: boolean
   icon?: LucideIcon
   className?: string
+  disabledPastDate?: boolean
 }
 
 export default function CustomDatePicker({
@@ -29,6 +30,7 @@ export default function CustomDatePicker({
   onChange,
   error,
   disabled = false,
+  disabledPastDate = false,
   placeholder = "DD/MM/YYYY",
   icon: Icon = CalendarIcon,
   className
@@ -66,6 +68,7 @@ export default function CustomDatePicker({
                         mode="single"
                         selected={dateValue}
                         disabled={disabled}
+                        hidden={disabledPastDate ? { before: new Date() } : undefined}
                         onSelect={(date) => {
                             onChange(date?.toISOString())
                             setOpen(false) 

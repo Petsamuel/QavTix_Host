@@ -33,7 +33,7 @@ export default function TopPerformingEventsSlotPW({ eventsData }: TopPerformingE
                         />
                     ))
                 ) : (
-                    <div className="py-12 text-center text-sm text-brand-neutral-6">
+                    <div className="py-12 text-center text-sm text-brand-neutral-7">
                         No top performing events yet.
                     </div>
                 )}

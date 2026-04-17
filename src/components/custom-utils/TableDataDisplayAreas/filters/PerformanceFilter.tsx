@@ -67,7 +67,7 @@ export function PerformanceFilter({ value, onChange, icon }: PerformanceFilterPr
                             key={option.value}
                             onClick={() => handleSelect(option.value)}
                             className={cn(
-                                "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-brand-neutral-1 transition-colors text-left",
+                                "w-full flex items-center gap-3 px-3 py-2.5 text-xs rounded-lg hover:bg-brand-neutral-1 transition-colors text-left",
                                 value === option.value && "bg-brand-primary-1 text-brand-primary-7 font-medium"
                             )}
                         >

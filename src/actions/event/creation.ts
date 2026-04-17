@@ -9,7 +9,7 @@ import { buildEventPayload } from "@/helper-fns/mapEventCreateData"
 
 async function getToken(): Promise<string | undefined> {
     const cookieStore = await cookies()
-    return cookieStore.get("access_token")?.value
+    return cookieStore.get("host_access_token")?.value
 }
 
 function authHeaders(token?: string) {
@@ -23,12 +23,14 @@ function authHeaders(token?: string) {
 
 export async function publishEvent({
     eventData,
+    media,
 }: {
     eventData: Partial<CompleteEventFormData>
+    media?: any[]
 }): Promise<{ success: boolean; message?: string; eventId?: string }> {
     try {
         const token = await getToken()
-        const body  = buildEventPayload(eventData, "active")
+        const body  = buildEventPayload(eventData, "active", media)
 
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_CREATE}`,
@@ -40,7 +42,7 @@ export async function publishEvent({
         )
 
         const json = await res.json().catch(() => ({}))
-
+        
         console.log(json)
 
         if (!res.ok) {
@@ -64,15 +66,17 @@ export async function publishEvent({
 export async function saveEventAsDraft({
     eventData,
     scheduledAt,
+    media,
 }: {
     eventData:    Partial<CompleteEventFormData>
-    scheduledAt?: string   // ISO string — only when scheduling for later
+    scheduledAt?: string
+    media?: any[]
 }): Promise<{ success: boolean; message?: string; eventId?: string }> {
     try {
         const token = await getToken()
         const body  = {
-            ...buildEventPayload(eventData, "draft"),
-            ...(scheduledAt ? { scheduled_at: scheduledAt } : {}),
+            ...buildEventPayload(eventData, "draft", media),
+            ...(scheduledAt ? { is_scheduled: true, scheduled_time: scheduledAt } : {}),
         }
 
         const res = await fetch(

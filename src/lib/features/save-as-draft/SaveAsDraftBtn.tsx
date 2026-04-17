@@ -8,12 +8,17 @@ import { useAppDispatch }  from "@/lib/redux/hooks"
 import { showAlert }       from "@/lib/redux/slices/alertSlice"
 import { useRevalidate }   from "@/custom-hooks/UseRevalidate"
 import { saveEventAsDraft } from "@/actions/event/creation"
+import { delay } from "@/helper-fns/delay"
+import { useRouter } from "next/navigation"
+import { NAVIGATION_LINKS } from "@/enums/navigation"
+import { uploadEventMedia } from "@/helper-fns/uploadEventMedia"
 
 
 export default function SaveAsDraftBtn() {
 
     const { eventData }  = useEventCreation()
     const dispatch       = useAppDispatch()
+    const router = useRouter()
     const { trigger }    = useRevalidate("events")
     const [saving, setSaving] = useState(false)
 
@@ -21,7 +26,8 @@ export default function SaveAsDraftBtn() {
         if (saving) return
         setSaving(true)
         try {
-            const result = await saveEventAsDraft({ eventData })
+            const media = await uploadEventMedia(eventData.detailsMedia)
+            const result = await saveEventAsDraft({ eventData, media })
             if (result.success) {
                 dispatch(showAlert({
                     title:       "Draft Saved",
@@ -29,6 +35,9 @@ export default function SaveAsDraftBtn() {
                     variant:     "success",
                 }))
                 trigger()
+                delay(1000).then(() => {
+                    router.push(NAVIGATION_LINKS.MY_EVENTS.href)
+                })
             } else {
                 dispatch(showAlert({
                     title:       "Save Failed",

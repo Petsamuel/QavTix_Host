@@ -1,6 +1,9 @@
+export const REFRESH_TOKEN_ENDPOINT = "auth/token/refresh/"
+export const TOKEN_VERIFY_ENDPOINT = "auth/token/verify/"
+
 export const DASHBOARD_OVERVIEW_ENDPOINT = "host/dashboard/overview/"
 export const HOST_UPCOMING_EVENTS_ENDPOINT = "host/events/management"
-export const EVENT_DETAILS_ENDPOINT = "public/event/[event_id]"
+export const EVENT_DETAILS_ENDPOINT = "host/events/[event_id]"
 export const EVENTS_ENDPOINT = "host/events/management"
 export const DASHBOARD_FEED_ENDPOINT = "host/dashboard/feed/"
 

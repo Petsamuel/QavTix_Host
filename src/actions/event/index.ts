@@ -9,7 +9,7 @@ import { cookies }               from "next/headers"
 
 async function getToken(): Promise<string | undefined> {
     const cookieStore = await cookies()
-    return cookieStore.get("access_token")?.value
+    return cookieStore.get("host_access_token")?.value
 }
 
 function authHeaders(token?: string): Record<string, string> {
@@ -77,7 +77,7 @@ interface GetEventDetailsResult {
 export async function getEventDetails(eventID: string): Promise<GetEventDetailsResult> {
     try {
         const cookiesStore = await cookies()
-        const token        = cookiesStore.get("access_token")?.value
+        const token        = cookiesStore.get("host_access_token")?.value
 
         const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_DETAILS_ENDPOINT.replace("[event_id]", eventID)}`
         const res = await fetch(url, {

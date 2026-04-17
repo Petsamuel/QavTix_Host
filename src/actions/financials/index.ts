@@ -10,7 +10,7 @@ import { cookies } from "next/headers"
 
 async function getToken(): Promise<string | undefined> {
     const cookieStore = await cookies()
-    return cookieStore.get("access_token")?.value
+    return cookieStore.get("host_access_token")?.value
 }
 
 export async function getFinancials(

@@ -75,6 +75,15 @@ export default function CreateEventStep1() {
     const address = watch("address")
     const city = watch("city")
 
+    const isLocationReadyForMap = () => {
+    if (locationType !== "physical") return false;
+        return (
+            (venueName && city) ||
+            (address && city) ||
+            (venueName && address)
+        )
+    }
+
     const handleFindOnMap = () => {
         const url = generateMapLink({ venueName, address, city, state, country })
         
@@ -263,12 +272,14 @@ export default function CreateEventStep1() {
                                     label={index === 0 ? "First Day" : `Day ${index + 1}`}
                                     {...register(`dates.${index}.startDateTime`)}
                                     error={errors.dates?.[index]?.startDateTime?.message}
+                                    disablePastDate
                                     data-testid={`input-recurring-start-${index}`}
                                 />
                                 <CustomDateTimeInput
                                     label="End Time"
                                     {...register(`dates.${index}.endDateTime`)}
                                     error={errors.dates?.[index]?.endDateTime?.message}
+                                    disablePastDate
                                     data-testid={`input-recurring-end-${index}`}
                                 />
 
@@ -410,7 +421,7 @@ export default function CreateEventStep1() {
                         <button
                             type="button"
                             onClick={handleFindOnMap}
-                            disabled={!venueName && !country && !state}
+                            disabled={!isLocationReadyForMap()}
                             className="flex disabled:cursor-not-allowed items-center gap-1 text-brand-primary-6 disabled:opacity-50 font-semibold text-sm hover:underline"
                             data-testid="btn-find-on-map"
                             

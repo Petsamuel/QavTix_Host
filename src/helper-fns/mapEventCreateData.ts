@@ -86,7 +86,8 @@ export function mapEventToFormData(
 
 export function buildEventPayload(
     data:   Partial<CompleteEventFormData>,
-    status: "active" | "draft"
+    status: "active" | "draft",
+    media: any[] = []
 ) {
     const info     = data.basicInformation
     const details  = data.detailsMedia
@@ -136,7 +137,6 @@ export function buildEventPayload(
     //  Media
     // Images/video are uploaded separately via presigned URL or multipart.
     // Include URLs if they've already been resolved; otherwise omit.
-    const media: any[] = []
 
     return {
         event_status: status,
@@ -159,7 +159,7 @@ export function buildEventPayload(
 
         // Location 
         location_type: info?.locationType ?? "physical",
-        ...(info?.locationType === "online"   ? { address: info.address, venue_name: info.venueName } : {}),
+        ...(info?.locationType === "online"   ? { event_location: { address: info.onlineLink, venue_name: info.venueName, country: "", state: "", city: "" } } : {}),
         ...(info?.locationType === "physical" ? {
             event_location: {
                 venue_name:  info.venueName   ?? "",

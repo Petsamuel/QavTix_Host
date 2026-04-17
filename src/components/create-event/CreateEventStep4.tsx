@@ -32,31 +32,31 @@ export default function CreateEventStep4() {
     const plan = usePlanRestrictions()
 
     const methods = useForm<Step4FormData>({
-        resolver: zodResolver(step4Schema),
+        resolver: zodResolver(step4Schema) as any,
         defaultValues: {
             checkInSettings: eventData.settings?.checkInSettings ?? {
-                qrCodeEnabled:  true,
+                qrCodeEnabled: true,
                 ageRestriction: false,
             },
             emailNotifications: eventData.settings?.emailNotifications ?? {
-                orderConfirmation:   true,
-                ticketDelivery:      true,
-                reminders:           true,
-                postEventEmails:     true,
+                orderConfirmation: true,
+                ticketDelivery: true,
+                reminders: true,
+                postEventEmails: true,
                 customizeSenderName: false,
             },
             affiliateProgram: eventData.settings?.affiliateProgram ?? {
-                enabled:              false,
+                enabled: false,
                 percentageCommission: 10,
             },
             permissions: eventData.settings?.permissions ?? {
                 collaborators: [
                     {
-                        id:          '1',
-                        name:        'QavTix Limited',
-                        email:       'info@qavtixlimited.com',
-                        role:        'host',
-                        status:      'active',
+                        id: '1',
+                        name: 'QavTix Limited',
+                        email: 'info@qavtixlimited.com',
+                        role: 'host',
+                        status: 'active',
                         permissions: ['all'],
                     },
                 ],
@@ -71,7 +71,7 @@ export default function CreateEventStep4() {
     })
 
     const isAffiliateEnabled = watch('affiliateProgram.enabled')
-    const isAgeRestricted    = watch('checkInSettings.ageRestriction')
+    const isAgeRestricted = watch('checkInSettings.ageRestriction')
 
     const [openAddCollaboratorForm, setOpenAddCollaboratorForm] = useState(false)
 
@@ -93,10 +93,10 @@ export default function CreateEventStep4() {
     }
 
     const EMAIL_NOTIFICATION_FIELDS = [
-        { key: 'orderConfirmation',   label: 'Order Confirmation' },
-        { key: 'ticketDelivery',      label: 'Ticket Delivery' },
-        { key: 'reminders',           label: 'Reminders' },
-        { key: 'postEventEmails',     label: 'Post-Event Emails' },
+        { key: 'orderConfirmation', label: 'Order Confirmation' },
+        { key: 'ticketDelivery', label: 'Ticket Delivery' },
+        { key: 'reminders', label: 'Reminders' },
+        { key: 'postEventEmails', label: 'Post-Event Emails' },
         { key: 'customizeSenderName', label: 'Customize Sender Name' },
     ] as const
 
@@ -348,8 +348,8 @@ export default function CreateEventStep4() {
                                         </span>
                                         <span className={cn(
                                             "text-[10px] font-medium flex items-center gap-1.5",
-                                            collab.status === 'active'   ? "text-[#359160]" :
-                                            collab.status === 'disabled' ? "text-red-500" : "text-brand-secondary-4"
+                                            collab.status === 'active' ? "text-[#359160]" :
+                                                collab.status === 'disabled' ? "text-red-500" : "text-brand-secondary-4"
                                         )}>
                                             <span className="size-1.5 rounded-full bg-current" />
                                             {collab.status.charAt(0).toUpperCase() + collab.status.slice(1)}
@@ -403,12 +403,12 @@ export default function CreateEventStep4() {
                 setOpen={setOpenAddCollaboratorForm}
                 setCollaborator={(v) => {
                     append({
-                        email:       v.email,
-                        role:        v.role as any,
+                        email: v.email,
+                        role: v.role as any,
                         permissions: [v.role],
-                        name:        v.email.split('@')[0],
-                        status:      "pending",
-                        id:          crypto.randomUUID(),
+                        name: v.email.split('@')[0],
+                        status: "pending",
+                        id: crypto.randomUUID(),
                     })
                 }}
             />

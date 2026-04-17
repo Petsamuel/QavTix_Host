@@ -23,7 +23,7 @@ export default function EventPublishStatusModal({
     isOpen,
     onClose,
     type,
-    eventId = "EVT-2025-12345",
+    eventId,
     errorMessage,
     onCreateAnother,
     onViewDashboard,
@@ -33,7 +33,7 @@ export default function EventPublishStatusModal({
     const isSuccess = type === 'SUCCESS';
 
     const handleShareClick = () => {
-        if (onShare) onShare(eventId)
+        if (onShare) onShare(eventId || "")
     }
 
     return (

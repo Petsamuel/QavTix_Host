@@ -22,9 +22,11 @@ export function VideoUpload({
     className
 }: VideoUploadProps) {
     const inputRef = useRef<HTMLInputElement>(null)
-    const [fileName, setFileName] = useState<string | null>(
-        typeof value === 'string' ? value.split('/').pop() || null : null
-    )
+    const [fileName, setFileName] = useState<string | null>(() => {
+        if (typeof value === 'string') return value.split('/').pop() || null
+        if (value instanceof File) return value.name
+        return null
+    })
 
     const handleFile = (file: File) => {
         if (file.size > maxSize * 1024 * 1024) {

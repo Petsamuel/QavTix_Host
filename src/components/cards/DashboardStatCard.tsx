@@ -14,7 +14,7 @@ export default function DashboardStatCard({ cardData }: { cardData: IDashboardSt
         : Number(cardData.number).toLocaleString()
 
     return (
-        <div className={cn(cardData.cardBg, "group rounded-xl flex flex-col justify-between gap-5 p-5")}>
+        <div className={cn(cardData.cardBg, "group rounded-xl shadow-xs flex flex-col justify-between gap-5 p-5")}>
             <div className={cn(
                 "flex justify-center items-center text-white w-9 aspect-square rounded-full",
                 cardData.iconBg,

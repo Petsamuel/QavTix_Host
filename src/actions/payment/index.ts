@@ -23,7 +23,7 @@ interface MutateResult {
 export async function getPaymentMethods(): Promise<PaymentMethodsResult> {
     try {
         const cookieStore = await cookies()
-        const accessToken = cookieStore.get("access_token")?.value
+        const accessToken = cookieStore.get("host_access_token")?.value
 
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${PAYMENT_METHODS_ENDPOINT}`,

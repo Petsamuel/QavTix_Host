@@ -8,8 +8,8 @@ import { redirect } from "next/navigation"
 
 export const logOut = async () => {
     const cookiesStore = await cookies()
-    cookiesStore.delete("access_token")
-    cookiesStore.delete("refresh_token")
+    cookiesStore.delete("host_access_token")
+    cookiesStore.delete("host_refresh_token")
     redirect(process.env.NEXT_PUBLIC_APP_DOMAIN || "/")
 }
 

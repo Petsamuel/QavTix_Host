@@ -29,9 +29,10 @@ export default function CreateEventStep3() {
     const plan = usePlanRestrictions()
 
     const methods = useForm<Step3FormData>({
-        resolver: zodResolver(step3Schema),
+        resolver: zodResolver(step3Schema) as any,
+        mode: 'onTouched',
         defaultValues: {
-            ticketTypes: eventData.ticketsPricing?.ticketTypes ?? [],
+            ticketTypes: eventData.ticketsPricing?.ticketTypes ?? [{ id: crypto.randomUUID(), ticketType: '', price: 0, currency: 'NGN', quantity: 1 }],
             refundPolicy:           eventData.ticketsPricing?.refundPolicy           ?? 'no',
             customRefundPercentage: eventData.ticketsPricing?.customRefundPercentage ?? undefined,
             salesPeriod: eventData.ticketsPricing?.salesPeriod ?? {
@@ -314,6 +315,7 @@ export default function CreateEventStep3() {
                                 render={({ field }) => (
                                     <CustomDatePicker
                                         label="Start Date & Time"
+                                        disabledPastDate
                                         placeholder="Select"
                                         icon={ChevronDown}
                                         value={field.value}
@@ -329,6 +331,7 @@ export default function CreateEventStep3() {
                                 render={({ field }) => (
                                     <CustomDatePicker
                                         label="End Date & Time"
+                                        disabledPastDate
                                         placeholder="Select"
                                         icon={ChevronDown}
                                         value={field.value}
@@ -379,7 +382,7 @@ export default function CreateEventStep3() {
                                 render={({ field }) => (
                                     <CustomPercentageInput
                                         label="Enter Refund Percentage"
-                                        onChange={field.onChange}
+                                        onChange={(val) => field.onChange(val ? Number(val) : val)}
                                         inputContainerStyles="max-w-29.25"
                                         value={field.value as number}
                                         error={errors.customRefundPercentage && "Invalid refund input"}

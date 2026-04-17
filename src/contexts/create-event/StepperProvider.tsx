@@ -1,6 +1,7 @@
 import { StepNumber } from "@/types/create-event";
 import { createContext, useCallback, useContext, useEffect } from "react";
 import { useEventCreation } from "./CreateEventProvider";
+import { delay } from "@/helper-fns/delay";
 
 interface StepperContextType {
     goToNextStep: () => void;
@@ -37,7 +38,7 @@ export function StepperProvider({ children }: { children: React.ReactNode }) {
     
     // SCROLL TO TOP WHENEVER THE USER MOVES BETWEEN STEPS
     useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
+        document.getElementById('step-top')?.scrollIntoView({ behavior: 'smooth' })
     }, [currentStep])
 
     return (
