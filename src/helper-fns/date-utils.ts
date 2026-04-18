@@ -11,10 +11,23 @@ export const formatDate = (date: Date | undefined, formatStr: string = 'MM / dd 
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   const year = date.getFullYear()
-  
+
+  if (formatStr === 'yyyy-MM-dd') {
+    return `${year}-${month}-${day}`
+  }
+    
   if (formatStr === 'MMM dd') {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     return `${monthNames[date.getMonth()]} ${day}`
+  }
+
+  if (formatStr === 'MMM d, yyyy | h:mm a') {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const hours   = date.getHours()
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    const ampm    = hours >= 12 ? 'pm' : 'am'
+    const hour12  = hours % 12 || 12
+    return `${monthNames[date.getMonth()]} ${date.getDate()}, ${year}  |  ${hour12}:${minutes} ${ampm}`
   }
   
   if (formatStr === 'MMM dd, yyyy') {

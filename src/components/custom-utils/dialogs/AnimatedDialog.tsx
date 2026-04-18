@@ -11,6 +11,7 @@ interface AnimatedDialogProps {
   title?: string
   children: React.ReactNode
   className?: string
+  childrenContainerStyles?: string
   showCloseButton?: boolean
 }
 
@@ -20,9 +21,12 @@ export function AnimatedDialog({
   trigger,
   title,
   children,
+  childrenContainerStyles = "px-6",
   showCloseButton = true,
   className = ''
 }: AnimatedDialogProps) {
+
+
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogPrimitive.Trigger asChild>{trigger}</DialogPrimitive.Trigger>}
@@ -30,7 +34,7 @@ export function AnimatedDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           className={cn(
-            "fixed inset-0 z-50 bg-black/60",
+            "fixed inset-0 z-900 bg-black/60",
             // Open
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-300 data-[state=open]:ease-out",
             // Close
@@ -40,7 +44,7 @@ export function AnimatedDialog({
 
         <DialogPrimitive.Content
           className={cn(
-            "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-full max-w-[90%] sm:max-w-125 max-h-[95vh] bg-white rounded-4xl shadow-2xl outline-none overflow-hidden flex flex-col",
+            "fixed left-1/2 top-1/2 z-910 -translate-x-1/2 -translate-y-1/2 w-full max-w-[90%] sm:max-w-125 max-h-[95vh] bg-white rounded-4xl shadow-2xl border-0 outline-transparent outline-none! ring-0 overflow-hidden flex flex-col",
             // Open animation
             "data-[state=open]:animate-in",
             "data-[state=open]:fade-in-0",
@@ -62,7 +66,7 @@ export function AnimatedDialog({
             </DialogPrimitive.Title>
           )}
 
-          <div className="px-6 py-6 overflow-y-auto flex-1">{children}</div>
+          <div className={cn("py-6 overflow-y-auto flex-1", childrenContainerStyles)}>{children}</div>
 
           {
             showCloseButton &&

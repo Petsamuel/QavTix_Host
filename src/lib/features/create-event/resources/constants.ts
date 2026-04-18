@@ -64,7 +64,7 @@ export const DAYS_OF_WEEK = [
 
 // Refund Policy Options
 export const REFUND_POLICIES = [
-    { value: 'no_refund', label: 'No Refund' },
+    { value: 'no', label: 'No Refund' },
     { value: 'partial', label: 'Partial Refund (50%)' },
     { value: 'full', label: 'Full Refund (100%)' },
     { value: 'custom', label: 'Custom Percentage' },
@@ -168,7 +168,7 @@ export const DEFAULT_VALUES = {
     country: 'NG',
     locationType: 'physical' as const,
     eventType: 'single' as const,
-    refundPolicy: 'no_refund' as const,
+    refundPolicy: 'no' as const,
     qrCodeEnabled: true,
     orderConfirmation: true,
     ticketDelivery: true,

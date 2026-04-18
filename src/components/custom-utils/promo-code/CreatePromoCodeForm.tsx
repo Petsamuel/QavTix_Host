@@ -11,30 +11,61 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue } from "@/components/ui/select";
-import { mockUpcomingEvents } from "@/components-data/demo-data";
-import EventInfo from "../event/EventInfo";
+import { createPromoCode } from "@/actions/marketing";
+import { formatDate } from "@/helper-fns/date-utils";
+import { showAlert } from "@/lib/redux/slices/alertSlice";
+import { useAppDispatch } from "@/lib/redux/hooks";
+import SearchableEventSelect from "../inputs/CustomEventSearchableSelect";
+import ActionButton1 from "../buttons/ActionBtn1";
+import { useRevalidate } from "@/custom-hooks/UseRevalidate";
 
 export default function CreatePromoCodeForm({ 
     openPromoModal, 
-    setOpenPromoModal 
-}: { 
+    setOpenPromoModal ,
+}: {
     openPromoModal: boolean, 
-    setOpenPromoModal: Dispatch<SetStateAction<boolean>> 
+    setOpenPromoModal: Dispatch<SetStateAction<boolean>> ,
 }) {
 
     const {
         control,
         register,
-        formState: { errors },
+        reset,
+        formState: { errors, isSubmitting },
         handleSubmit,
     } = useForm<CreatePromoCodeSchemaType>({
         resolver: zodResolver(createPromoCodeSchema),
     })
 
-    const onSubmit : SubmitHandler<CreatePromoCodeSchemaType> = (data) => {
-        console.log(data)
+    const dispatch = useAppDispatch()
+
+    const { trigger } = useRevalidate("marketing")
+
+    const onSubmit : SubmitHandler<CreatePromoCodeSchemaType> = async (data) => {
+        const result = await createPromoCode({
+            code: data.promo_code,
+            discount_percentage: data.discount.toString(),
+            event_id: data.event_id,
+            usage_limit: data.usage_limit,
+            valid_until: formatDate(data.valid_until, "yyyy-MM-dd")
+        })
+
+        if (result.success) {
+            reset()
+            dispatch(showAlert({
+                title:       "Promo code created",
+                description: "Your promo code is now active and ready to use.",
+                variant:     "success"
+            }))
+            trigger()
+            setOpenPromoModal(false)
+        } else {
+            dispatch(showAlert({
+                variant:     "destructive",
+                title:       "Failed to create promo code",
+                description: result.message ?? "Please try again.",
+            }))
+        }
     }
 
     return (
@@ -46,25 +77,28 @@ export default function CreatePromoCodeForm({
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-5">
-                    <div className="flex justify-between gap-4">
-                        {/* Promo Code */}
-                        <CustomInput1
-                            label="Promo Code"
-                            required
-                            showAshk={false}
-                            error={errors.promo_code?.message}
-                            {...register('promo_code')}
-                            className="h-11.25! border-0! rounded-sm!"
-                            placeholder="Enter promo code"
-                        />
+                    <div className="flex flex-wrap justify-between gap-4">
+                        <div className="w-[55%]">
+                            {/* Promo Code */}
+                            <CustomInput1
+                                label="Promo Code"
+                                required
+                                showAshk={false}
+                                error={errors.promo_code?.message}
+                                {...register('promo_code')}
+                                className="h-11.25! border-0! rounded-sm!"
+                                placeholder="Enter promo code"
+                            />
+                        </div>
 
                         {/* Discount */}
-                        <div className="relative h-fit w-[45%]">
+                        <div className="relative h-fit w-24">
                             <CustomInput1
                                 label="Discount"
                                 required
                                 showAshk={false}
                                 type="number"
+                                inputMode="numeric" 
                                 className="pr-12 h-11.25! border-0! rounded-e-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 error={errors.discount?.message}
                                 {...register('discount', { valueAsNumber: true })}
@@ -80,9 +114,12 @@ export default function CreatePromoCodeForm({
                     <CustomInput1
                         label="Usage Limit"
                         required
+                        type="number"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         showAshk={false}
                         error={errors.usage_limit?.message}
-                        {...register('usage_limit')}
+                        {...register('usage_limit', { valueAsNumber: true })}
                         className="h-11.25! border-0! rounded-sm!"
                         placeholder="Eg: First 50 People"
                     />
@@ -128,47 +165,11 @@ export default function CreatePromoCodeForm({
                         name="event_id"
                         control={control}
                         render={({ field }) => (
-                            <div className="w-full">
-                                <Label className="block text-sm font-medium text-brand-neutral-9 mb-2">
-                                    Events Applicable
-                                </Label>
-                                
-                                <Select value={field.value} onValueChange={field.onChange}>
-                                    <SelectTrigger
-                                        className={cn(
-                                            "w-full px-4 py-3 text-sm rounded-lg min-h-11.25 h-11.25 outline-none bg-[#F2F2F2] text-brand-neutral-9 transition-all",
-                                            errors.event_id 
-                                                ? 'border border-red-400 focus:ring-red-500' 
-                                                : 'border-transparent focus:border-[1.5px] focus:border-brand-neutral-6 hover:border-brand-neutral-5 border'
-                                        )}
-                                    >
-                                        <SelectValue placeholder="Select Event" />
-                                    </SelectTrigger>
-
-                                    <SelectContent position="popper" className="bg-white z-50 max-h-60">
-                                        {mockUpcomingEvents.map(option => (
-                                            <SelectItem 
-                                                key={option.id} 
-                                                value={option.id} 
-                                                className='cursor-pointer focus:bg-brand-neutral-4 my-1 py-1 focus:text-white'
-                                            >
-                                                <EventInfo 
-                                                    variant="mobile"
-                                                    category={option.category}
-                                                    image={option.image}
-                                                    title={option.title}
-                                                />
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-
-                                {errors.event_id && (
-                                    <p className="text-xs text-red-500 mt-1.5 ml-1">
-                                        {errors.event_id.message}
-                                    </p>
-                                )}
-                            </div>
+                            <SearchableEventSelect
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                error={errors.event_id?.message}
+                            />
                         )}
                     />
                     {/* Action Buttons */}
@@ -181,12 +182,13 @@ export default function CreatePromoCodeForm({
                             Cancel
                         </button>
 
-                        <button
-                            type="submit"
-                            className="flex-1 px-6 py-3.5 rounded-[30px] bg-brand-primary hover:bg-brand-primary-7 active:bg-brand-primary-8 hover:shadow-md active:scale-[0.98] disabled:bg-brand-neutral-5 disabled:cursor-not-allowed disabled:opacity-60 text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 transition-all duration-150 flex items-center justify-center gap-2"
-                        >
-                            Confirm
-                        </button>
+                        <ActionButton1 
+                            buttonText="Confirm"
+                            buttonType="submit"
+                            isLoading={isSubmitting}
+                            isDisabled={isSubmitting}
+                            className="flex-1"
+                        />
                     </div>
                 </form>
             </div>

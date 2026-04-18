@@ -1,20 +1,11 @@
 export const CONFIRMATION_ACTION_TYPES = {
+    DELETE_PAYOUT_ACCOUNT: 'DELETE_PAYOUT_ACCOUNT',
+    DELETE_EVENT: 'DELETE_EVENT',
     PUBLISH_EVENT: 'PUBLISH_EVENT',
-    DELETE_COLLABORATOR: 'DELETE_COLLABORATOR',
-    REACTIVATE_USER: 'REACTIVATE_USER',
-} as const;
+    UNPUBLISH_EVENT: 'UNPUBLISH_EVENT',
+    BULK_DELETE_EVENTS: 'BULK_DELETE_EVENTS',
+    BULK_CANCEL_EVENTS: 'BULK_CANCEL_EVENTS',
+    BULK_UNPUBLISH_EVENTS: 'BULK_UNPUBLISH_EVENTS',
+} as const
 
-export type ConfirmationActionType = keyof typeof CONFIRMATION_ACTION_TYPES;
-
-export const getConfirmationAction = (type: ConfirmationActionType, router: any) => {
-    switch (type) {
-        case 'PUBLISH_EVENT':
-            return () => {
-                console.log("Publishing...")
-            }
-        case 'DELETE_COLLABORATOR':
-            return () => console.log("Collaborator removed")
-        default:
-            return () => {}
-    }
-}
+export type ConfirmationActionType = keyof typeof CONFIRMATION_ACTION_TYPES

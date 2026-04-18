@@ -26,10 +26,12 @@ export default function AdditionalImagesUpload({
 
     const [previews, setPreviews] = useState<string[]>(() => {
         return value.map(item => 
-            typeof item === 'string' ? item : URL.createObjectURL(item)
+            typeof item === 'string' ? item : URL.createObjectURL(item) 
         )
     })
-    const [files, setFiles] = useState<File[]>([])
+    const [files, setFiles] = useState<File[]>(() => {
+        return value.filter((item): item is File => item instanceof File)
+    })
     const inputRef = useRef<HTMLInputElement>(null)
 
     const canAddMore = previews.length < maxImages

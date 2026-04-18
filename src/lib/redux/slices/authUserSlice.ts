@@ -1,52 +1,32 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export interface AuthUser {
-  readonly id: string | null
-  readonly full_name: string | null
-  readonly email: string | null
-  readonly phone: string | null
-  readonly role: 'host' | null
-  readonly profile_img?: string | null
+export type UserRole = "attendee" | "organizer" | "admin"
+
+export interface AuthUserState {
+    isAuthenticated: boolean
+    user:            AuthUser | null
 }
 
-const initialState: AuthUser = {
-    email: null,
-    full_name: null,
-    id: null,
-    phone: null,
-    profile_img: null,
-    role: null
+const initialState: AuthUserState = {
+    isAuthenticated: false,
+    user:            null,
 }
 
 const authUserSlice = createSlice({
-    name: 'authUser',
+    name: "authUser",
     initialState,
     reducers: {
-        // Set authenticated user
-        setAuthUser: (state, { payload }: PayloadAction<AuthUser>) => {
-            state = payload;
+        setUser(state, action: PayloadAction<AuthUser>) {
+            state.isAuthenticated = true
+            state.user            = action.payload
         },
 
-        logoutUser: (state) => {
-            state = { email: null, full_name: null, id: null, phone: null, role: null, profile_img: null }
+        clearUser() {
+            return initialState
         },
-
-        refreshAuthUser: (state, action: PayloadAction<Partial<AuthUser>>) => {
-            if (state) {
-                return { ...state, ...action.payload }
-            }
-            return state
-        }
-    }
+    },
 })
 
-export const {
-  setAuthUser,
-  logoutUser,
-  refreshAuthUser
-} = authUserSlice.actions
+export const { setUser, clearUser } = authUserSlice.actions
 
-export default authUserSlice.reducer;
-
-export const selectAuthUser = (state: { authUser: AuthUser | null }) => state.authUser
-export const selectIsAuthenticated = (state: { authUser: AuthUser | null }) => !!state.authUser
+export default authUserSlice.reducer

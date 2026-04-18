@@ -13,7 +13,7 @@ export const createPromoCodeSchema = z.object({
         .max(100, "Discount cannot exceed 100%"),
     
     usage_limit: z
-        .string()
+        .number("Invalid input")
         .min(1, "Usage limit is required"),
     
     valid_until: z

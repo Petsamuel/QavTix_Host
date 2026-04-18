@@ -1,28 +1,18 @@
 "use client"
 
-import { getInitialsFromName } from "@/helper-fns/getInitialFromName"
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { useAppSelector } from "@/lib/redux/hooks"
-import { useEffect, useState } from "react"
+import CustomAvatar from "../custom-utils/avatars/CustomAvatar"
+import NeedHelpButton from "../custom-utils/buttons/NeedHelpButton"
 
 export default function AuthUserDetailsWithActiveStatus(){
-    
-    // Use local state to prevent hydration mismatch
-    const [isMounted, setIsMounted] = useState(false)
-    
-    const { full_name, email, profile_img,  } = useAppSelector(store => store.authUser)
-    
-    useEffect(() => {
-        setIsMounted(true)
-    }, [])
+
+    const { user  } = useAppSelector(store => store.authUser)
   
     return (
         <div className="flex items-center gap-2">
+            <NeedHelpButton />
             <div className="relative w-fit">
-                <Avatar>
-                    <AvatarImage src={profile_img || ""} />
-                    <AvatarFallback className="uppercase">{full_name && getInitialsFromName(full_name)}</AvatarFallback>
-                </Avatar>
+                <CustomAvatar id={user?.user_id.toString() || "" } profileImg={user?.profile_picture} name={user?.full_name || ""} size="size-9 ring-brand-accent-2!" />
 
                 <span className="absolute -top-1 -left-1 w-3 h-3 rounded-full bg-green-500 ring-2 ring-white animate-ping" />
                 <span className="absolute -top-1 -left-1 w-3 h-3 rounded-full bg-green-500" />

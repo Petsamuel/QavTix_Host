@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@iconify/react": "^6.0.2",
+    "@paystack/inline-js": "^2.22.8",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -32,7 +32,9 @@
     "@tiptap/pm": "^3.16.0",
     "@tiptap/react": "^3.16.0",
     "@tiptap/starter-kit": "^3.16.0",
+    "axios": "^1.15.0",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "country-state-city": "^3.2.1",
@@ -50,11 +52,14 @@
     "recharts": "^3.6.0",
     "resolvers": "^1.0.0",
     "tailwind-merge": "^3.4.0",
+    "uuid": "^13.0.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@iconify/react": "^6.0.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/paystack__inline-js": "^1.0.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

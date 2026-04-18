@@ -1,13 +1,17 @@
+import { getCustomers } from "@/actions/customers";
 import CustomersPagePw from "@/components/page-wrappers/CustomersPagePw";
-import { delay } from "@/helper-fns/delay";
 
-
+export const dynamic = 'force-dynamic';
 
 export default async function CustomersPage(){
 
-    await delay(5000)
+    const customersResult = await getCustomers()
+
+    if (!customersResult.success || !customersResult.data) {
+        throw new Error("Failed to load customers data")
+    }
 
     return (
-        <CustomersPagePw />
+        <CustomersPagePw customersData={customersResult.data!} />
     )
 }

@@ -1,21 +1,30 @@
 "use client"
 
-import RevenueGrowthChart from "@/components/charts/RevenueGrowthChart";
-import OverviewSection from "@/components/dashboard/OverviewSection";
-import { useState } from "react";
-import { ChartFilterToggle } from "../dashboard/ChartFilterToggle";
+import { useState } from "react"
+import OverviewSection from "@/components/dashboard/OverviewSection"
+import RevenueGrowthChart from "@/components/charts/RevenueGrowthChart"
+import { ChartFilterToggle } from "../dashboard/ChartFilterToggle"
 
-export default function DashboardPagePW(){
+interface DashboardPagePWProps {
+    initialData: DashboardOverviewData
+}
 
-    const [chartFilter, setChartFilter] = useState<ChartFilter>("revenue")
+export default function DashboardPagePW({ initialData }: DashboardPagePWProps) {
+    const [chartFilter, setChartFilter] = useState<"revenue" | "tickets">("revenue")
 
     return (
         <main>
-            <OverviewSection />
+            <OverviewSection cards={initialData.cards} />
 
             <div className="mt-16">
-                <ChartFilterToggle chartFilter={chartFilter} setChartFilter={setChartFilter} />
-                <RevenueGrowthChart />
+                <ChartFilterToggle
+                    chartFilter={chartFilter}
+                    setChartFilter={setChartFilter}
+                />
+                <RevenueGrowthChart
+                    initialChartData={initialData.chart}
+                    chartFilter={chartFilter}
+                />
             </div>
         </main>
     )

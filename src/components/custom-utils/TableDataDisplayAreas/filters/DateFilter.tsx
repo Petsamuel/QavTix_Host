@@ -12,6 +12,7 @@ import FilterButtonsActions1 from './buttons-and-inputs/FilterActionButtons1'
 import { useMediaQuery } from '@/custom-hooks/UseMediaQuery'
 import { MobileBottomSheet } from '../../dropdown/EventFilterDropdownMobileBottomSheet'
 
+
 interface DateFilterProps {
     value?: DateRange | null
     onChange: (value: DateRange | null) => void,
@@ -20,7 +21,6 @@ interface DateFilterProps {
 }
 
 export default function DateFilter({ value, onChange, icon, label = "Date Range" }: DateFilterProps) {
-
     
     const [isOpen, setIsOpen] = useState(false)
     const isTablet = useMediaQuery('(min-width: 768px)')

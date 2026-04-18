@@ -1,17 +1,14 @@
 import { cn } from "@/lib/utils"
 import MetricCard from "./MetricCard1"
 
-interface MetricsCardsConatinerProps {
-    metrics: MetricCardData[]
+interface MetricsCardsContainerProps {
+    metrics:    MetricCardData[] 
     className?: string
 }
 
-export default function MetricCardsContainer1({ metrics, className }: MetricsCardsConatinerProps) {
+export default function CustomersProfilePageMetricCardsContainer({ metrics, className }: MetricsCardsContainerProps) {
     return (
-        <div className={cn(
-            'grid grid-cols-1 xsm:grid-cols-2 lg:grid-cols-4 gap-4',
-            className
-        )}>
+        <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4", className)}>
             {metrics.map((metric) => (
                 <MetricCard key={metric.id} data={metric} />
             ))}

@@ -1,74 +1,252 @@
-import { addAccountSchema, AddAccountSchemaType } from "@/schemas/add-account.schema";
-import { AnimatedDialog } from "../dialogs/AnimatedDialog";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Dispatch, SetStateAction } from "react";
-import CustomSelect from "../inputs/CustomSelect";
-import CustomInput1 from "../inputs/CustomInput1";
-import { DialogTitle } from "@/components/ui/dialog";
+"use client"
 
-export default function AddBankAccountForm({ openAddAccountModal, setOpenAddAccountModal }:{ openAddAccountModal: boolean, setOpenAddAccountModal: Dispatch<SetStateAction<boolean>> }){
+import { AnimatedDialog } from "../dialogs/AnimatedDialog"
+import { Controller, useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { DialogTitle } from "@/components/ui/dialog"
+import { addAccountSchema, AddAccountSchemaType } from "@/schemas/add-account.schema"
+import CustomInput1 from "../inputs/CustomInput1"
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
+import { showAlert } from "@/lib/redux/slices/alertSlice"
+import { openSuccessModal } from "@/lib/redux/slices/successModalSlice"
+import { Icon } from "@iconify/react"
+import { cn } from "@/lib/utils"
+import { BankOption, getPaystackBanks, verifyAccountNumber } from "@/actions/payout"
+import SearchableSelect from "../inputs/CustomSearchableSelect"
+import ActionButton1 from "../buttons/ActionBtn1"
+import { addPayoutAccount } from "@/actions/financials"
+
+interface Props {
+    openAddAccountModal:    boolean
+    setOpenAddAccountModal: Dispatch<SetStateAction<boolean>>
+}
+
+export default function AddBankAccountForm({
+    openAddAccountModal,
+    setOpenAddAccountModal,
+}: Props) {
+
+    const dispatch  = useAppDispatch()
+    const { user }  = useAppSelector(store => store.authUser)
+
+    // Determine if user is Nigerian based on their currency
+    const isNigerian = user?.currency?.toUpperCase() === "NGN"
+
+    const [banks,         setBanks]        = useState<BankOption[]>([])
+    const [banksLoading,  setBanksLoading]  = useState(false)
+    const [verifyState,   setVerifyState]   = useState<"idle" | "loading" | "success" | "error">("idle")
+    const [verifyMessage, setVerifyMessage] = useState("")
 
     const {
         control,
         register,
-        formState: { errors },
+        handleSubmit,
+        watch,
+        setValue,
+        reset,
+        formState: { errors, isSubmitting },
     } = useForm<AddAccountSchemaType>({
         resolver: zodResolver(addAccountSchema),
+        defaultValues: {
+            bank_code:      "",
+            bank_name:      "",
+            account_number: "",
+            account_name:   "",
+            is_default:     false,
+        },
     })
 
+    const bankCode      = watch("bank_code")
+    const accountNumber = watch("account_number")
+    const accountNumReady = accountNumber?.length === 10
+
+    // Load Nigerian banks on mount if user is Nigerian
+    useEffect(() => {
+        if (!isNigerian) return
+        setBanksLoading(true)
+        getPaystackBanks("nigeria").then(result => {
+            setBanksLoading(false)
+            if (result.success && result.data) setBanks(result.data)
+        })
+    }, [isNigerian])
+
+    // Auto-verify for Nigerian users when 10 digits + bank selected
+    useEffect(() => {
+        if (!isNigerian || !bankCode || !accountNumReady) return
+
+        setVerifyState("loading")
+        setVerifyMessage("")
+        setValue("account_name", "")
+
+        verifyAccountNumber(accountNumber, bankCode, "nigeria").then(result => {
+            if (result.success && result.account_name) {
+                setValue("account_name", result.account_name, { shouldValidate: true })
+                setVerifyState("success")
+                setVerifyMessage(result.account_name)
+            } else {
+                setVerifyState("error")
+                setVerifyMessage(result.message ?? "Could not verify account number")
+            }
+        })
+    }, [accountNumber, bankCode, isNigerian])
+
+    const onSubmit = async (data: AddAccountSchemaType) => {
+        const result = await addPayoutAccount({
+            bank_name:      data.bank_name,
+            account_name:   data.account_name,
+            account_number: data.account_number,
+            is_default:     data.is_default,
+        })
+
+        if (result.success) {
+            reset()
+            setVerifyState("idle")
+            setOpenAddAccountModal(false)
+            dispatch(openSuccessModal({
+                title:       "Submission Successful!",
+                description: "Your bank account is being verified. We’ll let you know when it’s done.",
+                variant:     "success"
+            }))
+        } else {
+            dispatch(showAlert({
+                variant:     "destructive",
+                title:       "Failed to add account",
+                description: result.message ?? "Please try again.",
+            }))
+        }
+    }
+
+    const handleClose = () => {
+        reset()
+        setVerifyState("idle")
+        setOpenAddAccountModal(false)
+    }
+
     return (
-        <AnimatedDialog className="md:max-w-[25em]" open={openAddAccountModal} onOpenChange={setOpenAddAccountModal}>
+        <AnimatedDialog className="md:max-w-[25em]" open={openAddAccountModal} onOpenChange={handleClose}>
             <div>
-                <div className="flex justify-center items-center flex-col text-center">
-                    <DialogTitle className="font-semibold text-brand-secondary-9">Add Bank Account</DialogTitle>
-                    <p className="text-sm text-brand-secondary-6 mt-2">Fill out the form to add a new Bank Account</p>
+                <div className="flex justify-center items-center flex-col text-center mb-6">
+                    <DialogTitle className="font-semibold text-brand-secondary-9">
+                        Add Bank Account
+                    </DialogTitle>
+                    <p className="text-sm text-brand-secondary-6 mt-2">
+                        Fill out the form to add a new bank account
+                    </p>
                 </div>
 
-                <form className="mt-8 space-y-5">
-                    <Controller
-                        name="bank_name"
-                        defaultValue=''
-                        control={control}
-                        render={({ field }) => (
-                            <CustomSelect
-                                label="Bank Name"
-                                required
-                                options={[
-                                    { value: 'bank1', label: 'Bank 1' },
-                                    { value: 'bank2', label: 'Bank 2' },
-                                    { value: 'bank3', label: 'Bank 3' },
-                                ]}
-                                value={field.value}
-                                onValueChange={field.onChange}
-                                error={errors.bank_name?.message}
-                            />
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+
+                    {isNigerian ? (
+                        <Controller
+                            name="bank_code"
+                            control={control}
+                            render={({ field }) => (
+                                <SearchableSelect
+                                    label="Bank Name"
+                                    required
+                                    options={banks.map(b => ({ value: b.value, label: b.label }))}
+                                    value={field.value}
+                                    onValueChange={(val) => {
+                                        field.onChange(val)
+                                        const bank = banks.find(b => b.value === val)
+                                        if (bank) setValue("bank_name", bank.name)
+                                        setValue("account_name", "")
+                                        setVerifyState("idle")
+                                    }}
+                                    placeholder={banksLoading ? "Loading banks..." : "Select bank"}
+                                    searchPlaceholder="Search bank..."
+                                    disabled={banksLoading}
+                                    error={errors.bank_code?.message}
+                                />
+                            )}
+                        />
+                    ) : (
+                        <CustomInput1
+                            label="Bank Name"
+                            required
+                            placeholder="Enter bank name"
+                            error={errors.bank_name?.message}
+                            {...register("bank_name")}
+                        />
+                    )}
+
+                    {/* Account number */}
+                    <div>
+                        <CustomInput1
+                            label="Account Number"
+                            required
+                            placeholder={isNigerian ? "Enter 10-digit account number" : "Enter account number"}
+                            maxLength={isNigerian ? 10 : 20}
+                            error={errors.account_number?.message}
+                            {...register("account_number")}
+                        />
+
+                        {/* Verify status — Nigerian users only */}
+                        {isNigerian && bankCode && (
+                            <div className={cn(
+                                "flex items-center gap-2 mt-2 text-xs",
+                                verifyState === "success" && "text-green-600",
+                                verifyState === "error"   && "text-red-500",
+                                verifyState === "loading" && "text-brand-secondary-6",
+                            )}>
+                                {verifyState === "loading" && (
+                                    <>
+                                        <Icon icon="svg-spinners:ring-resize" className="w-3.5 h-3.5" />
+                                        <span>Verifying account...</span>
+                                    </>
+                                )}
+                                {verifyState === "success" && (
+                                    <>
+                                        <Icon icon="lucide:check-circle" className="w-3.5 h-3.5" />
+                                        <span>{verifyMessage}</span>
+                                    </>
+                                )}
+                                {verifyState === "error" && (
+                                    <>
+                                        <Icon icon="lucide:alert-circle" className="w-3.5 h-3.5" />
+                                        <span>{verifyMessage}</span>
+                                    </>
+                                )}
+                            </div>
                         )}
-                    />
+                    </div>
 
-
+                    {/* Account name — auto-filled for Nigerian, manual for others */}
                     <CustomInput1
-                        label="Account Number"
-                        error={errors.account_number?.message}
-                        {...register('account_number')}
-                        placeholder="Enter 10-Digit Account Number"
+                        label="Account Name"
+                        required
+                        placeholder="Account holder name"
+                        readOnly={isNigerian && verifyState === "success"}
+                        error={errors.account_name?.message}
+                        className={cn(
+                            isNigerian && verifyState === "success" && "bg-brand-neutral-3 text-brand-secondary-6"
+                        )}
+                        {...register("account_name")}
                     />
 
+                    {/* Manual review notice for non-Nigerian */}
+                    {!isNigerian && (
+                        <p className="text-xs text-brand-secondary-6 bg-brand-neutral-2 rounded-lg px-3">
+                            Account details will be manually reviewed before activation.
+                        </p>
+                    )}
 
-                    <div className="flex justify-between gap-4">
+                    <div className="flex gap-4 pt-2">
                         <button
                             type="button"
-                            className="flex-1 text-brand-secondary-8 bg-white hover:shadow flex items-center gap-2 justify-center px-6 py-3.5 rounded-[30px] border-2 border-brand-secondary-3 font-medium text-sm hover:bg-brand-neutral-2 hover:border-brand-secondary-5 active:bg-brand-neutral-3 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-neutral-4 focus:ring-offset-2 transition-all duration-150"
+                            onClick={handleClose}
+                            className="flex-1 text-brand-secondary-8 bg-white hover:shadow flex items-center gap-2 justify-center px-6 py-3.5 rounded-[30px] border-2 border-brand-secondary-3 font-medium text-sm hover:bg-brand-neutral-2 transition-all duration-150"
                         >
                             Cancel
                         </button>
-
-                        <button
-                            type="submit"
-                            className="flex-1 px-6 py-3.5 rounded-[30px] bg-brand-primary hover:bg-brand-primary-7 active:bg-brand-primary-8 hover:shadow-md active:scale-[0.98] disabled:bg-brand-neutral-5 disabled:cursor-not-allowed disabled:opacity-60 text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 transition-all duration-150 flex items-center justify-center gap-2"
-                        >
-                            Confirm
-                        </button>
+                        <ActionButton1
+                            buttonText={isSubmitting ? "Saving..." : "Confirm"}
+                            isLoading={isSubmitting}
+                            isDisabled={isSubmitting}
+                            buttonType="submit"
+                            className="flex-1 py-3.5 rounded-[30px] text-sm"
+                        />
                     </div>
                 </form>
             </div>

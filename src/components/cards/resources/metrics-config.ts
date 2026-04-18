@@ -1,10 +1,12 @@
+import { formatPrice } from "@/helper-fns/formatPrice"
+
 export interface MetricConfig {
     id: string
     label: string
     description: string
     icon: string
     iconColor: string
-    valueFormatter?: (value: any) => string
+    valueFormatter?: (value: any, currency?: string) => string
 }
 
 
@@ -36,10 +38,48 @@ export const customerMetricsConfig: Record<string, MetricConfig> = {
         description: 'Avg. spend per customer.',
         icon: "icon-park-outline:average",
         iconColor: 'text-blue-600',
-        valueFormatter: (value: number) => `₦${value.toLocaleString()}`
+        valueFormatter: (v: string, currency?: string) =>
+            formatPrice(parseFloat(v ?? "0"), currency)
     }
 }
 
+
+export const customerProfileMetricsConfig: Record<string, MetricConfig> = {
+    "total-spent": {
+        id:             "total-spent",
+        label:          "Total Spent",
+        description:    "Cumulative spend by this customer.",
+        icon:           "hugeicons:dollar-square",
+        iconColor:      "text-[#359160]",
+        valueFormatter: (v: string, currency?: string) =>
+            formatPrice(parseFloat(v ?? "0"), currency),
+    },
+    "tickets-bought": {
+        id:          "tickets-bought",
+        label:       "Tickets Bought",
+        description: "Total tickets purchased.",
+        icon:        "hugeicons:ticket-02",
+        iconColor:   "text-brand-accent-5",
+        valueFormatter: (v: number) => String(v ?? 0),
+    },
+    "refund-count": {
+        id:          "refund-count",
+        label:       "Refund Count",
+        description: "Number of refunds requested.",
+        icon:        "uil:repeat",
+        iconColor:   "text-brand-accent-9",
+        valueFormatter: (v: number) => String(v ?? 0),
+    },
+    "last-order-value": {
+        id:             "last-order-value",
+        label:          "Last Order Value",
+        description:    "Most recent purchase amount.",
+        icon:           "icon-park-outline:average",
+        iconColor:      "text-blue-600",
+        valueFormatter: (v: string, currency?: string) =>
+            formatPrice(parseFloat(v ?? "0"), currency),
+    },
+}
 
 
 export const financeMetricsConfig: Record<string, MetricConfig> = {

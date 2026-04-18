@@ -1,17 +1,14 @@
 import CreatePromoCodeForm from "@/components/custom-utils/promo-code/CreatePromoCodeForm"
-import AddBankAccountForm from "@/components/custom-utils/withdrawal/AddBankAccountForm"
 import { cn } from "@/lib/utils"
 import { Icon } from "@iconify/react"
 import { useState } from "react"
 
 interface AddPromoCodeProps {
-    onAddPromoCode?: (format: ExportFormat) => void
-    className?: string
+    className?: string,
 }
 
 export default function AddPromoCode({
     className,
-    onAddPromoCode
 }: AddPromoCodeProps) {
 
     const [showAddPromoCodeModal, setShowAddPromoCodeModal] =  useState(false)
@@ -22,7 +19,8 @@ export default function AddPromoCode({
                 onClick={() => setShowAddPromoCodeModal(true)}
                 className={cn(
                     'flex items-center rounded justify-between text-xs md:text-sm font-bold gap-2 bg-brand-primary-1 p-1.5 transition-opacity',
-                    'text-brand-primary-6 hover:text-brand-primary-7 hover:bg-brand-primary-2 transition-colors ease-in-out duration-200'
+                    'text-brand-primary-6 hover:text-brand-primary-7 hover:bg-brand-primary-2 transition-colors ease-in-out duration-200',
+                    className
                 )}
             >
                 <span className={cn(

@@ -26,9 +26,12 @@ export function FeaturedImageUpload({
     maxSize = 5,
     className
 }: FeaturedImageUploadProps) {
-    const [preview, setPreview] = useState<string | null>(
-        typeof value === 'string' ? value : null
-    )
+    
+    const [preview, setPreview] = useState<string | null>(() => {
+        if (typeof value === 'string') return value
+        if (value instanceof File) return URL.createObjectURL(value)
+        return null
+    })
     const [isDragging, setIsDragging] = useState(false)
     const inputRef = useRef<HTMLInputElement>(null)
 

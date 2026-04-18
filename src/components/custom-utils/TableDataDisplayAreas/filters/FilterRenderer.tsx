@@ -5,19 +5,23 @@ import { FilterKey, TableDataDisplayFilter } from '../resources/avaliable-filter
 import { filterRegistry } from './filter-registry'
 
 
-
 interface FilterRendererProps {
     filterKey: FilterKey
     filter: TableDataDisplayFilter
     filters: Partial<FilterValues>
     setFilters: Dispatch<SetStateAction<Partial<FilterValues>>>
+    categories?: Category[]
+    statusOptions?: StatusOption[]
     className?: string
+    label?:  string
 }
 
 export function FilterRenderer({
     filterKey,
     filter,
     filters,
+    categories,
+    statusOptions,
     setFilters,
     className
 }: FilterRendererProps) {
@@ -38,8 +42,11 @@ export function FilterRenderer({
         <Component
             value={value}
             onChange={onChange}
+            statusOptions={statusOptions}
             className={className}
             icon={filter.icon}
+            label={filter.label}
+            categories={categories}
         />
     )
 }

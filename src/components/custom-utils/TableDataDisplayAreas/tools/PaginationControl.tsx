@@ -12,6 +12,7 @@ interface PaginationControlsProps {
   onNextPage: () => void
   onPreviousPage: () => void
   currentPage: number 
+  isLoadingMore: boolean
   totalPages: number
   className?: string
 }
@@ -22,6 +23,7 @@ export default function PaginationControls({
   onNextPage,
   onPreviousPage,
   currentPage,
+  isLoadingMore,
   totalPages,
   className = ''
 }: PaginationControlsProps) {
@@ -57,7 +59,7 @@ export default function PaginationControls({
         {/* Previous Button */}
         <button
           onClick={onPreviousPage}
-          disabled={!hasPreviousPage}
+          disabled={!hasPreviousPage || isLoadingMore}
           className={cn(
               "p-2.5 rounded-md text-xs font-medium transition-all flex items-center gap-1",
               hasPreviousPage 
@@ -106,7 +108,7 @@ export default function PaginationControls({
         {/* Next Button */}
         <button
           onClick={onNextPage}
-          disabled={!hasNextPage}
+          disabled={!hasNextPage || isLoadingMore}
           className={cn(
             "p-2.5 rounded-md text-xs font-medium transition-all flex items-center gap-1",
             hasNextPage 

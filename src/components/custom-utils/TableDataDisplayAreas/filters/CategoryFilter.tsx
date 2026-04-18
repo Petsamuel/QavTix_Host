@@ -13,38 +13,17 @@ import EventFilterTypeBtn from './buttons-and-inputs/EventFilterTypeBtn'
 import FilterButtonsActions1 from './buttons-and-inputs/FilterActionButtons1'
 import { MobileBottomSheet } from '../../dropdown/EventFilterDropdownMobileBottomSheet'
 
-interface Category {
-    value: string
-    label: string
-    count: number
-}
 
 interface CategoryFilterProps {
     value?: string[]
     onChange: (value: string[]) => void
     categories?: Category[]
-    icon?: string
-    label?: string 
 }
-
-const defaultCategories: Category[] = [
-    { value: 'all', label: 'All Events', count: 30 },
-    { value: 'concerts', label: 'Concerts & Music', count: 30 },
-    { value: 'sports', label: 'Sport & Fitness', count: 30 },
-    { value: 'arts', label: 'Arts & Theater', count: 30 },
-    { value: 'food', label: 'Food & Dining', count: 30 },
-    { value: 'festivals', label: 'Festivals', count: 30 },
-    { value: 'business', label: 'Business & Networking', count: 30 },
-    { value: 'travel', label: 'Travel & Tours', count: 30 },
-    { value: 'nightlife', label: 'Nightlife & Parties', count: 30 },
-]
 
 export default function CategoryFilter({
     value = [],
     onChange,
-    icon,
-    label = 'Event category',
-    categories = defaultCategories,
+    categories = [],
 }: CategoryFilterProps) {
 
     
@@ -85,7 +64,7 @@ export default function CategoryFilter({
     const hasActiveFilter = value.length > 0
     const displayText = hasActiveFilter
         ? `${value.length} selected`
-        : label
+        : 'Event category'
     
 
     const categoryList = (
@@ -116,7 +95,6 @@ export default function CategoryFilter({
                     <EventFilterTypeBtn 
                         onClick={() => setIsOpen(true)}
                         displayText={displayText} 
-                        icon={icon}
                         hasActiveFilter={hasActiveFilter}
                     />
 
@@ -137,13 +115,12 @@ export default function CategoryFilter({
                     <DropdownMenuTrigger asChild>
                         <EventFilterTypeBtn 
                             displayText={displayText} 
-                            icon={icon}
                             hasActiveFilter={hasActiveFilter}
                         />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
                         className={cn(
-                            "w-full z-100! p-4 rounded-xl shadow-[0px_3.69px_14.76px_0px_rgba(51,38,174,0.08)]",
+                            "w-full min-w-[18em] z-100! p-4 rounded-xl shadow-[0px_3.69px_14.76px_0px_rgba(51,38,174,0.08)]",
                             // Open animation
                             "data-[state=open]:animate-in",
                             "data-[state=open]:fade-in-0",

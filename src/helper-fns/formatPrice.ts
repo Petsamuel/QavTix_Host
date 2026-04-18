@@ -1,34 +1,24 @@
-// * Formats a price amount with proper currency formatting
+import { LOCALE_MAP, PLATFORM_CURRENCY } from "@/components-data/currencies"
+
 export function formatPrice(
-  amount: number,
-  country: "NG" | "US" | "GB" | "EU" | string = "NG",
-  useSymbol: boolean = true
+    amount:    number,
+    currency?:  string,
+    useSymbol: boolean = true
 ): string {
-  const currencyMap: Record<string, string> = {
-    NG: "NGN",
-    US: "USD",
-    GB: "GBP",
-    EU: "EUR",
-  }
+    const code   = currency ? currency.toUpperCase() : PLATFORM_CURRENCY
+    const locale = LOCALE_MAP[code] ?? "en-US"
 
-  const localeMap: Record<string, string> = {
-    NG: "en-NG",
-    US: "en-US",
-    GB: "en-GB",
-    EU: "en-IE",
-  }
+    return new Intl.NumberFormat(locale, {
+        style:                 "currency",
+        currency:              code,
+        minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+        maximumFractionDigits: 2,
+        currencyDisplay:       useSymbol ? "symbol" : "code",
+    }).format(amount)
+}
 
-  const upperCountry = country.toUpperCase()
-  const currency = currencyMap[upperCountry] || upperCountry
-  const locale = localeMap[upperCountry] || "en-US"
-
-  const formatter = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
-    maximumFractionDigits: 2,
-    currencyDisplay: useSymbol ? "symbol" : "code",
-  })
-
-  return formatter.format(amount)
+export const parsePrice = (val: string | number | undefined): number | null => {
+    if (val == null || val === "") return null
+    const n = typeof val === "number" ? val : parseFloat(val)
+    return isNaN(n) ? null : n
 }
