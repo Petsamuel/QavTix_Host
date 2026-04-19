@@ -40,6 +40,8 @@
     "country-state-city": "^3.2.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.26.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "jsqr": "^1.4.0",
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
@@ -53,6 +55,7 @@
     "resolvers": "^1.0.0",
     "tailwind-merge": "^3.4.0",
     "uuid": "^13.0.0",
+    "xlsx": "^0.18.5",
     "zod": "^4.3.5"
   },
   "devDependencies": {

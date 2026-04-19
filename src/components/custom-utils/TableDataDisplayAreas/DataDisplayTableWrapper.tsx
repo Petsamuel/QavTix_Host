@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 import SearchTableInput1 from "./tools/SearchTableInput"
-import { Dispatch, ReactNode, SetStateAction } from "react";
+import { Dispatch, ReactNode, SetStateAction, useEffect, useRef } from "react";
 import DataCountIndicator from "./tools/DataCountIndicator";
 import { DashboardUpcomingEventsFilters, MarketingToolsFilter, MyEventsPageFilters, SystemCheckInDataTableFilters, TableDataDisplayFilter } from "./resources/avaliable-filters";
 import ActiveFilterChips from "./filters/ActiveFilterChip";
@@ -49,9 +49,16 @@ export default function DataDisplayTableWrapper({
     children,
     className,
 }: DataDisplayTableWrapperProps) {
+
+    const wrapperRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (!activeTab) return
+        wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }, [activeTab])
     
     return (
-        <div className={cn(
+        <div ref={wrapperRef} className={cn(
             'pt-8 pb-16 bg-white rounded-3xl shadow-[0px_5.8px_23.17px_0px_#3326AE14] overflow-hidden',
             className
         )}>

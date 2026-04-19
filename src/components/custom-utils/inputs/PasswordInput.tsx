@@ -10,7 +10,7 @@ interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement>
 }
 
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-    ({ label, error, required, className = '', ...props }, ref) => {
+    ({ label, error, required, className = '', autoComplete = "new-password", ...props }, ref) => {
         const [showPassword, setShowPassword] = useState(false)
 
         return (
@@ -19,21 +19,22 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                     {label}
                 </label>
 
-                <div
+                <div 
                     className={`
-                        relative flex items-center gap-3 px-4 py-3.5 rounded-[6px] h-14 transition-all duration-200
-                        border-[1.5px]
+                        relative flex items-center gap-3 px-4 py-3.5 
+                        rounded-[6px] border h-14 text-sm transition-all duration-200
+                        outline-none bg-white
                         ${error 
-                            ? 'border-red-400 focus-within:border-red-500' 
-                            : 'border-brand-neutral-5 hover:border-brand-neutral-6 focus-within:border-neutral'
+                            ? 'border-red-400 focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500' 
+                            : 'border-neutral-5 focus-within:border-primary-6 focus-within:shadow-sm'
                         }
-                        bg-white
                     `}
                 >
                     <input
                         ref={ref}
                         type={showPassword ? 'text' : 'password'}
                         className={`flex-1 outline-none text-sm text-brand-neutral-9 placeholder:text-brand-neutral-6 bg-transparent ${className}`}
+                        autoComplete={autoComplete}
                         {...props}
                     />
 
