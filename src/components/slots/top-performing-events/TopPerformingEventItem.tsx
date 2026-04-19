@@ -32,7 +32,7 @@ export default function TopPerformingEventCard({ event, rank }: TopPerformingEve
 
             {/* Event Info */}
             <div className="flex items-center gap-3 mb-3">
-                <div className="relative size-6.25 rounded-md overflow-hidden shrink-0 bg-brand-neutral-2">
+                <div className="relative size-6.25 rounded-sm overflow-hidden shrink-0 bg-brand-neutral-2">
                     {event.event_image ? (
                         <Image
                             src={event.event_image}
