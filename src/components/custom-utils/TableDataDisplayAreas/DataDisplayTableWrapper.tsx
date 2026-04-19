@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 import SearchTableInput1 from "./tools/SearchTableInput"
-import { Dispatch, ReactNode, SetStateAction } from "react";
+import { Dispatch, ReactNode, SetStateAction, useEffect, useRef } from "react";
 import DataCountIndicator from "./tools/DataCountIndicator";
 import { DashboardUpcomingEventsFilters, MarketingToolsFilter, MyEventsPageFilters, SystemCheckInDataTableFilters, TableDataDisplayFilter } from "./resources/avaliable-filters";
 import ActiveFilterChips from "./filters/ActiveFilterChip";
@@ -49,9 +49,18 @@ export default function DataDisplayTableWrapper({
     children,
     className,
 }: DataDisplayTableWrapperProps) {
+
+    const wrapperRef = useRef<HTMLDivElement>(null)
+
+    const handleTabChange = (value: string) => {
+        setActiveTab?.(value)
+        setTimeout(() => {
+            wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+        }, 100)
+    }
     
     return (
-        <div className={cn(
+        <div ref={wrapperRef} className={cn(
             'pt-8 pb-16 bg-white rounded-3xl shadow-[0px_5.8px_23.17px_0px_#3326AE14] overflow-hidden',
             className
         )}>
@@ -64,7 +73,7 @@ export default function DataDisplayTableWrapper({
                         {tabs.map((tab) => (
                             <button
                                 key={tab.value}
-                                onClick={() => setActiveTab(tab.value)}
+                                onClick={() => handleTabChange(tab.value)}
                                 className={cn(
                                     'relative pb-3 px-1 text-sm transition-colors whitespace-nowrap',
                                     activeTab === tab.value

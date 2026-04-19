@@ -36,6 +36,7 @@ import { TabSlice, useDataDisplay } from "@/custom-hooks/UseDataDisplay"
 import DateRangePresetFilter from "../custom-utils/TableDataDisplayAreas/filters/DateRangePresetFilter"
 import { SALES_ANALYTICS_TRANSACTIONS_ENDPOINT } from "@/endpoints"
 import ChartPresetFilter from "../custom-utils/TableDataDisplayAreas/filters/ChartPresetFilter"
+import { exportSalesAnalyticsFull } from "@/helper-fns/exportData"
 
 
 interface Props {
@@ -198,7 +199,19 @@ export default function SalesAnalyticsPageContentWrapper({
                         onChange={handleChartPresetChange}
                     />
                 </div>
-                <ExportButton1 showFormatSelector />
+                <ExportButton1
+                    showFormatSelector
+                    label="Export"
+                    onExport={(format) =>
+                        exportSalesAnalyticsFull(
+                            cards,
+                            activeTabState.items,
+                            graphs.geo_breakdown.data,
+                            graphs.sales_breakdown.overall,
+                            format,
+                        )
+                    }
+                />
             </div>
 
             {/* Row 1 — 4 KPI cards */}

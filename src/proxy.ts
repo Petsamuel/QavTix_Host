@@ -13,7 +13,7 @@ const isSkippedPath = (pathname: string) =>
     SKIP_PATHS.some(p => pathname.startsWith(p))
 
 const redirectToLogin = (requestUrl?: string) => {
-    const loginUrl = new URL(HOST_LOGIN_URL + "/auth/signup/host?type=individual")
+    const loginUrl = new URL(HOST_LOGIN_URL + "/auth/signin/")
     if (requestUrl) {
         loginUrl.searchParams.set('returnTo', requestUrl)
     }

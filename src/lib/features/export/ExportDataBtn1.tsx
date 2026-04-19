@@ -44,8 +44,9 @@ export default function ExportButton1({
         formats.includes(format.value)
     )
 
-    const handleExport = () => {
-        if (!disabled && onExport) {
+    const handleExport = async () => {
+        if (disabled) return
+        if (onExport) {
             onExport(selectedFormat)
         }
     }

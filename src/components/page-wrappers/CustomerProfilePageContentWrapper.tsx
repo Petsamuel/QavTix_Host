@@ -17,6 +17,7 @@ import ExportButton1 from "@/lib/features/export/ExportDataBtn1"
 import { Icon } from "@iconify/react"
 import { DashboardConsumerListFilters } from "../custom-utils/TableDataDisplayAreas/resources/avaliable-filters"
 import CustomersProfilePageMetricCardsContainer from "../cards/CustomerProfilePageMetricsCardContainer"
+import { exportData } from "@/helper-fns/exportData"
 
 interface Props {
     userID:        number
@@ -100,7 +101,19 @@ export default function CustomerProfilePageCW({
                         label="KPI Range"
                     />
                 </div>
-                <ExportButton1 showFormatSelector />
+                <ExportButton1
+                    showFormatSelector
+                    label="Export Orders"
+                    onExport={(format) =>
+                        exportData({
+                            data:     activeTabState.items as unknown as Record<string, unknown>[],
+                            format,
+                            filename: `orders_${profile.full_name.replace(/\s+/g, '_')}`,
+                            title:    `Order History – ${profile.full_name}`,
+                            skipKeys: ['event_id'],
+                        })
+                    }
+                />
             </div>
 
             {/*  KPI cards  */}

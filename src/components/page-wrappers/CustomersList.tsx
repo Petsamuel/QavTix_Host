@@ -1,7 +1,7 @@
 "use client"
 
 import { DashboardConsumerListFilters } from "../custom-utils/TableDataDisplayAreas/resources/avaliable-filters"
-import { Dispatch, SetStateAction, useRef, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 import DataDisplayTableWrapper from "../custom-utils/TableDataDisplayAreas/DataDisplayTableWrapper"
 import CustomersTable from "../custom-utils/TableDataDisplayAreas/tables/CustomersTable"
 import { space_grotesk } from "@/lib/fonts"
@@ -20,21 +20,27 @@ interface ExternalFilters {
 }
 
 interface CustomerListProps {
-    externalFilters: ExternalFilters
-    initialData:     TabSlice<Customer>
-    cards:           CustomersCards
+    externalFilters:  ExternalFilters
+    initialData:      TabSlice<Customer>
+    cards:            CustomersCards
+    onItemsChange?:   (items: Customer[]) => void  // ← new
 }
 
-export default function CustomersList({ externalFilters, initialData, cards: initialCards }: CustomerListProps) {
+export default function CustomersList({
+    externalFilters,
+    initialData,
+    cards: initialCards,
+    onItemsChange,
+}: CustomerListProps) {
     const { filterOptions } = DashboardConsumerListFilters
     const { user } = useAppSelector(store => store.authUser)
 
     const [filters, setFilters] = useState<Partial<FilterValues>>({
         purchaseDate: null,
     })
-    
+
     const cardsRef = useRef<CustomersCards>(initialCards)
-    const [cards, _setCards] = useState<CustomersCards>(initialCards)
+    const [cards, _setCards]     = useState<CustomersCards>(initialCards)
     const [cardsError, setCardsError] = useState(false)
 
     const setCards = (newCards: CustomersCards) => {
@@ -55,7 +61,6 @@ export default function CustomersList({ externalFilters, initialData, cards: ini
                 initialData,
                 staticParams: {},
                 onCards: (incoming: CustomersCards | null) => {
-                    console.log("incoming", incoming)
                     if (incoming) {
                         setCards(incoming)
                         setCardsError(false)
@@ -69,6 +74,11 @@ export default function CustomersList({ externalFilters, initialData, cards: ini
         },
         mergedFilters,
     )
+
+    // Notify parent whenever the visible items change
+    useEffect(() => {
+        onItemsChange?.(activeTabState.items)
+    }, [activeTabState.items, onItemsChange])
 
     const customerStatusOptions = Array.from(
         new Set(activeTabState.items.map(c => c.status))
@@ -91,7 +101,6 @@ export default function CustomersList({ externalFilters, initialData, cards: ini
                 ) : (
                     <div className="relative">
                         <MetricCardsContainer1 metrics={metrics} />
-
                         {cardsError && (
                             <div className="flex items-center gap-1.5 mt-2 text-xs text-amber-500">
                                 <Icon icon="lucide:alert-triangle" className="w-3.5 h-3.5" />

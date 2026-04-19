@@ -26,6 +26,7 @@ interface ChartDataPoint {
 interface RevenueGrowthChartProps {
     initialChartData: DashboardChartPoint[]
     chartFilter:      "revenue" | "tickets"
+    onChartDataChange?: (data: DashboardChartPoint[]) => void
 }
 
 const YEARS        = ["2023", "2024", "2025", "2026"]
@@ -84,6 +85,7 @@ const CustomTooltip = ({ active, payload, chartFilter }: any) => {
 export default function RevenueGrowthChart({
     initialChartData,
     chartFilter,
+    onChartDataChange,
 }: RevenueGrowthChartProps) {
     const [timeFilter,    setTimeFilter]    = useState<TimeFilter>("annual")
     const [selectedYear,  setSelectedYear]  = useState(CURRENT_YEAR)
@@ -101,22 +103,17 @@ export default function RevenueGrowthChart({
 
         const params = buildParams(timeFilter, selectedYear, chartFilter)
 
-        console.log("[RevenueGrowthChart] fetching with params:", params)
-
         startTransition(async () => {
             const result = await getDashboardOverview(params)
 
-            console.log("[RevenueGrowthChart] result:", result)
-
             if (result.success && result.data?.chart) {
                 const points = toChartPoints(result.data.chart)
-                console.log("[RevenueGrowthChart] chart points:", points)
                 setChartData(points)
-            } else {
-                console.warn("[RevenueGrowthChart] fetch failed or no chart data:", result.message)
+                onChartDataChange?.(result.data.chart) 
             }
         })
     }, [timeFilter, selectedYear, chartFilter])
+
 
     const maxValue      = Math.max(...chartData.map(d => d.value), 0)
     const { ticks, yMax } = getNiceTicks(maxValue)
