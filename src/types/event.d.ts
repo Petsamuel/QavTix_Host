@@ -175,16 +175,6 @@ interface UpcomingEventsData {
 type EventPerformance = "fully_booked" | "almost_full" | "moderate_sales" | "low_sales" | "no_sales"
 type EventStatus      = "active" | "draft" | "ended" | "sold-out" | "cancelled" | "banned"
 
-interface UpcomingEventsParams {
-    page?:        number
-    search?:      string
-    ordering?:    string
-    status?:      EventStatus
-    category?:    number
-    performance?: EventPerformance
-    start_date?:  string
-    end_date?:    string
-}
 
 interface GetUpcomingEventsResult {
     success:  boolean
@@ -288,4 +278,79 @@ interface EventDetails {
     online_link?: string
     is_favorite?: boolean
     user_ticket_summary?: UserTicketSummary
+}
+
+
+
+interface EditEventDetails {
+    id:                     string
+    event_name:             string
+    category:               number
+    tags:                   string[]
+    event_type:             'single' | 'recurring'
+    start_datetime:         string
+    end_datetime:           string
+    location_type:          'physical' | 'online' | 'tba'
+    short_description:      string
+    full_description:       string
+    organizer_display_name: string
+    organizer_description:  string
+    public_email:           string
+    phone_number:           string
+    refund_policy:          'no' | 'partial' | 'full' | 'custom'
+    refund_percentage:      number | null
+    qr_enabled:             boolean
+    age_restriction:        boolean
+    minimum_age:            number | null
+    order_confirmation:     boolean
+    ticket_delivery:        boolean
+    reminders:              boolean
+    post_event_emails:      boolean
+    customize_sender_name:  boolean
+    affiliate_enabled:      boolean
+    commission_percentage:  string
+    affiliate_start:        string | null
+    affiliate_end:          string | null
+    event_location: {
+        venue_name:  string
+        address:     string
+        country:     string
+        state:       string
+        city:        string
+        postal_code: string
+    }
+    social_links: {
+        url: string
+    }[]
+    tickets: {
+        id:            number
+        ticket_type:   string
+        description:   string
+        price:         string
+        quantity:      number
+        per_person_max: number | null
+        sales_start:   string | null
+        sales_end:     string | null
+        promo_codes: {
+            code:                string
+            discount_percentage: number
+            maximum_users:       number | null
+            valid_till:          string | null
+        }[]
+    }[]
+    permissions: {
+        id:     number
+        email:  string
+        role:   "manager" | "financials" | "customers" | "marketing" | "sales" | "checkin" | "host"
+        status: 'active' | 'disabled' | 'pending'
+    }[]
+    media: {
+        image_url:   string
+        video_url:   string | null
+        is_featured: boolean
+    }[]
+    currency:       string
+    event_status:   'draft' | 'active' | 'cancelled' | 'completed'
+    is_scheduled:   boolean
+    schedule_time:  string | null
 }

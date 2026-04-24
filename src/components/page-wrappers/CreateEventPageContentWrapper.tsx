@@ -10,15 +10,17 @@ interface Props {
     categories:   ApiCategory[]
     initialData?: Partial<CompleteEventFormData>
     eventID?:     string 
+    isDuplicate?: boolean
 }
 
 export default function CreateEventPageContentWrapper({
     categories,
     initialData,
     eventID,
+    isDuplicate
 }: Props) {
     return (
-        <EventCreationProvider categories={categories} initialData={initialData} eventID={eventID}>
+        <EventCreationProvider isDuplicate={isDuplicate} categories={categories} initialData={initialData} eventID={eventID}>
         <StepperProvider>
                 <EventCreationLayout />
             </StepperProvider>

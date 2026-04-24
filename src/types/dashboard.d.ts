@@ -146,9 +146,14 @@ interface UpcomingEventsData {
 }
 
 interface UpcomingEventsParams {
-    page?:     number
-    search?:   string
-    ordering?: string
+    page?:        number
+    search?:      string
+    ordering?:    string
+    status?:      EventStatus
+    category?:    number
+    performance?: EventPerformance
+    start_date?:  string
+    end_date?:    string
 }
 
 interface GetUpcomingEventsResult {

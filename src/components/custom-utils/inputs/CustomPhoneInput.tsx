@@ -2,10 +2,12 @@
 
 import React from 'react'
 import PhoneInput, { getCountryCallingCode, Country } from 'react-phone-number-input'
+import flags from 'react-phone-number-input/flags'
 import 'react-phone-number-input/style.css'
 import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
 import { inter } from '@/lib/fonts'
+
 
 interface CountrySelectProps {
     value?: Country
@@ -34,27 +36,27 @@ export default function PhoneNumberInput({
     onChange,
     error,
     placeholder = '8123456789',
-    defaultCountry = 'NG',
+    defaultCountry = 'US',
     label = "Phone Number (Optional)",
     className
 }: PhoneNumberInputProps) {
-    
+
     // Ensure we always have a country code to display even if value is empty
     // We derive it from the value (if it exists) or fall back to defaultCountry
-    const currentCountry = (value && value.startsWith('+')) 
+    const currentCountry = (value && value.startsWith('+'))
         ? undefined // The library will handle deriving it from the string
         : defaultCountry;
 
     return (
         <div className={cn("w-full space-y-2", className)}>
-            <label className="block text-sm font-medium text-brand-secondary-9">
+            <label className="block text-sm font-medium text-secondary-9">
                 {label}
             </label>
-            
+
             <div className={cn(
                 inter.className,
-                "flex items-center w-full h-14 text-sm rounded-lg border bg-white transition-all focus-within:ring-1 focus-within:ring-brand-accent-4",
-                error ? "border-red-400" : "border-brand-secondary-5 hover:border-brand-secondary-6"
+                "flex items-center w-full h-14 text-sm rounded-lg border bg-white transition-all focus-within:ring-1 focus-within:ring-primary-6 focus-within:border-primary-6",
+                error ? "border-red-400" : "border-secondary-5 hover:border-secondary-6"
             )}>
                 <PhoneInput
                     international
@@ -65,12 +67,13 @@ export default function PhoneNumberInput({
                     placeholder={placeholder}
                     autoComplete="off"
                     className="flex w-full h-full custom-phone-input"
-                    
+
                     countrySelectComponent={({ value: country, onChange: onCountryChange, options }: CountrySelectProps) => {
                         // If 'country' is undefined (because user cleared input), 
                         // we fallback to display the defaultCountry code
                         const displayCountry = country || defaultCountry;
-                        
+                        const Flag = flags[displayCountry]
+
                         return (
                             <div className="relative flex items-center px-4 h-full cursor-pointer group">
                                 <select
@@ -84,11 +87,15 @@ export default function PhoneNumberInput({
                                         </option>
                                     ))}
                                 </select>
-                                <div className="flex items-center gap-2 text-sm font-medium text-brand-secondary-9 min-w-15">
-                                    <span>+{displayCountry ? getCountryCallingCode(displayCountry) : ''}</span>
-                                    <ChevronDown className="size-4 text-brand-secondary-5" />
+                                <div className="flex items-center gap-2 ...">
+                                    {Flag && (
+                                        <span className="size-7 overflow-hidden rounded-sm shrink-0 inline-flex">
+                                            <Flag title={displayCountry} />
+                                        </span>
+                                    )}
+                                    <ChevronDown className="size-4 text-secondary-5" />
                                 </div>
-                                <div className="ml-2 h-8 w-px bg-brand-secondary-4" />
+                                <div className="ml-2 h-8 w-px bg-secondary-4" />
                             </div>
                         )
                     }}
@@ -96,7 +103,7 @@ export default function PhoneNumberInput({
                     numberinputcomponent={React.forwardRef<HTMLInputElement, NumberInputProps>(
                         ({ country, international, withCountryCallingCode, ...rest }, ref) => {
                             const { value, onChange, ...inputProps } = rest;
-                            
+
                             return (
                                 <input
                                     {...inputProps}
@@ -107,10 +114,10 @@ export default function PhoneNumberInput({
                                     data-lpignore="true"
                                     data-form-type="other"
                                     data-1p-ignore="true"
-                                    name={`phone-${Math.random()}`} 
+                                    name={`phone-${Math.random()}`}
                                     className={cn(
                                         inter.className,
-                                        "flex-1 bg-transparent px-4 py-3 text-sm outline-none text-brand-neutral-9 placeholder:text-brand-secondary-5 h-full"
+                                        "flex-1 bg-transparent px-4 py-3 text-sm outline-none text-neutral-9 placeholder:text-secondary-5 h-full"
                                     )}
                                 />
                             )

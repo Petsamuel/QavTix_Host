@@ -1,7 +1,6 @@
 "use client"
 
 import { Dispatch, SetStateAction, useRef, useState, useTransition } from "react"
-import { DateRange } from "react-day-picker"
 import { Icon } from "@iconify/react"
 import { cn } from "@/lib/utils"
 import { space_grotesk } from "@/lib/fonts"
@@ -11,7 +10,6 @@ import {
     getSalesAnalyticsGraphs,
 } from "@/actions/sales-n-analytics"
 
-import DateFilter from "../custom-utils/TableDataDisplayAreas/filters/DateFilter"
 import { EventFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventFilter"
 import ExportButton1 from "@/lib/features/export/ExportDataBtn1"
 import {
@@ -37,10 +35,13 @@ import DateRangePresetFilter from "../custom-utils/TableDataDisplayAreas/filters
 import { SALES_ANALYTICS_TRANSACTIONS_ENDPOINT } from "@/endpoints"
 import ChartPresetFilter from "../custom-utils/TableDataDisplayAreas/filters/ChartPresetFilter"
 import { exportSalesAnalyticsFull } from "@/helper-fns/exportData"
+import { useHostGate } from "@/custom-hooks/UseRoleGate"
+import UpgradePlanModal from "../modals/UpgradePlanModal"
+import { useRouter } from "next/navigation"
 
 
 interface Props {
-    initialCards:  SalesAnalyticsCardsData
+    initialCards: SalesAnalyticsCardsData
     initialGraphs: SalesAnalyticsGraphsData
     initialTransactions: TabSlice<Transaction>
 }
@@ -51,18 +52,31 @@ export default function SalesAnalyticsPageContentWrapper({
     initialGraphs,
     initialTransactions,
 }: Props) {
-    const { user }   = useAppSelector(store => store.authUser)
-    const currency   = user?.currency || ""
+    const { user } = useAppSelector(store => store.authUser)
+    const currency = user?.currency || ""
+    const router = useRouter()
+    const { allowed, modalOpen } = useHostGate()
+
+    if (!allowed) {
+        return (
+            <UpgradePlanModal
+                open={modalOpen}
+                onClose={() => router.back()}
+                featureName="Sales & Analytics"
+                requiredPlan="Host Account"
+            />
+        )
+    }
 
     // External filters (drive BOTH cards + graphs)
-    const [date,  setDate]  = useState<DatePreset | null>(null)
-    const [chartPreset, setChartPreset]  = useState<ChartPreset | null>(null)
-    const [eventId,    setEventId]    = useState<string | null>(null)
+    const [date, setDate] = useState<DatePreset | null>(null)
+    const [chartPreset, setChartPreset] = useState<ChartPreset | null>(null)
+    const [eventId, setEventId] = useState<string | null>(null)
 
     // Cards state with rollback 
-    const cardsRef           = useRef<SalesAnalyticsCardsData>(initialCards)
+    const cardsRef = useRef<SalesAnalyticsCardsData>(initialCards)
     const [cards, _setCards] = useState<SalesAnalyticsCardsData>(initialCards)
-    const [cardsError,  setCardsError]  = useState(false)
+    const [cardsError, setCardsError] = useState(false)
 
     const setCards = (next: SalesAnalyticsCardsData) => {
         cardsRef.current = next
@@ -70,7 +84,7 @@ export default function SalesAnalyticsPageContentWrapper({
     }
 
     // Graphs state with rollback 
-    const graphsRef            = useRef<SalesAnalyticsGraphsData>(initialGraphs)
+    const graphsRef = useRef<SalesAnalyticsGraphsData>(initialGraphs)
     const [graphs, _setGraphs] = useState<SalesAnalyticsGraphsData>(initialGraphs)
     const [graphsError, setGraphsError] = useState(false)
 
@@ -80,7 +94,7 @@ export default function SalesAnalyticsPageContentWrapper({
     }
 
     // Loading states 
-    const [isCardsLoading,  startCardsTransition]  = useTransition()
+    const [isCardsLoading, startCardsTransition] = useTransition()
     const [isGraphsLoading, startGraphsTransition] = useTransition()
 
     // Table filters (scoped to the transaction table only) 
@@ -92,7 +106,7 @@ export default function SalesAnalyticsPageContentWrapper({
     const mergedFilters: Partial<FilterValues> = {
         dateRangePreset: date ?? undefined,
         event: eventId ?? undefined,
-        ...tableFilters, 
+        ...tableFilters,
     }
 
     // Fetch helpers 
@@ -103,7 +117,7 @@ export default function SalesAnalyticsPageContentWrapper({
             const params: Parameters<typeof getSalesAnalyticsCards>[0] = {}
             if (nextEvent) params.event = nextEvent
 
-            if (datePreset){
+            if (datePreset) {
                 params.date_range = datePreset
             }
 
@@ -123,7 +137,7 @@ export default function SalesAnalyticsPageContentWrapper({
             const { chart, year } = deriveChartFilter(chartPreset)
             const params: Parameters<typeof getSalesAnalyticsGraphs>[0] = { chart }
             if (nextEvent) params.event = nextEvent
-            if (year)      params.year  = year
+            if (year) params.year = year
 
             const result = await getSalesAnalyticsGraphs(params)
             if (result.success && result.data) {
@@ -158,8 +172,8 @@ export default function SalesAnalyticsPageContentWrapper({
         {
             endpoint: SALES_ANALYTICS_TRANSACTIONS_ENDPOINT,
             tabs: [{
-                key:          "transactions",
-                initialData:  initialTransactions,
+                key: "transactions",
+                initialData: initialTransactions,
                 staticParams: {},
             }],
             activeTab: "transactions"
@@ -169,8 +183,8 @@ export default function SalesAnalyticsPageContentWrapper({
 
     // Derive metric card arrays 
     const row1And2Metrics = mapSalesAnalyticsCards(cards, currency)
-    const row1Metrics     = row1And2Metrics.slice(0, 4)   // total_revenue, tickets_sold, conversion, aov
-    const row2Cards       = row1And2Metrics.slice(4)      // page_views, refunds, repeat_buyers
+    const row1Metrics = row1And2Metrics.slice(0, 4)   // total_revenue, tickets_sold, conversion, aov
+    const row2Cards = row1And2Metrics.slice(4)      // page_views, refunds, repeat_buyers
 
     // Row-2 cards piggyback on analyticsMetricStatCardsConfig2 shape:
     // we override the value field from live data

@@ -1,11 +1,10 @@
 "use server"
 
-import { CACHE_TAGS }            from "@/cache-tags"
+import { revalidateTag } from "next/cache"
+import { CACHE_TAGS } from "@/cache-tags"
 import { EVENT_DELETE, EVENT_UPDATE, EVENTS_ENDPOINT, CUSTOMER_LIST_DOWNLOAD_ENDPOINT, EVENT_DETAILS_ENDPOINT } from "@/endpoints"
-import { handleApiError }        from "@/helper-fns/handleApiErrors"
-import { cookies }               from "next/headers"
-
-// Auth
+import { handleApiError } from "@/helper-fns/handleApiErrors"
+import { cookies } from "next/headers"
 
 async function getToken(): Promise<string | undefined> {
     const cookieStore = await cookies()
@@ -19,10 +18,8 @@ function authHeaders(token?: string): Record<string, string> {
     }
 }
 
-// Types
-
 interface ActionResult {
-    success:  boolean
+    success: boolean
     message?: string
 }
 
@@ -30,26 +27,26 @@ interface BulkActionParams {
     eventIds: string[]
 }
 
-
 export async function getEvents(
     params: GetEventsParams = {}
 ): Promise<GetEventsResult> {
     try {
         const token = await getToken()
-        const url   = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENTS_ENDPOINT}`)
+        const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENTS_ENDPOINT}`)
 
-        if (params.category    != null) url.searchParams.set("category",    String(params.category))
-        if (params.end_date    != null) url.searchParams.set("end_date",    params.end_date)
-        if (params.ordering    != null) url.searchParams.set("ordering",    params.ordering)
-        if (params.page        != null) url.searchParams.set("page",        String(params.page))
+        if (params.category != null) url.searchParams.set("category", String(params.category))
+        if (params.end_date != null) url.searchParams.set("end_date", params.end_date)
+        if (params.ordering != null) url.searchParams.set("ordering", params.ordering)
+        if (params.page != null) url.searchParams.set("page", String(params.page))
         if (params.performance != null) url.searchParams.set("performance", params.performance)
-        if (params.search      != null) url.searchParams.set("search",      params.search)
-        if (params.start_date  != null) url.searchParams.set("start_date",  params.start_date)
-        if (params.status      != null) url.searchParams.set("status",      params.status)
+        if (params.search != null) url.searchParams.set("search", params.search)
+        if (params.start_date != null) url.searchParams.set("start_date", params.start_date)
+        if (params.status != null) url.searchParams.set("status", params.status)
 
         const res = await fetch(url.toString(), {
             headers: authHeaders(token),
-            next:    { tags: [CACHE_TAGS.EVENTS] },
+            cache: "force-cache",
+            next: { tags: [CACHE_TAGS.EVENTS], revalidate: 60 },
         })
 
         if (!res.ok) {
@@ -60,6 +57,7 @@ export async function getEvents(
 
         const json = await res.json()
         return { success: true, data: json.data }
+
     } catch (err) {
         console.error("[getEvents] error:", err)
         return { success: false, message: "Failed to load events." }
@@ -67,32 +65,29 @@ export async function getEvents(
 }
 
 
-
 interface GetEventDetailsResult {
-    success:  boolean
-    data?:    EventDetails
+    success: boolean
+    data?: EventDetails
     message?: string
 }
 
 export async function getEventDetails(eventID: string): Promise<GetEventDetailsResult> {
     try {
-        const cookiesStore = await cookies()
-        const token        = cookiesStore.get("host_access_token")?.value
-
+        const token = await getToken()
         const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_DETAILS_ENDPOINT.replace("[event_id]", eventID)}`
+
         const res = await fetch(url, {
-            cache:   "no-store",
-            headers: { ...(token && { Authorization: `Bearer ${token}` }) },
-            next:    { tags: [CACHE_TAGS.EVENT_DETAILS] },
+            headers: authHeaders(token),
+            cache: "force-cache",
+            // ✅ Only per-event tag — no shared base tag to avoid write collision
+            next: { tags: [`event-${eventID}`], revalidate: 60 },
         })
 
         const json = await res.json()
-
         if (!res.ok) {
             console.log("[getEventDetails] status:", res.status, JSON.stringify(json))
             return { success: false, message: handleApiError(json) }
         }
-
         return { success: true, data: json.data ?? json }
 
     } catch (err) {
@@ -102,30 +97,58 @@ export async function getEventDetails(eventID: string): Promise<GetEventDetailsR
 }
 
 
+interface GetEditEventDetailsResult {
+    success: boolean
+    data?: EditEventDetails
+    message?: string
+}
 
+export async function getEditEventDetails(eventID: string): Promise<GetEditEventDetailsResult> {
+    try {
+        const token = await getToken()
+        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_DETAILS_ENDPOINT.replace("[event_id]", eventID)}`
 
-// Single Delete 
+        const res = await fetch(url, {
+            headers: authHeaders(token),
+            cache: "force-cache",
+            // ✅ Separate tag from getEventDetails — prevents parallel write collision
+            next: { tags: [`event-edit-${eventID}`], revalidate: 60 },
+        })
+
+        const json = await res.json()
+        if (!res.ok) {
+            console.log("[getEditEventDetails] status:", res.status, JSON.stringify(json))
+            return { success: false, message: handleApiError(json) }
+        }
+        return { success: true, data: json.data ?? json }
+
+    } catch (err) {
+        console.log("[getEditEventDetails] error:", err)
+        return { success: false, message: "Failed to load event details." }
+    }
+}
+
 
 export async function deleteEvent(
     { eventId }: { eventId: string }
 ): Promise<ActionResult> {
     try {
-        const token    = await getToken()
+        const token = await getToken()
         const endpoint = EVENT_DELETE.replace("[event_id]", eventId)
 
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`,
-            {
-                method:  "DELETE",
-                headers: authHeaders(token),
-            }
+            { method: "DELETE", headers: authHeaders(token) }
         )
 
         if (!res.ok) {
-            // Some DELETE endpoints return empty body on success; guard against that
             const json = await res.json()
             return { success: false, message: handleApiError(json) }
         }
+
+        revalidateTag(CACHE_TAGS.EVENTS, "max")
+        revalidateTag(`event-${eventId}`, "max")
+        revalidateTag(`event-edit-${eventId}`, "max")
 
         return { success: true, message: "Event deleted successfully." }
     } catch (err) {
@@ -134,24 +157,20 @@ export async function deleteEvent(
     }
 }
 
-// Single Update (publish / unpublish) 
-//
-//  Pass  status: "active"  to publish
-//  Pass  status: "draft"   to unpublish
 
 export async function updateEventStatus(
     { eventId, status }: { eventId: string; status: "active" | "draft" }
 ): Promise<ActionResult> {
     try {
-        const token    = await getToken()
+        const token = await getToken()
         const endpoint = EVENT_UPDATE.replace("[event_id]", eventId)
 
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`,
             {
-                method:  "PATCH",
+                method: "PATCH",
                 headers: authHeaders(token),
-                body:    JSON.stringify({ event_status: status }),
+                body: JSON.stringify({ event_status: status }),
             }
         )
 
@@ -160,6 +179,10 @@ export async function updateEventStatus(
             return { success: false, message: handleApiError(json) }
         }
 
+        revalidateTag(CACHE_TAGS.EVENTS, "max")
+        revalidateTag(`event-${eventId}`, "max")
+        revalidateTag(`event-edit-${eventId}`, "max")
+
         const label = status === "active" ? "published" : "unpublished"
         return { success: true, message: `Event ${label} successfully.` }
     } catch (err) {
@@ -167,22 +190,21 @@ export async function updateEventStatus(
         return { success: false, message: "Failed to update event." }
     }
 }
-
 
 
 export async function cancelEvent(
     { eventId }: { eventId: string }
 ): Promise<ActionResult> {
     try {
-        const token    = await getToken()
+        const token = await getToken()
         const endpoint = EVENT_UPDATE.replace("[event_id]", eventId)
 
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`,
             {
-                method:  "PATCH",
+                method: "PATCH",
                 headers: authHeaders(token),
-                body:    JSON.stringify({ event_status: "cancelled" }),
+                body: JSON.stringify({ event_status: "cancelled" }),
             }
         )
 
@@ -191,17 +213,17 @@ export async function cancelEvent(
             return { success: false, message: handleApiError(json) }
         }
 
-        const label = status === "active" ? "published" : "unpublished"
-        return { success: true, message: `Event ${label} successfully.` }
+        revalidateTag(CACHE_TAGS.EVENTS, "max")
+        revalidateTag(`event-${eventId}`, "max")
+        revalidateTag(`event-edit-${eventId}`, "max")
+
+        return { success: true, message: "Event cancelled successfully." }
     } catch (err) {
-        console.error("[updateEventStatus] error:", err)
+        console.error("[cancelEvent] error:", err)
         return { success: false, message: "Failed to update event." }
     }
 }
 
-// Bulk Delete
-//
-//  No dedicated bulk endpoint → fire individual DELETE calls in parallel.
 
 export async function bulkDeleteEvents(
     { eventIds }: BulkActionParams
@@ -212,46 +234,32 @@ export async function bulkDeleteEvents(
         const results = await Promise.allSettled(
             eventIds.map((id) => {
                 const endpoint = EVENT_DELETE.replace("[event_id]", id)
-                return fetch(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`,
-                    {
-                        method:  "DELETE",
-                        headers: authHeaders(token),
-                    }
-                )
+                return fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`, {
+                    method: "DELETE",
+                    headers: authHeaders(token),
+                })
             })
         )
 
         const failed = results.filter(
             (r): r is PromiseRejectedResult | PromiseFulfilledResult<Response> =>
-                r.status === "rejected" ||
-                (r.status === "fulfilled" && !r.value.ok)
+                r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok)
         )
 
-        if (failed.length === eventIds.length) {
+        revalidateTag(CACHE_TAGS.EVENTS, "max")
+
+        if (failed.length === eventIds.length)
             return { success: false, message: "All deletions failed. Please try again." }
-        }
+        if (failed.length > 0)
+            return { success: true, message: `${eventIds.length - failed.length} of ${eventIds.length} events deleted. ${failed.length} failed.` }
 
-        if (failed.length > 0) {
-            return {
-                success: true,
-                message: `${eventIds.length - failed.length} of ${eventIds.length} events deleted. ${failed.length} failed.`,
-            }
-        }
-
-        return {
-            success: true,
-            message: `${eventIds.length} event${eventIds.length > 1 ? "s" : ""} deleted successfully.`,
-        }
+        return { success: true, message: `${eventIds.length} event${eventIds.length > 1 ? "s" : ""} deleted successfully.` }
     } catch (err) {
         console.error("[bulkDeleteEvents] error:", err)
         return { success: false, message: "A network error occurred." }
     }
 }
 
-// Bulk Cancel
-//
-//  No dedicated bulk endpoint → fire individual PATCH calls in parallel.
 
 export async function bulkCancelEvents(
     { eventIds }: BulkActionParams
@@ -262,45 +270,33 @@ export async function bulkCancelEvents(
         const results = await Promise.allSettled(
             eventIds.map((id) => {
                 const endpoint = EVENT_UPDATE.replace("[event_id]", id)
-                return fetch(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`,
-                    {
-                        method:  "PATCH",
-                        headers: authHeaders(token),
-                        body:    JSON.stringify({ event_status: "cancelled" }),
-                    }
-                )
+                return fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`, {
+                    method: "PATCH",
+                    headers: authHeaders(token),
+                    body: JSON.stringify({ event_status: "cancelled" }),
+                })
             })
         )
 
         const failed = results.filter(
             (r): r is PromiseRejectedResult | PromiseFulfilledResult<Response> =>
-                r.status === "rejected" ||
-                (r.status === "fulfilled" && !r.value.ok)
+                r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok)
         )
 
-        if (failed.length === eventIds.length) {
+        revalidateTag(CACHE_TAGS.EVENTS, "max")
+
+        if (failed.length === eventIds.length)
             return { success: false, message: "All cancellations failed. Please try again." }
-        }
+        if (failed.length > 0)
+            return { success: true, message: `${eventIds.length - failed.length} of ${eventIds.length} events cancelled. ${failed.length} failed.` }
 
-        if (failed.length > 0) {
-            return {
-                success: true,
-                message: `${eventIds.length - failed.length} of ${eventIds.length} events cancelled. ${failed.length} failed.`,
-            }
-        }
-
-        return {
-            success: true,
-            message: `${eventIds.length} event${eventIds.length > 1 ? "s" : ""} cancelled successfully.`,
-        }
+        return { success: true, message: `${eventIds.length} event${eventIds.length > 1 ? "s" : ""} cancelled successfully.` }
     } catch (err) {
         console.error("[bulkCancelEvents] error:", err)
         return { success: false, message: "Failed to cancel events." }
     }
 }
 
-// Bulk Unpublish
 
 export async function bulkUnpublishEvents(
     { eventIds }: BulkActionParams
@@ -311,56 +307,40 @@ export async function bulkUnpublishEvents(
         const results = await Promise.allSettled(
             eventIds.map((id) => {
                 const endpoint = EVENT_UPDATE.replace("[event_id]", id)
-                return fetch(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`,
-                    {
-                        method:  "PATCH",
-                        headers: authHeaders(token),
-                        body:    JSON.stringify({ event_status: "draft" }),
-                    }
-                )
+                return fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`, {
+                    method: "PATCH",
+                    headers: authHeaders(token),
+                    body: JSON.stringify({ event_status: "draft" }),
+                })
             })
         )
 
         const failed = results.filter(
             (r): r is PromiseRejectedResult | PromiseFulfilledResult<Response> =>
-                r.status === "rejected" ||
-                (r.status === "fulfilled" && !r.value.ok)
+                r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok)
         )
 
-        if (failed.length === eventIds.length) {
+        revalidateTag(CACHE_TAGS.EVENTS, "max")
+
+        if (failed.length === eventIds.length)
             return { success: false, message: "All unpublish actions failed. Please try again." }
-        }
+        if (failed.length > 0)
+            return { success: true, message: `${eventIds.length - failed.length} of ${eventIds.length} events unpublished. ${failed.length} failed.` }
 
-        if (failed.length > 0) {
-            return {
-                success: true,
-                message: `${eventIds.length - failed.length} of ${eventIds.length} events unpublished. ${failed.length} failed.`,
-            }
-        }
-
-        return {
-            success: true,
-            message: `${eventIds.length} event${eventIds.length > 1 ? "s" : ""} unpublished successfully.`,
-        }
+        return { success: true, message: `${eventIds.length} event${eventIds.length > 1 ? "s" : ""} unpublished successfully.` }
     } catch (err) {
         console.error("[bulkUnpublishEvents] error:", err)
         return { success: false, message: "Failed to unpublish events." }
     }
 }
 
-// Attendee Export (single event)
 
 export async function getAttendeesExport(
     { eventId }: { eventId: string }
 ): Promise<{ success: boolean; message?: string; blob?: Blob }> {
     try {
         const token = await getToken()
-
-        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMER_LIST_DOWNLOAD_ENDPOINT}`.replace(
-            "[event_id]",
-            eventId
-        )
+        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMER_LIST_DOWNLOAD_ENDPOINT}`.replace("[event_id]", eventId)
 
         const res = await fetch(url, {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -379,10 +359,6 @@ export async function getAttendeesExport(
     }
 }
 
-// Bulk Attendee Download
-//
-//  Fetches one export file per selected event and triggers a browser download
-//  for each.  Returns a summary result so the caller can show an alert.
 
 export async function bulkDownloadAttendees(
     { eventIds }: BulkActionParams
@@ -393,7 +369,7 @@ export async function bulkDownloadAttendees(
         )
 
         const blobs: Array<{ eventId: string; blob: Blob }> = []
-        let   failCount = 0
+        let failCount = 0
 
         results.forEach((r, i) => {
             if (r.status === "fulfilled" && r.value.success && r.value.blob) {
@@ -403,14 +379,12 @@ export async function bulkDownloadAttendees(
             }
         })
 
-        if (blobs.length === 0) {
+        if (blobs.length === 0)
             return { success: false, message: "Failed to download any attendee lists." }
-        }
 
-        const message =
-            failCount > 0
-                ? `${blobs.length} of ${eventIds.length} downloads succeeded. ${failCount} failed.`
-                : `${blobs.length} attendee list${blobs.length > 1 ? "s" : ""} downloaded.`
+        const message = failCount > 0
+            ? `${blobs.length} of ${eventIds.length} downloads succeeded. ${failCount} failed.`
+            : `${blobs.length} attendee list${blobs.length > 1 ? "s" : ""} downloaded.`
 
         return { success: true, message, blobs }
     } catch (err) {

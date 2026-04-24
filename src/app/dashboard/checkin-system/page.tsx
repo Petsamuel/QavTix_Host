@@ -9,25 +9,27 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.CHECK_IN_SYSTEM.description,
 }
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic"
 
 
 export default async function CheckInSystemPage() {
-    const [metricsResult, attendeesResult] = await Promise.all([
+    const [metricsResult, attendeesResult] = await Promise.allSettled([
         getCheckInMetrics(),
         getCheckInAttendees(),
     ])
 
-    if (!metricsResult.success) {
-        throw new Error(metricsResult.message || "Failed to load check-in data.")
-    }
+    const metrics = metricsResult.status === "fulfilled" && metricsResult.value.success
+        ? metricsResult.value.data!
+        : null
+
+    const attendees = attendeesResult.status === "fulfilled" && attendeesResult.value.success
+        ? attendeesResult.value.data
+        : null
 
     return (
         <CheckInSystemPageContentWrapper
-            initialMetrics={metricsResult.data!}
-            initialAttendees={attendeesResult.data ?? {
-                results: [], count: 0, next: null, previous: null, total_pages: 1
-            }}
+            initialMetrics={metrics ?? { total_tickets: 0, total_checkins: 0, total_not_checked_in: 0, issues: 0 }}
+            initialAttendees={attendees ?? { results: [], count: 0, next: null, previous: null, total_pages: 1 }}
         />
     )
 }

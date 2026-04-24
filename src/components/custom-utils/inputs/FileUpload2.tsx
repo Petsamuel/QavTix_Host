@@ -1,15 +1,15 @@
 import { cn } from "@/lib/utils"
 import { Icon } from "@iconify/react"
 import Image from "next/image"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 interface AdditionalImagesUploadProps {
     value?: (File | string)[]
-    onChange: (files: File[]) => void
+    onChange: (files: (File | string)[]) => void
     maxImages?: number
     error?: string
     accept?: string
-    maxSize?: number // in MB
+    maxSize?: number
     className?: string
 }
 
@@ -23,25 +23,26 @@ export default function AdditionalImagesUpload({
     className
 }: AdditionalImagesUploadProps) {
 
-
-    const [previews, setPreviews] = useState<string[]>(() => {
-        return value.map(item => 
-            typeof item === 'string' ? item : URL.createObjectURL(item) 
-        )
-    })
-    const [files, setFiles] = useState<File[]>(() => {
-        return value.filter((item): item is File => item instanceof File)
-    })
+    const [items, setItems] = useState<(File | string)[]>(value)
+    const [previews, setPreviews] = useState<string[]>(() =>
+        value.map(item => typeof item === 'string' ? item : URL.createObjectURL(item))
+    )
     const inputRef = useRef<HTMLInputElement>(null)
 
     const canAddMore = previews.length < maxImages
+
+    useEffect(() => {
+        setItems(value)
+        setPreviews(value.map(item =>
+            typeof item === 'string' ? item : URL.createObjectURL(item)
+        ))
+    }, [value])
 
     const handleFiles = (newFiles: FileList) => {
         const filesArray = Array.from(newFiles)
         const remainingSlots = maxImages - previews.length
         const filesToAdd = filesArray.slice(0, remainingSlots)
 
-        // Validate files
         const validFiles = filesToAdd.filter(file => {
             if (file.size > maxSize * 1024 * 1024) {
                 alert(`File ${file.name} is too large. Max size: ${maxSize}MB`)
@@ -56,33 +57,26 @@ export default function AdditionalImagesUpload({
 
         if (validFiles.length === 0) return
 
-        // Create previews
         const newPreviews = validFiles.map(file => URL.createObjectURL(file))
+        const updatedItems = [...items, ...validFiles]
         const updatedPreviews = [...previews, ...newPreviews]
-        const updatedFiles = [...files, ...validFiles]
 
+        setItems(updatedItems)
         setPreviews(updatedPreviews)
-        setFiles(updatedFiles)
-        onChange(updatedFiles)
+        onChange(updatedItems)
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            handleFiles(e.target.files)
-        }
+        if (e.target.files) handleFiles(e.target.files)
     }
 
     const handleRemove = (index: number) => {
+        const updatedItems = items.filter((_, i) => i !== index)
         const updatedPreviews = previews.filter((_, i) => i !== index)
-        const updatedFiles = files.filter((_, i) => i !== index)
-        
+        setItems(updatedItems)
         setPreviews(updatedPreviews)
-        setFiles(updatedFiles)
-        onChange(updatedFiles)
-
-        if (inputRef.current) {
-            inputRef.current.value = ''
-        }
+        onChange(updatedItems)
+        if (inputRef.current) inputRef.current.value = ''
     }
 
     return (
@@ -114,7 +108,6 @@ export default function AdditionalImagesUpload({
                 disabled={!canAddMore}
             />
 
-            {/* Image Previews */}
             {previews.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
                     {previews.map((preview, index) => (

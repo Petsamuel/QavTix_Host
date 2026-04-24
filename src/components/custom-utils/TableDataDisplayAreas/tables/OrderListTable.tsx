@@ -7,23 +7,23 @@ import PaginationControls from "../tools/PaginationControl"
 import TableLoader from "@/components/loaders/TableLoader"
 
 interface OrderListTableProps {
-    items:         CustomerOrder[]
-    isLoading:     boolean
+    items: CustomerOrder[]
+    isLoading: boolean
     isLoadingMore: boolean
-    hasNext:       boolean
-    count:         number
-    onLoadMore:    () => void
-    isEmpty:       boolean
-    isError:       boolean
-    search:        string
-    currentPage:   number
-    totalPages:    number
-    fetchPage:     (page: number) => void
+    hasNext: boolean
+    count: number
+    onLoadMore: () => void
+    isEmpty: boolean
+    isError: boolean
+    search: string
+    currentPage: number
+    totalPages: number
+    fetchPage: (page: number) => void
 }
 
 const statusStyle: Record<string, string> = {
     completed: "text-postive-default bg-green-50",
-    pending:   "text-amber-600 bg-amber-50",
+    pending: "text-amber-600 bg-amber-50",
     cancelled: "text-brand-secondary-4 bg-brand-secondary-1",
 }
 

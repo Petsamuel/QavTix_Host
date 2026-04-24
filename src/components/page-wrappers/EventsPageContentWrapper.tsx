@@ -10,14 +10,14 @@ import {
     useState,
 } from "react"
 import { space_grotesk } from "@/lib/fonts"
-import { cn }            from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
-import CreateEventBtn            from "@/lib/features/create-event/CreateEventBtn"
-import MetricCardsContainer1     from "../cards/MetricCardsContainer1"
-import DataDisplayTableWrapper   from "../custom-utils/TableDataDisplayAreas/DataDisplayTableWrapper"
-import { MyEventsPageFilters }   from "../custom-utils/TableDataDisplayAreas/resources/avaliable-filters"
+import CreateEventBtn from "@/lib/features/create-event/CreateEventBtn"
+import MetricCardsContainer1 from "../cards/MetricCardsContainer1"
+import DataDisplayTableWrapper from "../custom-utils/TableDataDisplayAreas/DataDisplayTableWrapper"
+import { MyEventsPageFilters } from "../custom-utils/TableDataDisplayAreas/resources/avaliable-filters"
 import { TabSlice, useDataDisplay } from "@/custom-hooks/UseDataDisplay"
-import { EVENTS_ENDPOINT }       from "@/endpoints"
+import { EVENTS_ENDPOINT } from "@/endpoints"
 
 import {
     bulkCancelEvents,
@@ -28,36 +28,36 @@ import {
     updateEventStatus,
 } from "@/actions/event"
 
-import { mapEventsCards }        from "@/helper-fns/mapToStatCards"
-import MetricsContainerLoader    from "../loaders/MetricsContainerLoader"
-import MyLiveEventsTable         from "../custom-utils/TableDataDisplayAreas/tables/MyLiveEventsTable"
-import AllEventsTable            from "../custom-utils/TableDataDisplayAreas/tables/AllEventsTable"
-import DraftedEventsTable        from "../custom-utils/TableDataDisplayAreas/tables/DraftedEventsTable"
-import EventsBulkActionsBar      from "../custom-utils/dropdown/EventBulkActionBar"
+import { mapEventsCards } from "@/helper-fns/mapToStatCards"
+import MetricsContainerLoader from "../loaders/MetricsContainerLoader"
+import MyLiveEventsTable from "../custom-utils/TableDataDisplayAreas/tables/MyLiveEventsTable"
+import AllEventsTable from "../custom-utils/TableDataDisplayAreas/tables/AllEventsTable"
+import DraftedEventsTable from "../custom-utils/TableDataDisplayAreas/tables/DraftedEventsTable"
+import EventsBulkActionsBar from "../custom-utils/dropdown/EventBulkActionBar"
 import { CancelledEventsTable, EndedEventsTable } from "../custom-utils/TableDataDisplayAreas/tables/EndedEventsTable"
-import { ApiCategory }           from "@/actions/filters"
-import { deriveCategories }      from "@/helper-fns/deriveCategories"
+import { ApiCategory } from "@/actions/filters"
+import { deriveCategories } from "@/helper-fns/deriveCategories"
 
-import { useAppDispatch }        from "@/lib/redux/hooks"
-import { showAlert }             from "@/lib/redux/slices/alertSlice"
+import { useAppDispatch } from "@/lib/redux/hooks"
+import { showAlert } from "@/lib/redux/slices/alertSlice"
 import {
     openConfirmation,
     finishConfirmAction,
     resetConfirmationStatus,
 } from "@/lib/redux/slices/confirmationSlice"
-import { useAppSelector }        from "@/lib/redux/hooks"
-import { useRevalidate }         from "@/custom-hooks/UseRevalidate"
+import { useAppSelector } from "@/lib/redux/hooks"
+import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 import { downloadBlob } from "@/helper-fns/downloadBlob"
 
 
 interface Props {
     initialEvents: {
-        all:       TabSlice<OrganizerEvent>
-        live:      TabSlice<OrganizerEvent>
-        draft:     TabSlice<OrganizerEvent>
-        ended:     TabSlice<OrganizerEvent>
+        all: TabSlice<OrganizerEvent>
+        live: TabSlice<OrganizerEvent>
+        draft: TabSlice<OrganizerEvent>
+        ended: TabSlice<OrganizerEvent>
         cancelled: TabSlice<OrganizerEvent>
-        cards:     EventCards
+        cards: EventCards
     }
     categories: ApiCategory[]
 }
@@ -71,10 +71,10 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
 
     const { filterOptions, tabList } = MyEventsPageFilters
 
-    const [activeTab,       setActiveTab]       = useState<typeof MyEventsPageFilters.tabList[number]["value"]>("all")
-    const [filters,         setFilters]         = useState<Partial<FilterValues>>({})
-    const [selectedEvents,  setSelectedEvents]  = useState<string[]>([])
-    const [cards,           setCards]           = useState<EventCards>(initialEvents.cards)
+    const [activeTab, setActiveTab] = useState<typeof MyEventsPageFilters.tabList[number]["value"]>("all")
+    const [filters, setFilters] = useState<Partial<FilterValues>>({})
+    const [selectedEvents, setSelectedEvents] = useState<string[]>([])
+    const [cards, setCards] = useState<EventCards>(initialEvents.cards)
 
     const {
         isConfirmed,
@@ -92,10 +92,10 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
         {
             endpoint: EVENTS_ENDPOINT,
             tabs: [
-                { key: "all",       initialData: initialEvents.all,       staticParams: {},                    onCards: (c) => { if (c) setCards(c) } },
-                { key: "live",      initialData: initialEvents.live,      staticParams: { status: "active" },  onCards: (c) => { if (c) setCards(c) } },
-                { key: "draft",     initialData: initialEvents.draft,     staticParams: { status: "draft" } },
-                { key: "ended",     initialData: initialEvents.ended,     staticParams: { status: "ended" } },
+                { key: "all", initialData: initialEvents.all, staticParams: {}, onCards: (c) => { if (c) setCards(c) } },
+                { key: "live", initialData: initialEvents.live, staticParams: { status: "active" }, onCards: (c) => { if (c) setCards(c) } },
+                { key: "draft", initialData: initialEvents.draft, staticParams: { status: "draft" } },
+                { key: "ended", initialData: initialEvents.ended, staticParams: { status: "ended" } },
                 { key: "cancelled", initialData: initialEvents.cancelled, staticParams: { status: "cancelled" } },
             ],
             activeTab,
@@ -108,7 +108,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
 
     const availableCategories = useMemo(
         () => deriveCategories(categories, state.cachedItems),
-        [categories.length, state.cachedItems]
+        [categories?.length, state.cachedItems]
     )
 
     useEffect(() => { setSelectedEvents([]) }, [activeTab])
@@ -132,18 +132,18 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
         }
 
         run()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isConfirmed])
 
     // Confirmation helper
 
     const askConfirmation = useCallback((
         opts: {
-            title:       string
+            title: string
             description: string
             confirmText: string
-            actionType:  import("@/components/modals/resources/confirmationActions").ConfirmationActionType
-            targetId?:   string
+            actionType: import("@/components/modals/resources/confirmationActions").ConfirmationActionType
+            targetId?: string
         },
         action: () => Promise<void>
     ) => {
@@ -158,11 +158,11 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
     const handleSingleDelete = useCallback((eventId: string, eventName?: string) => {
         askConfirmation(
             {
-                title:       "Delete Event",
+                title: "Delete Event",
                 description: `Are you sure you want to delete "${eventName ?? "this event"}"? This action cannot be undone.`,
                 confirmText: "Yes, delete it",
-                actionType:  "DELETE_EVENT",
-                targetId:    eventId,
+                actionType: "DELETE_EVENT",
+                targetId: eventId,
             },
             async () => {
                 setDeletingId(eventId)
@@ -188,11 +188,11 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
     const handlePublish = useCallback((eventId: string, eventName?: string) => {
         askConfirmation(
             {
-                title:       "Publish Event",
+                title: "Publish Event",
                 description: `Publish "${eventName ?? "this event"}"? It will become visible to attendees.`,
                 confirmText: "Yes, publish",
-                actionType:  "PUBLISH_EVENT",
-                targetId:    eventId,
+                actionType: "PUBLISH_EVENT",
+                targetId: eventId,
             },
             async () => {
                 const result = await updateEventStatus({ eventId, status: "active" })
@@ -212,11 +212,11 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
     const handleUnpublish = useCallback((eventId: string, eventName?: string) => {
         askConfirmation(
             {
-                title:       "Unpublish Event",
+                title: "Unpublish Event",
                 description: `Move "${eventName ?? "this event"}" back to draft? It will be hidden from attendees.`,
                 confirmText: "Yes, unpublish",
-                actionType:  "UNPUBLISH_EVENT",
-                targetId:    eventId,
+                actionType: "UNPUBLISH_EVENT",
+                targetId: eventId,
             },
             async () => {
                 const result = await updateEventStatus({ eventId, status: "draft" })
@@ -332,43 +332,43 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 break
             }
 
-         case "bulk-delete": {
-            // Only draft, ended, and cancelled events can be deleted
-            const eligibleIds = selectedEventObjects
-                .filter(e => e.status === "draft" || e.status === "ended" || e.status === "cancelled")
-                .map(e => e.id)
+            case "bulk-delete": {
+                // Only draft, ended, and cancelled events can be deleted
+                const eligibleIds = selectedEventObjects
+                    .filter(e => e.status === "draft" || e.status === "ended" || e.status === "cancelled")
+                    .map(e => e.id)
 
-            if (!eligibleIds.length) {
-                dispatch(showAlert({
-                    title: "Nothing to Delete",
-                    description: "Only draft, ended, or cancelled events can be deleted. None of your selected events qualify.",
-                    variant: "destructive",
-                }))
-                return
-            }
-
-            const skipped = selectedEvents.length - eligibleIds.length
-            askConfirmation(
-                {
-                    title: "Delete Events",
-                    description: `Delete ${eligibleIds.length} event${eligibleIds.length > 1 ? "s" : ""}?${skipped > 0 ? ` (${skipped} active/sold-out events cannot be deleted and will be skipped)` : ""} This cannot be undone.`,
-                    confirmText: "Yes, delete all",
-                    actionType: "BULK_DELETE_EVENTS",
-                },
-                async () => {
-                    const result = await bulkDeleteEvents({ eventIds: eligibleIds })
-                    if (result.success) {
-                        dispatch(showAlert({ title: "Events Deleted", description: result.message, variant: "success" }))
-                        setSelectedEvents([])
-                        state.refresh()
-                        triggerRevalidation()
-                    } else {
-                        dispatch(showAlert({ title: "Delete Failed", description: result.message, variant: "destructive" }))
-                    }
+                if (!eligibleIds.length) {
+                    dispatch(showAlert({
+                        title: "Nothing to Delete",
+                        description: "Only draft, ended, or cancelled events can be deleted. None of your selected events qualify.",
+                        variant: "destructive",
+                    }))
+                    return
                 }
-            )
-            break
-        }
+
+                const skipped = selectedEvents.length - eligibleIds.length
+                askConfirmation(
+                    {
+                        title: "Delete Events",
+                        description: `Delete ${eligibleIds.length} event${eligibleIds.length > 1 ? "s" : ""}?${skipped > 0 ? ` (${skipped} active/sold-out events cannot be deleted and will be skipped)` : ""} This cannot be undone.`,
+                        confirmText: "Yes, delete all",
+                        actionType: "BULK_DELETE_EVENTS",
+                    },
+                    async () => {
+                        const result = await bulkDeleteEvents({ eventIds: eligibleIds })
+                        if (result.success) {
+                            dispatch(showAlert({ title: "Events Deleted", description: result.message, variant: "success" }))
+                            setSelectedEvents([])
+                            state.refresh()
+                            triggerRevalidation()
+                        } else {
+                            dispatch(showAlert({ title: "Delete Failed", description: result.message, variant: "destructive" }))
+                        }
+                    }
+                )
+                break
+            }
 
             case "bulk-download": {
                 const result = await bulkDownloadAttendees({ eventIds: selectedEvents })
@@ -378,15 +378,15 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                         downloadBlob(blob, `attendees-${eventId}.csv`)
                     })
                     dispatch(showAlert({
-                        title:       "Download Complete",
+                        title: "Download Complete",
                         description: result.message,
-                        variant:     "success",
+                        variant: "success",
                     }))
                 } else {
                     dispatch(showAlert({
-                        title:       "Download Failed",
+                        title: "Download Failed",
                         description: result.message,
-                        variant:     "destructive",
+                        variant: "destructive",
                     }))
                 }
                 break
@@ -399,15 +399,15 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
     const metrics = mapEventsCards(cards)
 
     const sharedProps = {
-        isLoading:     state.isLoading,
+        isLoading: state.isLoading,
         isLoadingMore: state.isLoadingMore,
-        isEmpty:       state.isEmpty,
-        isError:       state.isError,
-        search:        state.search,
-        count:         state.count,
-        currentPage:   state.currentPage,
-        totalPages:    state.totalPages,
-        fetchPage:     state.fetchPage,
+        isEmpty: state.isEmpty,
+        isError: state.isError,
+        search: state.search,
+        count: state.count,
+        currentPage: state.currentPage,
+        totalPages: state.totalPages,
+        fetchPage: state.fetchPage,
     }
 
     const selectProps = { selectedEvents, setSelectedEvents }

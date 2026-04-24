@@ -6,22 +6,24 @@ import RecentActivityItem from './RecentActivityItem'
 import { cn } from '@/lib/utils'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 interface RecentActivityTabProps {
     activities: DashboardActivity[]
 }
 
 const FILTER_OPTIONS: { label: string; value: ActivityType }[] = [
-    { label: "Sales",        value: "sale"            },
-    { label: "Check-ins",    value: "checkin"         },
-    { label: "Refunds",      value: "refund"          },
-    { label: "Withdrawals",  value: "withdrawal"      },
+    { label: "Sales", value: "sale" },
+    { label: "Check-ins", value: "checkin" },
+    { label: "Refunds", value: "refund" },
+    { label: "Withdrawals", value: "withdrawal" },
 ]
 
 const PREVIEW_COUNT = 4
 
 export default function RecentActivityTab({ activities }: RecentActivityTabProps) {
     const [filterValue, setFilterValue] = useState<string>("")
+    const pathName = usePathname()
 
     const filtered = filterValue
         ? activities.filter(a => a.activity_type === filterValue)
@@ -44,7 +46,7 @@ export default function RecentActivityTab({ activities }: RecentActivityTabProps
                         <Icon icon="hugeicons:sliders-horizontal" width="24" height="24" className="shrink-0" />
                         <SelectValue placeholder="Filter" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className='z-999'>
                         {FILTER_OPTIONS.map((opt) => (
                             <SelectItem key={opt.value} value={opt.value} className="text-xs">
                                 {opt.label}
@@ -67,10 +69,10 @@ export default function RecentActivityTab({ activities }: RecentActivityTabProps
                 )}
             </div>
 
-            {filtered.length > PREVIEW_COUNT && (
+            {filtered.length > PREVIEW_COUNT && !pathName.includes("/all-activities") && (
                 <div className="px-4 pt-1 pb-2">
                     <Link
-                        href="/dashboard/activity"
+                        href="/dashboard/all-activities"
                         className="text-xs flex items-center gap-1 text-brand-primary-6 hover:text-brand-primary-7 font-bold transition-colors"
                     >
                         <span>View All Activity</span>

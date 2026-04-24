@@ -1,11 +1,12 @@
 "use server"
 
 import type { CompleteEventFormData } from "@/schemas/create-event.schema"
-import { EVENT_CREATE }  from "@/endpoints"
-import { handleApiError }   from "@/helper-fns/handleApiErrors"
-import { cookies }          from "next/headers"
-import { countries, getStates } from "@/components-data/location"
+import { EVENT_CREATE } from "@/endpoints"
+import { handleApiError } from "@/helper-fns/handleApiErrors"
+import { cookies } from "next/headers"
 import { buildEventPayload } from "@/helper-fns/mapEventCreateData"
+import { revalidateTag } from "next/cache"
+import { CACHE_TAGS } from "@/cache-tags"
 
 async function getToken(): Promise<string | undefined> {
     const cookieStore = await cookies()
@@ -30,26 +31,27 @@ export async function publishEvent({
 }): Promise<{ success: boolean; message?: string; eventId?: string }> {
     try {
         const token = await getToken()
-        const body  = buildEventPayload(eventData, "active", media)
+        const body = buildEventPayload(eventData, "active", media)
 
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_CREATE}`,
             {
-                method:  "POST",
+                method: "POST",
                 headers: authHeaders(token),
-                body:    JSON.stringify(body),
+                body: JSON.stringify(body),
             }
         )
 
         const json = await res.json().catch(() => ({}))
-        
+
         console.log(json)
 
         if (!res.ok) {
             return { success: false, message: handleApiError(json) || "Failed to publish event." }
         }
 
-        
+        revalidateTag(CACHE_TAGS.EVENTS, 'max')
+
         return {
             success: true,
             message: "Event published successfully.",
@@ -68,13 +70,13 @@ export async function saveEventAsDraft({
     scheduledAt,
     media,
 }: {
-    eventData:    Partial<CompleteEventFormData>
+    eventData: Partial<CompleteEventFormData>
     scheduledAt?: string
     media?: any[]
 }): Promise<{ success: boolean; message?: string; eventId?: string }> {
     try {
         const token = await getToken()
-        const body  = {
+        const body = {
             ...buildEventPayload(eventData, "draft", media),
             ...(scheduledAt ? { is_scheduled: true, scheduled_time: scheduledAt } : {}),
         }
@@ -82,17 +84,22 @@ export async function saveEventAsDraft({
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_CREATE}`,
             {
-                method:  "POST",
+                method: "POST",
                 headers: authHeaders(token),
-                body:    JSON.stringify(body),
+                body: JSON.stringify(body),
             }
         )
 
-        const json = await res.json().catch(() => ({}))
+        const json = await res.json()
+
+        console.log(res)
+        console.log(json)
 
         if (!res.ok) {
             return { success: false, message: handleApiError(json) || "Failed to save draft." }
         }
+
+        revalidateTag(CACHE_TAGS.EVENTS, 'max')
 
         return {
             success: true,

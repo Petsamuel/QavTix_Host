@@ -3,7 +3,7 @@ import { Plus, Info } from "lucide-react";
 import CustomInput2 from "../custom-utils/inputs/CustomInput2";
 import CustomSelect2 from "../custom-utils/inputs/CustomSelect2";
 import { Step1FormData, step1Schema } from "@/schemas/create-event.schema";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { CustomDateTimeInput } from "../custom-utils/inputs/CustomDateTimeInput";
 import { Button } from "../ui/button";
 import { Icon } from "@iconify/react";
@@ -33,28 +33,28 @@ export default function CreateEventStep1() {
         register,
         handleSubmit,
     } = useForm<Step1FormData>({
-        resolver: zodResolver(step1Schema),
+        resolver: yupResolver(step1Schema, { abortEarly: false }) as any,
         // Restore previously saved data if user navigates back
         defaultValues: {
-            eventTitle:    eventData.basicInformation?.eventTitle    ?? "",
+            eventTitle: eventData.basicInformation?.eventTitle ?? "",
             eventCategory: eventData.basicInformation?.eventCategory ?? "",
             additionalTags: eventData.basicInformation?.additionalTags ?? [],
-            eventType:     eventData.basicInformation?.eventType     ?? "single",
-            locationType:  eventData.basicInformation?.locationType  ?? "physical",
+            eventType: eventData.basicInformation?.eventType ?? "single",
+            locationType: eventData.basicInformation?.locationType ?? "physical",
             startDateTime: eventData.basicInformation?.startDateTime ?? "",
-            endDateTime:   eventData.basicInformation?.endDateTime   ?? "",
-            dates:         eventData.basicInformation?.dates         ?? [{ startDateTime: "", endDateTime: "" }],
-            venueName:     eventData.basicInformation?.venueName     ?? "",
-            address:       eventData.basicInformation?.address       ?? "",
-            country:       eventData.basicInformation?.country       ?? "",
-            state:         eventData.basicInformation?.state         ?? "",
-            city:          eventData.basicInformation?.city          ?? "",
-            postalCode:    eventData.basicInformation?.postalCode    ?? "",
-            onlineLink:    eventData.basicInformation?.onlineLink    ?? "",
+            endDateTime: eventData.basicInformation?.endDateTime ?? "",
+            dates: eventData.basicInformation?.dates ?? [{ startDateTime: "", endDateTime: "" }],
+            venueName: eventData.basicInformation?.venueName ?? "",
+            address: eventData.basicInformation?.address ?? "",
+            country: eventData.basicInformation?.country ?? "",
+            state: eventData.basicInformation?.state ?? "",
+            city: eventData.basicInformation?.city ?? "",
+            postalCode: eventData.basicInformation?.postalCode ?? "",
+            onlineLink: eventData.basicInformation?.onlineLink ?? "",
         },
     })
 
-    const eventType    = watch("eventType")
+    const eventType = watch("eventType")
     const locationType = watch("locationType")
     const selectedTags = watch("additionalTags") || []
 
@@ -64,7 +64,7 @@ export default function CreateEventStep1() {
         updateStep("basicInformation", {
             ...data,
             startDateTime: data.startDateTime!,
-            endDateTime:   data.endDateTime!,
+            endDateTime: data.endDateTime!,
         })
         goToNextStep()
     }
@@ -76,7 +76,7 @@ export default function CreateEventStep1() {
     const city = watch("city")
 
     const isLocationReadyForMap = () => {
-    if (locationType !== "physical") return false;
+        if (locationType !== "physical") return false;
         return (
             (venueName && city) ||
             (address && city) ||
@@ -86,7 +86,7 @@ export default function CreateEventStep1() {
 
     const handleFindOnMap = () => {
         const url = generateMapLink({ venueName, address, city, state, country })
-        
+
         window.open(url, "_blank")
     }
 
@@ -218,17 +218,33 @@ export default function CreateEventStep1() {
                 {/* Single */}
                 {eventType === "single" && (
                     <div className="grid grid-cols-2 gap-5 max-w-lg" data-testid="single-event-dates">
-                        <CustomDateTimeInput
-                            label="Start Date & Time"
-                            {...register("startDateTime")}
-                            error={errors.startDateTime?.message}
-                            data-testid="input-start-datetime"
+                        <Controller
+                            name="startDateTime"
+                            control={control}
+                            render={({ field }) => (
+                                <CustomDateTimeInput
+                                    label="Start Date & Time"
+                                    name={field.name}
+                                    value={field.value ?? ""}
+                                    onChange={(e) => field.onChange(e.target.value)}
+                                    onBlur={field.onBlur}
+                                    error={errors.startDateTime?.message}
+                                />
+                            )}
                         />
-                        <CustomDateTimeInput
-                            label="End Date & Time"
-                            {...register("endDateTime")}
-                            error={errors.endDateTime?.message}
-                            data-testid="input-end-datetime"
+                        <Controller
+                            name="endDateTime"
+                            control={control}
+                            render={({ field }) => (
+                                <CustomDateTimeInput
+                                    label="End Date & Time"
+                                    name={field.name}
+                                    value={field.value ?? ""}
+                                    onChange={(e) => field.onChange(e.target.value)}
+                                    onBlur={field.onBlur}
+                                    error={errors.endDateTime?.message}
+                                />
+                            )}
                         />
                     </div>
                 )}
@@ -237,7 +253,7 @@ export default function CreateEventStep1() {
                 {eventType === "recurring" && (
                     <div className="space-y-6 max-w-lg" data-testid="recurring-event-dates">
                         {fields.map((field, index) => (
-                            <div key={field.id} className="flex flex-row items-start sm:items-end gap-4" data-testid={`recurring-date-row-${index}`}>
+                            <div key={field.id} className="flex flex-wrap flex-row items-start sm:items-end gap-4" data-testid={`recurring-date-row-${index}`}>
 
                                 {/* Mobile remove */}
                                 {index > 0 && (
@@ -268,19 +284,37 @@ export default function CreateEventStep1() {
                                     </div>
                                 )}
 
-                                <CustomDateTimeInput
-                                    label={index === 0 ? "First Day" : `Day ${index + 1}`}
-                                    {...register(`dates.${index}.startDateTime`)}
-                                    error={errors.dates?.[index]?.startDateTime?.message}
-                                    disablePastDate
-                                    data-testid={`input-recurring-start-${index}`}
+                                <Controller
+                                    name={`dates.${index}.startDateTime`}
+                                    control={control}
+                                    render={({ field: f }) => (
+                                        <CustomDateTimeInput
+                                            label={index === 0 ? "First Day" : `Day ${index + 1}`}
+                                            name={f.name}
+                                            value={f.value ?? ""}
+                                            onChange={(e) => f.onChange(e.target.value)}
+                                            onBlur={f.onBlur}
+                                            error={errors.dates?.[index]?.startDateTime?.message}
+                                            disablePastDate
+                                            data-testid={`input-recurring-start-${index}`}
+                                        />
+                                    )}
                                 />
-                                <CustomDateTimeInput
-                                    label="End Time"
-                                    {...register(`dates.${index}.endDateTime`)}
-                                    error={errors.dates?.[index]?.endDateTime?.message}
-                                    disablePastDate
-                                    data-testid={`input-recurring-end-${index}`}
+                                <Controller
+                                    name={`dates.${index}.endDateTime`}
+                                    control={control}
+                                    render={({ field: f }) => (
+                                        <CustomDateTimeInput
+                                            label="End Time"
+                                            name={f.name}
+                                            value={f.value ?? ""}
+                                            onChange={(e) => f.onChange(e.target.value)}
+                                            onBlur={f.onBlur}
+                                            error={errors.dates?.[index]?.endDateTime?.message}
+                                            disablePastDate
+                                            data-testid={`input-recurring-end-${index}`}
+                                        />
+                                    )}
                                 />
 
                                 {/* Desktop remove */}
@@ -299,11 +333,11 @@ export default function CreateEventStep1() {
                                 )}
                                 {index === 0 && (
                                     <div className="flex-col hidden md:flex">
-                                        <span className="text-sm font-medium text-brand-secondary-8">Add Date</span>
+                                        <span className="text-xs whitespace-nowrap font-medium text-brand-secondary-8">Add Date</span>
                                         <button
                                             type="button"
                                             onClick={() => append({ startDateTime: "", endDateTime: "" })}
-                                            className="flex items-center gap-2 h-12 p-3 bg-brand-primary-1 w-fit rounded-md border-brand-neutral-3 text-brand-primary-4 hover:border-brand-primary-4 hover:text-brand-primary-6 transition-all group"
+                                            className="flex items-center gap-2 h-10 p-3 bg-brand-primary-1 w-fit rounded-md border-brand-neutral-3 text-brand-primary-4 hover:border-brand-primary-4 hover:text-brand-primary-6 transition-all group"
                                             data-testid="add-recurring-date-desktop"
                                             aria-label="Add another day"
                                         >
@@ -345,7 +379,7 @@ export default function CreateEventStep1() {
                                         circleIconClass="size-3 text-brand-primary-6"
                                         data-testid={`radio-location-${val}`}
                                     />
-                                    <Label htmlFor={`loc-${val}`} className="cursor-pointer font-medium text-brand-secondary-9 text-sm">
+                                    <Label htmlFor={`loc-${val}`} className="cursor-pointer font-medium text-brand-secondary-9 text-xs md:text-sm">
                                         {val === "physical" ? "Physical Venue" : val === "online" ? "Online Event" : "To Be Announced"}
                                     </Label>
                                 </div>
@@ -424,7 +458,7 @@ export default function CreateEventStep1() {
                             disabled={!isLocationReadyForMap()}
                             className="flex disabled:cursor-not-allowed items-center gap-1 text-brand-primary-6 disabled:opacity-50 font-semibold text-sm hover:underline"
                             data-testid="btn-find-on-map"
-                            
+
                         >
                             Find on Map
                             <Icon icon="tabler:arrow-right" width="24" height="24" className="size-5" />

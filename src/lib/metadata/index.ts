@@ -13,10 +13,7 @@ export const hostSiteMetadata: Metadata = {
     robots: {
         index: false,
         follow: false,
-    },
-    icons: {
-        icon: "/favicon.ico",
-    },
+    }
 }
 
 // Page-specific metadata

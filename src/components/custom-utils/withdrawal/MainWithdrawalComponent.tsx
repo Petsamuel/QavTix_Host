@@ -23,7 +23,7 @@ import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 
 interface Props {
     availableBalance: string
-    payoutAccounts:   PayoutAccountItem[]
+    payoutAccounts: PayoutAccountItem[]
 }
 
 export default function MainWithdrawalComponent({
@@ -31,13 +31,13 @@ export default function MainWithdrawalComponent({
     payoutAccounts,
 }: Props) {
 
-    const dispatch  = useAppDispatch()
+    const dispatch = useAppDispatch()
     const isMounted = useIsMounted()
-    const { user }  = useAppSelector(store => store.authUser)
-    const [amount,          setAmount]          = useState("")
+    const { user } = useAppSelector(store => store.authUser)
+    const [amount, setAmount] = useState("")
     const [selectedAccount, setSelectedAccount] = useState("")
-    const [isSubmitting,    setIsSubmitting]    = useState(false)
-    const [removingId,      setRemovingId]      = useState<string | null>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [removingId, setRemovingId] = useState<string | null>(null)
     const { isConfirmed, sessionId } = useAppSelector(store => store.confirmation)
 
     const balance = parseFloat(availableBalance)
@@ -55,18 +55,18 @@ export default function MainWithdrawalComponent({
         e.preventDefault()
 
         dispatch(openConfirmation({
-            title:       "Remove Bank Account",
+            title: "Remove Bank Account",
             description: "Are you sure you want to remove this bank account? This action cannot be undone.",
-            actionType:  CONFIRMATION_ACTION_TYPES.DELETE_PAYOUT_ACCOUNT,
-            targetId:    accountId,
+            actionType: CONFIRMATION_ACTION_TYPES.DELETE_PAYOUT_ACCOUNT,
+            targetId: accountId,
         }))
     }
 
     const handleContinue = async () => {
         if (!amount || !selectedAccount) {
             dispatch(showAlert({
-                variant:     "destructive",
-                title:       "Missing fields",
+                variant: "destructive",
+                title: "Missing fields",
                 description: "Please enter an amount and select a bank account.",
             }))
             return
@@ -76,8 +76,8 @@ export default function MainWithdrawalComponent({
 
         if (numericAmount <= 0) {
             dispatch(showAlert({
-                variant:     "destructive",
-                title:       "Invalid amount",
+                variant: "destructive",
+                title: "Invalid amount",
                 description: "Amount must be greater than zero.",
             }))
             return
@@ -85,8 +85,8 @@ export default function MainWithdrawalComponent({
 
         if (numericAmount > balance) {
             dispatch(showAlert({
-                variant:     "destructive",
-                title:       "Insufficient balance",
+                variant: "destructive",
+                title: "Insufficient balance",
                 description: `You can only withdraw up to ${isMounted ? formatPrice(balance, user?.currency) : balance.toLocaleString()}.`,
             }))
             return
@@ -95,7 +95,7 @@ export default function MainWithdrawalComponent({
         setIsSubmitting(true)
 
         const result = await submitWithdrawal({
-            amount:            amount,
+            amount: amount,
             payout_account_id: selectedAccount,
         })
 
@@ -106,16 +106,16 @@ export default function MainWithdrawalComponent({
             setSelectedAccount("")
 
             dispatch(openSuccessModal({
-                title:       "Withdrawal Submitted!",
+                title: "Withdrawal Submitted!",
                 description: "Your Payment Withdrawal was successful. Thank you for choosing QavTix.",
-                variant:     "success",
+                variant: "success",
             }))
-            
+
             trigger()
         } else {
             dispatch(showAlert({
-                variant:     "destructive",
-                title:       "Withdrawal failed",
+                variant: "destructive",
+                title: "Withdrawal failed",
                 description: result.message ?? "Something went wrong. Please try again.",
             }))
         }
@@ -142,14 +142,14 @@ export default function MainWithdrawalComponent({
             if (result.success) {
                 if (selectedAccount === parsedTargetId) setSelectedAccount("")
                 dispatch(showAlert({
-                    variant:     "success",
-                    title:       "Account removed",
+                    variant: "success",
+                    title: "Account removed",
                     description: "Bank account removed successfully.",
                 }))
             } else {
                 dispatch(showAlert({
-                    variant:     "destructive",
-                    title:       "Failed to remove account",
+                    variant: "destructive",
+                    title: "Failed to remove account",
                     description: result.message ?? "Please try again.",
                 }))
             }
@@ -245,7 +245,7 @@ export default function MainWithdrawalComponent({
                             <SelectValue placeholder="Select Bank Account" />
                         </SelectTrigger>
                         <SelectContent>
-                            {payoutAccounts.map(acct => (
+                            {payoutAccounts.length ? payoutAccounts?.map(acct => (
                                 <div key={acct.id} className="relative flex items-center">
                                     <SelectItem
                                         value={acct.id}
@@ -298,7 +298,7 @@ export default function MainWithdrawalComponent({
                                         )}
                                     </button>
                                 </div>
-                            ))}
+                            )) : null}
                         </SelectContent>
                     </Select>
                 )}

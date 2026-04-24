@@ -1,292 +1,375 @@
-import { CHARACTER_LIMITS, ROLE_IDS, VALIDATION_MESSAGES } from '@/lib/features/create-event/resources/constants';
-import { z } from 'zod';
+import * as yup from 'yup';
+import { ROLE_IDS, VALIDATION_MESSAGES } from '@/lib/features/create-event/resources/constants';
 
 
-// [Basic Information Schema]
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/**
+ * Validates a value that is either a File object or a URL string.
+ * Works for featured images, additional images, and videos.
+ */
+const fileOrUrlSchema = yup.mixed<File | string>().test(
+    'file-or-url',
+    'Please provide a valid file or image URL',
+    (value) => {
+        if (!value) return false;
+        if (value instanceof File) return true;
+        if (typeof value === 'string') {
+            try { new URL(value); return true; } catch { return false; }
+        }
+        return false;
+    }
+);
+
+const optionalFileOrUrl = yup.mixed<File | string>().test(
+    'optional-file-or-url',
+    'Please provide a valid file or URL',
+    (value) => {
+        if (!value) return true; // optional
+        if (value instanceof File) return true;
+        if (typeof value === 'string') {
+            try { new URL(value); return true; } catch { return false; }
+        }
+        return false;
+    }
+);
+
+/** Coerces empty strings / null / undefined to undefined, otherwise parses as number. */
+function toOptionalNumber(value: unknown) {
+    if (value === '' || value === null || value === undefined) return undefined;
+    return Number(value);
+}
 
 
-const eventDateSchema = z.object({
-    startDateTime: z.string().min(1, "Start date is required"),
-    endDateTime: z.string().min(1, "End date is required"),
+// ─── Step 1: Basic Information ────────────────────────────────────────────────
+
+const eventDateSchema = yup.object({
+    startDateTime: yup.string().required('Start date & time is required'),
+    endDateTime:   yup.string().required('End date & time is required'),
+}).test('start-in-future', 'Start date must be in the future', function (value) {
+    if (!value?.startDateTime) return true;
+    return new Date(value.startDateTime) > new Date();
+}).test('end-after-start', 'End date must be after the start date', function (value) {
+    if (!value?.startDateTime || !value?.endDateTime) return true;
+    return new Date(value.endDateTime) > new Date(value.startDateTime);
+});
+
+export const step1Schema = yup.object({
+    eventTitle:     yup.string().required('Event title is required').max(100, 'Title cannot exceed 100 characters'),
+    eventCategory:  yup.string().required('Please select an event category'),
+    additionalTags: yup.array(yup.string().defined()).max(5, 'You can add a maximum of 5 tags').default([]),
+    eventType:      yup.string().oneOf(['single', 'recurring'] as const).required(),
+
+    // Date fields — conditionally validated below
+    startDateTime: yup.string().default(''),
+    endDateTime:   yup.string().default(''),
+    dates: yup.array(eventDateSchema).default([]),
+
+    // Location
+    locationType: yup.string().oneOf(['physical', 'online', 'tba'] as const).required(),
+    venueName:    yup.string().optional(),
+    address:      yup.string().optional(),
+    country:      yup.string().optional(),
+    state:        yup.string().optional(),
+    city:         yup.string().optional(),
+    postalCode:   yup.string().optional(),
+    onlineLink:   yup.string().optional(),
 })
-    .refine((data) => {
-        const start = new Date(data.startDateTime);
-        return start > new Date();
-    }, {
-        message: "Start time must be in the future",
-        path: ["startDateTime"],
-    })
-    .refine((data) => {
-        const start = new Date(data.startDateTime);
-        const end = new Date(data.endDateTime);
-        return end > start;
-    }, {
-        message: "End time must be after start time",
-        path: ["endDateTime"],
-    })
-
-export const step1Schema = z.object({
-    eventTitle: z.string().min(1, "Event title is required").max(100),
-    eventCategory: z.string().min(1, "Category is required"),
-    additionalTags: z.array(z.string()).max(5, "Maximum 5 tags allowed"),
-    eventType: z.enum(['single', 'recurring']),
-
-    // Date Fields - Make them nullable instead of optional
-    startDateTime: z.string(),
-    endDateTime: z.string(),
-    dates: z.array(eventDateSchema),
-
-    // Location Fields
-    locationType: z.enum(['physical', 'online', 'tba']),
-    venueName: z.string().optional(),
-    address: z.string().optional(),
-    country: z.string().optional(),
-    state: z.string().optional(),
-    city: z.string().optional(),
-    postalCode: z.string().optional(),
-    onlineLink: z.url("Please enter a valid URL").optional().or(z.literal("")),
+// ── Single: start date required ──
+.test('single-start-required', 'Please select a start date & time', function (values) {
+    if (values.eventType !== 'single') return true;
+    if (!values.startDateTime) return this.createError({ path: 'startDateTime', message: 'Please select a start date & time' });
+    return true;
 })
-    .refine((data) => {
-        // Only validate if single event type
-        if (data.eventType !== 'single') return true;
-
-        return !!data.startDateTime && !!data.endDateTime;
-    }, {
-        message: "Start date and time is required for single events",
-        path: ["startDateTime"]
-    })
-    .refine((data) => {
-        // Only validate if single event type and dates exist
-        if (data.eventType !== 'single' || !data.startDateTime) return true;
-
-        const start = new Date(data.startDateTime);
-        return start > new Date();
-    }, {
-        message: "Start date and time must be in the future",
-        path: ["startDateTime"]
-    })
-    .refine((data) => {
-        // Only validate if single event type and both dates exist
-        if (data.eventType !== 'single' || !data.startDateTime || !data.endDateTime) return true;
-
-        const start = new Date(data.startDateTime);
-        const end = new Date(data.endDateTime);
-        return end > start;
-    }, {
-        message: "End date and time must be after start time",
-        path: ["endDateTime"]
-    })
-    .refine((data) => {
-        // Validate recurring events have dates
-        if (data.eventType !== 'recurring') return true;
-
-        return !!data.dates && data.dates.length > 0;
-    }, {
-        message: "Please add at least one date for recurring events",
-        path: ["dates"]
-    })
-    .refine((data) => {
-        // Validate physical location
-        if (data.locationType !== 'physical') return true;
-
-        return !!data.venueName && !!data.address && !!data.city && !!data.country;
-    }, {
-        message: "Venue name is required",
-        path: ["venueName"]
-    })
-    .refine((data) => {
-        if (data.locationType !== 'physical') return true;
-        return !!data.address;
-    }, {
-        message: "Address is required",
-        path: ["address"]
-    })
-    .refine((data) => {
-        if (data.locationType !== 'physical') return true;
-        return !!data.city;
-    }, {
-        message: "City is required",
-        path: ["city"]
-    })
-    .refine((data) => {
-        if (data.locationType !== 'physical') return true;
-        return !!data.country;
-    }, {
-        message: "Country is required",
-        path: ["country"]
-    })
-    .refine((data) => {
-        // Validate online location
-        if (data.locationType !== 'online') return true;
-
-        return !!data.onlineLink;
-    }, {
-        message: "Online event link is required",
-        path: ["onlineLink"]
-    })
-
-
-
-
-
-// [Details & Media Schema]
-
-const socialMediaLinkSchema = z.object({
-    id: z.string(),
-    platform: z.string(),
-    url: z.url(VALIDATION_MESSAGES.invalidUrl),
+// ── Single: start must be future ──
+.test('single-start-future', 'Start date & time must be in the future', function (values) {
+    if (values.eventType !== 'single' || !values.startDateTime) return true;
+    if (new Date(values.startDateTime) <= new Date())
+        return this.createError({ path: 'startDateTime', message: 'Start date & time must be in the future' });
+    return true;
 })
-
-export const step2Schema = z.object({
-    shortDescription: z.string()
-        .min(1, "Required")
-        .max(160, "Max 160 characters"),
-    fullDescription: z.string()
-        .min(1, "Required")
-        .max(5000, "Max 5000 characters"),
-
-    // File Validation using instanceof
-    featuredImage: z.instanceof(File, { message: "Featured image is required" })
-        .refine((file) => file.size <= 10 * 1024 * 1024, "Max size is 10MB"),
-
-    additionalImages: z.array(z.instanceof(File))
-        .max(10, "Maximum 10 images allowed"),
-
-    eventVideo: z.instanceof(File).optional(),
-
-    organizerDisplayName: z.string().min(1, "Required"),
-    organizerDescription: z.string().max(500).optional(),
-    publicEmail: z.email("Invalid email"),
-    phoneNumber: z.string().optional(),
-    countryCode: z.string().optional(),
-
-    socialMediaLinks: z.array(socialMediaLinkSchema),
+// ── Single: end required ──
+.test('single-end-required', 'Please select an end date & time', function (values) {
+    if (values.eventType !== 'single') return true;
+    if (!values.endDateTime) return this.createError({ path: 'endDateTime', message: 'Please select an end date & time' });
+    return true;
 })
-
-
-
-
-
-// [Tickets & Pricing Schema]
-const promoCodeSchema = z.object({
-    codeWord: z.string().min(1, "Code is required"),
-    discountAmount: z.coerce.number("Invalid discount amount").min(0, "Discount must be 0 or greater"),
-    maximumUsers: z.coerce.number("Invalid user count").min(1, "At least 1 user allowed"),
-    validTill: z.string().min(1, "Valid until date is required"),
+// ── Single: end after start ──
+.test('single-end-after-start', 'End date & time must be after the start date', function (values) {
+    if (values.eventType !== 'single' || !values.startDateTime || !values.endDateTime) return true;
+    if (new Date(values.endDateTime) <= new Date(values.startDateTime))
+        return this.createError({ path: 'endDateTime', message: 'End date & time must be after the start date' });
+    return true;
 })
-
-const ticketTypeSchema = z.object({
-    id: z.string(),
-    ticketType: z.string().min(1, "Ticket type is required"),
-    description: z.string().optional(),
-    price: z.coerce.number("Invalid price").min(0, "Price must be 0 or greater"),
-    currency: z.string().min(1, "Currency is required"),
-    quantity: z.coerce.number("Invalid quantity").min(1, "Quantity must be at least 1"),
-    perPersonMax: z.coerce.number("Invalid max per person").min(1).optional(),
-    promoCode: promoCodeSchema.optional(),
+// ── Recurring: at least one date ──
+.test('recurring-has-dates', 'Please add at least one date for this recurring event', function (values) {
+    if (values.eventType !== 'recurring') return true;
+    if (!values.dates || values.dates.length === 0)
+        return this.createError({ path: 'dates', message: 'Please add at least one date for this recurring event' });
+    return true;
 })
+// ── Physical: venue required ──
+.test('physical-venue', 'Venue details are required', function (values) {
+    if (values.locationType !== 'physical') return true;
+    if (!values.venueName) return this.createError({ path: 'venueName', message: 'Venue name is required' });
+    return true;
+})
+.test('physical-address', 'Address is required', function (values) {
+    if (values.locationType !== 'physical') return true;
+    if (!values.address) return this.createError({ path: 'address', message: 'Street address is required' });
+    return true;
+})
+.test('physical-city', 'City is required', function (values) {
+    if (values.locationType !== 'physical') return true;
+    if (!values.city) return this.createError({ path: 'city', message: 'City is required' });
+    return true;
+})
+.test('physical-country', 'Country is required', function (values) {
+    if (values.locationType !== 'physical') return true;
+    if (!values.country) return this.createError({ path: 'country', message: 'Country is required' });
+    return true;
+})
+// ── Online: link required & valid ──
+.test('online-link-required', 'Event link is required', function (values) {
+    if (values.locationType !== 'online') return true;
+    if (!values.onlineLink) return this.createError({ path: 'onlineLink', message: 'Please provide the online event link (e.g. Zoom, Google Meet)' });
+    return true;
+})
+.test('online-link-url', 'Event link must be a valid URL', function (values) {
+    if (values.locationType !== 'online' || !values.onlineLink) return true;
+    try { new URL(values.onlineLink); return true; }
+    catch { return this.createError({ path: 'onlineLink', message: 'Please enter a valid URL (e.g. https://zoom.us/j/...)' }); }
+});
 
-export type TicketType = z.infer<typeof ticketTypeSchema>;
 
-export const step3Schema = z.object({
-    ticketTypes: z.array(ticketTypeSchema).min(1, "At least one ticket type is required"),
-    salesPeriod: z.object({
-        startDateTime: z.string().min(1, "Start date is required"),
-        endDateTime: z.string().min(1, "End date is required"),
+// ─── Step 2: Details & Media ──────────────────────────────────────────────────
+
+const socialMediaLinkSchema = yup.object({
+    id:       yup.string().required(),
+    platform: yup.string().required(),
+    url:      yup.string().url(VALIDATION_MESSAGES.invalidUrl).required(),
+});
+
+export const step2Schema = yup.object({
+    shortDescription: yup.string()
+        .required('Short description is required')
+        .max(160, 'Short description cannot exceed 160 characters'),
+    fullDescription: yup.string()
+        .required('Full description is required')
+        .max(5000, 'Full description cannot exceed 5,000 characters'),
+
+    // Accepts a File upload OR an existing image URL (e.g. when editing an event)
+    featuredImage: fileOrUrlSchema
+        .required('Please upload a featured image for your event')
+        .test('max-size', 'Featured image must be smaller than 10 MB', (value) => {
+            if (!(value instanceof File)) return true;
+            return value.size <= 10 * 1024 * 1024;
+        }),
+
+    additionalImages: yup.array(optionalFileOrUrl)
+        .max(10, 'You can add a maximum of 10 additional images')
+        .default([]),
+
+    eventVideo: optionalFileOrUrl,
+
+    organizerDisplayName:    yup.string().required('Organiser display name is required'),
+    organizerDescription:    yup.string().max(500, 'Organiser description cannot exceed 500 characters').optional(),
+    publicEmail:             yup.string().email('Please enter a valid email address').required('Public email is required'),
+    phoneNumber:             yup.string().optional(),
+    countryCode:             yup.string().optional(),
+
+    socialMediaLinks: yup.array(socialMediaLinkSchema).default([]),
+});
+
+
+// ─── Step 3: Tickets & Pricing ────────────────────────────────────────────────
+
+const promoCodeSchema = yup.object({
+    // Fields are optional individually — the .test below decides when they're required
+    codeWord:       yup.string().optional(),
+    discountAmount: yup.number()
+        .typeError('Please enter a valid discount amount')
+        .min(0, 'Discount cannot be negative')
+        .optional(),
+    maximumUsers:   yup.number()
+        .typeError('Please enter a valid number of users')
+        .min(1, 'At least 1 user must be allowed')
+        .optional(),
+    validTill: yup.string().optional(),
+}).test('promo-complete', 'Please fill in all promo code fields', function (value) {
+    // If NOTHING in the promo object has been filled → skip entirely (fully optional)
+    const hasAnyValue =
+        !!value?.codeWord?.trim() ||
+        (value?.discountAmount !== undefined && value?.discountAmount !== null && value?.discountAmount !== ('' as any)) ||
+        (value?.maximumUsers !== undefined && value?.maximumUsers !== null && value?.maximumUsers !== ('' as any)) ||
+        !!value?.validTill?.trim()
+
+    if (!hasAnyValue) return true
+
+    // At least one field was touched — collect ALL missing required fields at once
+    const errors: yup.ValidationError[] = []
+
+    if (!value?.codeWord?.trim())
+        errors.push(this.createError({ path: 'codeWord', message: 'Promo code word is required' }))
+
+    if (value?.discountAmount === undefined || value?.discountAmount === null || (value?.discountAmount as any) === '')
+        errors.push(this.createError({ path: 'discountAmount', message: 'Discount amount is required' }))
+
+    if (!value?.maximumUsers)
+        errors.push(this.createError({ path: 'maximumUsers', message: 'Maximum number of users is required' }))
+
+    if (!value?.validTill?.trim())
+        errors.push(this.createError({ path: 'validTill', message: 'Expiry date is required' }))
+
+    if (errors.length > 0)
+        throw new yup.ValidationError(errors)
+
+    return true
+}).optional();
+
+const ticketTypeSchema = yup.object({
+    id:           yup.string().required(),
+    ticketType:   yup.string().required('Ticket type name is required'),
+    description:  yup.string().optional(),
+    price:        yup.number().typeError('Please enter a valid price').min(0, 'Price cannot be negative').required('Price is required'),
+    currency:     yup.string().required('Please select a currency'),
+    quantity:     yup.number().typeError('Please enter a valid quantity').min(1, 'Quantity must be at least 1').required('Quantity is required'),
+    perPersonMax: yup.number().typeError('Please enter a valid limit').min(1).optional(),
+    promoCode:    promoCodeSchema,
+});
+
+export type TicketType = yup.InferType<typeof ticketTypeSchema>;
+
+export const step3Schema = yup.object({
+    ticketTypes: yup.array(ticketTypeSchema)
+        .min(1, 'Please add at least one ticket type')
+        .required(),
+
+    salesPeriod: yup.object({
+        startDateTime: yup.string().required('Sales start date & time is required'),
+        endDateTime:   yup.string().required('Sales end date & time is required'),
+    })
+    .test('sales-start-future', 'Sales start date must be in the future', function (value) {
+        if (!value?.startDateTime) return true;
+        if (new Date(value.startDateTime) <= new Date())
+            return this.createError({ path: 'startDateTime', message: 'Sales start date must be in the future' });
+        return true;
+    })
+    .test('sales-end-after-start', 'Sales end date must be after the start date', function (value) {
+        if (!value?.startDateTime || !value?.endDateTime) return true;
+        if (new Date(value.endDateTime) <= new Date(value.startDateTime))
+            return this.createError({ path: 'endDateTime', message: 'Sales end date must be after the start date' });
+        return true;
     }),
-    refundPolicy: z.enum(['no', 'partial', 'full', 'custom']),
-    customRefundPercentage: z.coerce.number("Invalid input").min(1).max(100).default(50).optional(),
+
+    refundPolicy: yup.string()
+        .oneOf(['no', 'partial', 'full', 'custom'] as const)
+        .required('Please select a refund policy'),
+
+    // Only validated when refundPolicy === 'custom'
+    customRefundPercentage: yup.mixed().transform(toOptionalNumber),
 })
-
-// [Settings Schema]
-
-const collaboratorSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.email(),
-    avatar: z.string().optional(),
-    role: z.enum([...ROLE_IDS, "host"]),
-    permissions: z.array(z.string()),
-    status: z.enum(['active', 'disabled', 'pending']),
-})
-
-export const step4Schema = z.object({
-    checkInSettings: z.object({
-        qrCodeEnabled: z.boolean(),
-        ageRestriction: z.boolean(),
-        minimumAge: z.coerce.number("Invalid input").min(18, "Minimum age must be at least 18").default(18).optional(),
-    }),
-
-    emailNotifications: z.object({
-        orderConfirmation: z.boolean(),
-        ticketDelivery: z.boolean(),
-        reminders: z.boolean(),
-        postEventEmails: z.boolean(),
-        customizeSenderName: z.boolean(),
-        senderName: z.string().optional(),
-    }),
-
-    affiliateProgram: z.object({
-        enabled: z.boolean(),
-        percentageCommission: z.coerce.number("Invalid input")
-            .min(1)
-            .max(50)
-            .optional(),
-        startDate: z.date().optional(),
-        endDate: z.date().optional(),
-    }),
-
-    permissions: z.object({
-        collaborators: z.array(collaboratorSchema),
-    }),
-}).refine((data) => {
-    // Age restriction requires minimum age
-    if (data.checkInSettings.ageRestriction) {
-        return !!data.checkInSettings.minimumAge;
+.test('custom-refund-pct', 'Custom refund percentage is required', function (values) {
+    if (values.refundPolicy !== 'custom') return true;
+    const val = toOptionalNumber(values.customRefundPercentage);
+    if (typeof val !== 'number' || isNaN(val) || val < 1 || val > 100) {
+        return this.createError({
+            path: 'customRefundPercentage',
+            message: 'Please enter a refund percentage between 1% and 100%',
+        });
     }
     return true;
-}, {
-    message: 'Please specify minimum age',
-    path: ['checkInSettings', 'minimumAge'],
-}).refine((data) => {
-    // Custom sender name requires name
-    if (data.emailNotifications.customizeSenderName) {
-        return !!data.emailNotifications.senderName;
-    }
-    return true;
-}, {
-    message: 'Please enter sender name',
-    path: ['emailNotifications', 'senderName'],
-}).refine((data) => {
-    // Affiliate program requires commission
-    if (data.affiliateProgram.enabled) {
-        return !!data.affiliateProgram.percentageCommission;
-    }
-    return true;
-}, {
-    message: 'Please enter commission percentage',
-    path: ['affiliateProgram', 'percentageCommission'],
-})
+});
 
 
+// ─── Step 4: Settings ─────────────────────────────────────────────────────────
 
-export const completeEventSchema = z.object({
+const collaboratorSchema = yup.object({
+    id:          yup.string().required(),
+    name:        yup.string().required(),
+    email:       yup.string().email().required(),
+    avatar:      yup.string().optional(),
+    role:        yup.string().oneOf([...ROLE_IDS, 'host'] as const).required(),
+    permissions: yup.array(yup.string().defined()).default([]),
+    status:      yup.string().oneOf(['active', 'disabled', 'pending'] as const).required(),
+});
+
+export const step4Schema = yup.object({
+    checkInSettings: yup.object({
+        qrCodeEnabled:  yup.boolean().required(),
+        ageRestriction: yup.boolean().required(),
+        // Validated directly on the field so the error path is checkInSettings.minimumAge
+        minimumAge: yup.mixed()
+            .transform(toOptionalNumber)
+            .when('ageRestriction', {
+                is: true,
+                then: (schema) =>
+                    schema.test(
+                        'min-age-required',
+                        'Minimum age must be 18 or older',
+                        (val) => {
+                            const age = Number(val)
+                            return !isNaN(age) && age >= 18
+                        }
+                    ),
+                otherwise: (schema) => schema.optional(),
+            }),
+    }),
+
+    emailNotifications: yup.object({
+        orderConfirmation:   yup.boolean().required(),
+        ticketDelivery:      yup.boolean().required(),
+        reminders:           yup.boolean().required(),
+        postEventEmails:     yup.boolean().required(),
+        customizeSenderName: yup.boolean().required(),
+    }),
+
+    affiliateProgram: yup.object({
+        enabled: yup.boolean().required(),
+        // Validated directly on the field so the error path is affiliateProgram.percentageCommission
+        percentageCommission: yup.mixed()
+            .transform(toOptionalNumber)
+            .when('enabled', {
+                is: true,
+                then: (schema) =>
+                    schema.test(
+                        'commission-range',
+                        'Commission must be between 1% and 50%',
+                        (val) => {
+                            const n = Number(val)
+                            return !isNaN(n) && n >= 1 && n <= 50
+                        }
+                    ),
+                otherwise: (schema) => schema.optional(),
+            }),
+        startDate: yup.date().optional(),
+        endDate:   yup.date().optional(),
+    }),
+
+    permissions: yup.object({
+        collaborators: yup.array(collaboratorSchema).default([]),
+    }),
+});
+
+
+// ─── Full combined schema ─────────────────────────────────────────────────────
+
+export const completeEventSchema = yup.object({
     basicInformation: step1Schema,
-    detailsMedia: step2Schema,
-    ticketsPricing: step3Schema,
-    settings: step4Schema,
-    reviewPublish: z.object({
-        status: z.enum(['draft', 'published']),
-        publishedAt: z.date().optional(),
+    detailsMedia:     step2Schema,
+    ticketsPricing:   step3Schema,
+    settings:         step4Schema,
+    reviewPublish: yup.object({
+        status:      yup.string().oneOf(['draft', 'published'] as const).required(),
+        publishedAt: yup.date().optional(),
     }),
-})
+});
 
 
+// ─── Type exports ─────────────────────────────────────────────────────────────
 
-
-// Type exports
-export type Step1FormData = z.infer<typeof step1Schema>;
-export type Step2FormData = z.infer<typeof step2Schema>;
-export type Step3FormData = z.output<typeof step3Schema>;
-export type Step4FormData = z.infer<typeof step4Schema>;
-export type CompleteEventFormData = z.infer<typeof completeEventSchema>;
+export type Step1FormData         = yup.InferType<typeof step1Schema>;
+export type Step2FormData         = yup.InferType<typeof step2Schema>;
+export type Step3FormData         = yup.InferType<typeof step3Schema>;
+export type Step4FormData         = yup.InferType<typeof step4Schema>;
+export type CompleteEventFormData = yup.InferType<typeof completeEventSchema>;

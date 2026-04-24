@@ -26,6 +26,8 @@ export function FeaturedImageUpload({
     maxSize = 5,
     className
 }: FeaturedImageUploadProps) {
+
+    console.log(value)
     
     const [preview, setPreview] = useState<string | null>(() => {
         if (typeof value === 'string') return value

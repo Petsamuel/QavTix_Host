@@ -3,6 +3,7 @@
 import { Icon } from '@iconify/react'
 import Link from 'next/link'
 import NotificationItem from './NotificationItem'
+import { usePathname } from 'next/navigation'
 
 interface NotificationsTabProps {
     notifications: DashboardNotification[]
@@ -12,7 +13,8 @@ const PREVIEW_COUNT = 4
 
 export default function NotificationsTab({ notifications }: NotificationsTabProps) {
     const hasUnread = notifications.some(n => !n.is_read)
-    const preview   = notifications.slice(0, PREVIEW_COUNT)
+    const preview = notifications.slice(0, PREVIEW_COUNT)
+    const pathName = usePathname()
 
     return (
         <div className="space-y-4 px-4">
@@ -40,9 +42,9 @@ export default function NotificationsTab({ notifications }: NotificationsTabProp
                 )}
             </div>
 
-            {notifications.length > PREVIEW_COUNT && (
+            {notifications.length > PREVIEW_COUNT && !pathName.includes("/all-activities") && (
                 <Link
-                    href="/dashboard/notifications"
+                    href="/dashboard/all-activities"
                     className="text-xs flex items-center gap-1 text-brand-primary-6 hover:text-brand-primary-7 font-bold transition-colors"
                 >
                     <span>View All Notifications</span>

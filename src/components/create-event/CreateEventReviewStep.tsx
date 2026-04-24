@@ -1,21 +1,21 @@
 'use client'
 
-import { Icon }            from '@iconify/react'
-import Image               from 'next/image'
-import { cn }              from '@/lib/utils'
-import { space_grotesk }   from '@/lib/fonts'
+import { Icon } from '@iconify/react'
+import Image from 'next/image'
+import { cn } from '@/lib/utils'
+import { space_grotesk } from '@/lib/fonts'
 import { PricingBreakdown } from './PricingBreakdown'
-import ActionButton1       from '../custom-utils/buttons/ActionBtn1'
-import { useStepper }      from '@/contexts/create-event/StepperProvider'
+import ActionButton1 from '../custom-utils/buttons/ActionBtn1'
+import { useStepper } from '@/contexts/create-event/StepperProvider'
 import { useEffect, useState } from 'react'
 import SchedulePublishModal from './SchedulePublishModal'
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks'
-import { showAlert }       from '@/lib/redux/slices/alertSlice'
+import { showAlert } from '@/lib/redux/slices/alertSlice'
 import { triggerPopupAlert } from '@/lib/redux/slices/popupAlertSlice'
-import { EVENT_DETAILS_LINK, NAVIGATION_LINKS }  from '@/enums/navigation'
+import { EVENT_DETAILS_LINK, NAVIGATION_LINKS } from '@/enums/navigation'
 import { openConfirmation, resetConfirmationStatus, finishConfirmAction } from '@/lib/redux/slices/confirmationSlice'
 import EventPublishStatusModal from './EventPublishStatusModal'
-import ShareEventModal     from '../modals/ShareEventModal'
+import ShareEventModal from '../modals/ShareEventModal'
 import { useEventCreation } from '@/contexts/create-event/CreateEventProvider'
 import { publishEvent, saveEventAsDraft } from '@/actions/event/creation'
 import { useRouter } from 'next/navigation'
@@ -27,20 +27,20 @@ import { uploadEventMedia } from '@/helper-fns/uploadEventMedia'
 export default function CreateEventReviewStep() {
 
     const dispatch = useAppDispatch()
-    const { eventData, resetForm } = useEventCreation()
-    const { goToPreviousStep }     = useStepper()
+    const { eventData, resetForm, categories } = useEventCreation()
+    const { goToPreviousStep } = useStepper()
 
     const { isConfirmed, lastConfirmedAction } = useAppSelector((state) => state.confirmation)
 
     const [openScheduleLaterModal, setOpenScheduleLaterModal] = useState(false)
-    const [isPublishing,           setIsPublishing]           = useState(false)
-    const [isSavingDraft,          setIsSavingDraft]          = useState(false)
+    const [isPublishing, setIsPublishing] = useState(false)
+    const [isSavingDraft, setIsSavingDraft] = useState(false)
     const router = useRouter()
 
     const [statusModal, setStatusModal] = useState<{
-        isOpen:    boolean
-        type:      'SUCCESS' | 'FAILED'
-        eventId?:  string
+        isOpen: boolean
+        type: 'SUCCESS' | 'FAILED'
+        eventId?: string
         errorMsg?: string
     }>({ isOpen: false, type: 'SUCCESS' })
 
@@ -62,8 +62,8 @@ export default function CreateEventReviewStep() {
 
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('en-NG', {
-            style:              'currency',
-            currency:           'NGN',
+            style: 'currency',
+            currency: 'NGN',
             maximumFractionDigits: 0,
         }).format(amount).replace('NGN', '₦')
 
@@ -71,9 +71,9 @@ export default function CreateEventReviewStep() {
 
     const handleConfirmImmediatePublish = () => {
         dispatch(openConfirmation({
-            title:       "Publish Event",
+            title: "Publish Event",
             description: "Are you sure you want to publish this event? It will be visible to attendees immediately.",
-            actionType:  "PUBLISH_EVENT",
+            actionType: "PUBLISH_EVENT",
         }))
     }
 
@@ -87,34 +87,34 @@ export default function CreateEventReviewStep() {
                 const media = await uploadEventMedia(eventData.detailsMedia)
                 const result = await publishEvent({ eventData, media })
                 if (result.success) {
-                    setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: result.eventId }) 
+                    setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: result.eventId })
                     dispatch(finishConfirmAction())
                     dispatch(resetConfirmationStatus())
                     // resetForm()
                 } else {
-                    setStatusModal({ isOpen: true, type: 'FAILED', errorMsg: result.message }) 
+                    setStatusModal({ isOpen: true, type: 'FAILED', errorMsg: result.message })
                     dispatch(finishConfirmAction())
                     dispatch(resetConfirmationStatus())
                     dispatch(showAlert({
-                        title:       "Publish Failed",
+                        title: "Publish Failed",
                         description: result.message,
-                        variant:     "destructive",
+                        variant: "destructive",
                     }))
                 }
             } catch {
                 dispatch(finishConfirmAction())
                 dispatch(resetConfirmationStatus())
                 dispatch(showAlert({
-                    title:       "Publish Failed",
+                    title: "Publish Failed",
                     description: "An unexpected error occurred. Please try again.",
-                    variant:     "destructive",
+                    variant: "destructive",
                 }))
             } finally {
                 setIsPublishing(false)
             }
         }
         run()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isConfirmed, lastConfirmedAction])
 
     // Schedule for later
@@ -128,21 +128,21 @@ export default function CreateEventReviewStep() {
             const result = await saveEventAsDraft({ eventData, scheduledAt: new Date(`${v.date}T${v.time}`).toISOString(), media })
             if (result.success) {
                 dispatch(triggerPopupAlert({
-                    id:          `schedule-${Date.now()}`,
-                    type:        "schedule_success",
-                    title:       "Event Scheduled Successfully",
-                    subtitle:    "Your post will go live at the selected time.",
+                    id: `schedule-${Date.now()}`,
+                    type: "schedule_success",
+                    title: "Event Scheduled Successfully",
+                    subtitle: "Your post will go live at the selected time.",
                     description: "View or manage it in Drafts/Scheduled Events.",
-                    buttonText:  "View Drafts/Scheduled",
-                    navigateTo:  NAVIGATION_LINKS.MY_EVENTS.href,
+                    buttonText: "View Drafts/Scheduled",
+                    navigateTo: NAVIGATION_LINKS.MY_EVENTS.href,
                 }))
-                
+
                 resetForm()
             } else {
                 dispatch(showAlert({
-                    title:       "Schedule Failed",
+                    title: "Schedule Failed",
                     description: result.message,
-                    variant:     "destructive",
+                    variant: "destructive",
                 }))
             }
         } finally {
@@ -178,7 +178,13 @@ export default function CreateEventReviewStep() {
                 <div className="bg-white border border-brand-neutral-3 rounded-[32px] overflow-hidden flex flex-col md:flex-row drop-shadow-xs">
                     <div className="w-full md:w-[30%] h-64 md:h-auto relative">
                         <Image
-                            src="/images/demo-images/event-detail-img.png"
+                            src={
+                                eventData.detailsMedia?.featuredImage instanceof File
+                                    ? URL.createObjectURL(eventData.detailsMedia.featuredImage)
+                                    : typeof eventData.detailsMedia?.featuredImage === 'string'
+                                        ? eventData.detailsMedia.featuredImage
+                                        : "/images/demo-images/demo-review-create.png"
+                            }
                             alt="Event Cover"
                             className="w-full h-full object-cover"
                             fill
@@ -195,7 +201,7 @@ export default function CreateEventReviewStep() {
                                     {eventData.basicInformation?.eventTitle ?? "5ive Tour Concert"}
                                 </h2>
                                 <p className={cn(space_grotesk.className, "text-brand-secondary-9 font-light text-sm md:text-base")}>
-                                    {eventData.basicInformation?.eventCategory ?? "Music Festival"}
+                                    {categories.find((category) => category.id.toString() === eventData.basicInformation?.eventCategory)?.name}
                                 </p>
                             </div>
 
@@ -225,12 +231,12 @@ export default function CreateEventReviewStep() {
                                     {eventData.basicInformation?.locationType === "online"
                                         ? eventData.basicInformation.onlineLink ?? "Online Event"
                                         : eventData.basicInformation?.locationType === "tba"
-                                        ? "To Be Announced"
-                                        : [
-                                            eventData.basicInformation?.venueName,
-                                            eventData.basicInformation?.address,
-                                            eventData.basicInformation?.city,
-                                        ].filter(Boolean).join(", ") || "1234, Shima Road, Victoria Island, Lagos"}
+                                            ? "To Be Announced"
+                                            : [
+                                                eventData.basicInformation?.venueName,
+                                                eventData.basicInformation?.address,
+                                                eventData.basicInformation?.city,
+                                            ].filter(Boolean).join(", ") || "1234, Shima Road, Victoria Island, Lagos"}
                                 </p>
                             </div>
 
@@ -281,12 +287,12 @@ export default function CreateEventReviewStep() {
                     <span>Back</span>
                 </button>
 
-                <div className="mt-12 flex gap-4">
+                <div className="mt-12 flex flex-col sm:flex-row gap-4">
                     <button
                         type="button"
                         onClick={() => setOpenScheduleLaterModal(true)}
                         disabled={isPublishing || isSavingDraft}
-                        className="h-12 md:h-14 text-brand-primary-6 bg-white hover:shadow flex items-center gap-2 justify-center px-6 py-3 rounded-[30px] border border-brand-primary-6 font-medium text-xs md:text-sm hover:bg-brand-primary-1 hover:border-brand-primary-7 active:bg-brand-primary-1 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-primary-4 focus:ring-offset-2 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="h-12 w-full text-sm sm:w-auto md:h-14 text-brand-primary-6 bg-white hover:shadow flex items-center gap-2 justify-center px-6 py-3 rounded-[30px] border border-brand-primary-6 font-medium md:text-sm hover:bg-brand-primary-1 hover:border-brand-primary-7 active:bg-brand-primary-1 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-primary-4 focus:ring-offset-2 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
                         data-testid="btn-schedule-later"
                     >
                         {isSavingDraft
@@ -299,7 +305,7 @@ export default function CreateEventReviewStep() {
                         buttonText={isPublishing ? "Publishing..." : "Publish Now"}
                         iconPosition="right"
                         buttonType="button"
-                        className='text-sm!'
+                        className='text-sm! w-full sm:w-auto'
                         action={handleConfirmImmediatePublish}
                         isLoading={isPublishing}
                         icon={isPublishing ? "lucide:loader-2" : "gravity-ui:arrow-right"}
@@ -322,7 +328,7 @@ export default function CreateEventReviewStep() {
                 onClose={() => {
                     setStatusModal(prev => ({ ...prev, isOpen: false }))
                     resetForm()
-                    router.push(NAVIGATION_LINKS.DASHBOARD.href)
+                    router.push(NAVIGATION_LINKS.MY_EVENTS.href)
                 }}
                 type={statusModal.type}
                 onViewDashboard={() => router.push(NAVIGATION_LINKS.DASHBOARD.href)}

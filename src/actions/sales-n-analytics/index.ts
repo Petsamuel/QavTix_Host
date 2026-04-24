@@ -1,7 +1,8 @@
 "use server"
 
-import { getServerAxios } from "@/lib/axios"
+import { cookies } from "next/headers"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
+import { CACHE_TAGS } from "@/cache-tags"
 
 import {
     SALES_ANALYTICS_CARDS_ENDPOINT,
@@ -9,85 +10,78 @@ import {
     SALES_ANALYTICS_TRANSACTIONS_ENDPOINT,
 } from "@/endpoints"
 
+const FINANCIALS_REVALIDATE_SECONDS = 300
+
+async function fetchFinancials<T>(
+    endpoint: string,
+    tag: string,
+    params?: Record<string, string | number>,
+): Promise<{ success: true; data: T } | { success: false; message: string }> {
+    try {
+        const cookieStore = await cookies()
+        const accessToken = cookieStore.get("access_token")?.value
+
+        const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`)
+        if (params) {
+            Object.entries(params).forEach(([k, v]) => {
+                if (v != null) url.searchParams.set(k, String(v))
+            })
+        }
+
+        const res = await fetch(url.toString(), {
+            headers: {
+                "Content-Type": "application/json",
+                ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+            },
+            cache: "force-cache",
+            next: {
+                tags: [tag],
+                revalidate: FINANCIALS_REVALIDATE_SECONDS,
+            },
+        })
+
+        if (!res.ok) {
+            const json = await res.json()
+            console.error(`[${tag}] status:`, res.status, JSON.stringify(json))
+            return { success: false, message: handleApiError(json) }
+        }
+
+        const json = await res.json()
+        return { success: true, data: json.data ?? json }
+
+    } catch (err: any) {
+        console.error(`[${tag}] error:`, err?.message)
+        return { success: false, message: "Request failed." }
+    }
+}
 
 
 export async function getSalesAnalyticsCards(
     params: SalesAnalyticsCardsParams = {}
 ): Promise<SalesAnalyticsCardsResult> {
-    try {
-        const axios = await getServerAxios()
-
-        const searchParams = new URLSearchParams()
-        if (params.date_range) searchParams.set("date_range", params.date_range)
-        if (params.event)      searchParams.set("event",      params.event)
-
-        const query = searchParams.toString()
-        const url   = query
-            ? `${SALES_ANALYTICS_CARDS_ENDPOINT}?${query}`
-            : SALES_ANALYTICS_CARDS_ENDPOINT
-
-        const { data } = await axios.get(url)
-
-        return { success: true, data: data.data }
-
-    } catch (err: any) {
-        console.error("[getSalesAnalyticsCards] status:", err?.response?.status)
-        console.error("[getSalesAnalyticsCards] body:",   JSON.stringify(err?.response?.data))
-        return { success: false, message: handleApiError(err?.response?.data) }
-    }
+    return fetchFinancials<SalesAnalyticsCardsData>(
+        SALES_ANALYTICS_CARDS_ENDPOINT,
+        CACHE_TAGS.FINANCIALS,
+        params as Record<string, string | number>,
+    )
 }
 
 export async function getSalesAnalyticsGraphs(
     params: SalesAnalyticsGraphsParams = {}
 ): Promise<SalesAnalyticsGraphsResult> {
-    try {
-        const axios = await getServerAxios()
-
-        const searchParams = new URLSearchParams()
-        if (params.chart) searchParams.set("chart", params.chart)
-        if (params.event) searchParams.set("event", params.event)
-        if (params.year)  searchParams.set("year",  String(params.year))
-
-        const query = searchParams.toString()
-        const url   = query
-            ? `${SALES_ANALYTICS_GRAPHS_ENDPOINT}?${query}`
-            : SALES_ANALYTICS_GRAPHS_ENDPOINT
-
-        const { data } = await axios.get(url)
-
-        return { success: true, data: data.data }
-
-    } catch (err: any) {
-        console.error("[getSalesAnalyticsGraphs] status:", err?.response?.status)
-        console.error("[getSalesAnalyticsGraphs] body:",   JSON.stringify(err?.response?.data))
-        return { success: false, message: handleApiError(err?.response?.data) }
-    }
+    return fetchFinancials<SalesAnalyticsGraphsData>(
+        SALES_ANALYTICS_GRAPHS_ENDPOINT,
+        CACHE_TAGS.FINANCIALS,
+        params as Record<string, string | number>,
+    )
 }
-
 
 export async function getSalesAnalyticsTransaction(
     params: SalesAnalyticsGraphsParams = {}
 ): Promise<SalesAnalyticsTransactionsResult> {
-    try {
-        const axios = await getServerAxios()
-
-        const searchParams = new URLSearchParams()
-        if (params.chart) searchParams.set("chart", params.chart)
-        if (params.event) searchParams.set("event", params.event)
-        if (params.year)  searchParams.set("year",  String(params.year))
-
-        const query = searchParams.toString()
-        const url   = query
-            ? `${SALES_ANALYTICS_TRANSACTIONS_ENDPOINT}?${query}`
-            : SALES_ANALYTICS_TRANSACTIONS_ENDPOINT
-
-        const { data } = await axios.get(url)
-
-        return { success: true, data: data.data }
-
-    } catch (err: any) {
-        console.error("[getSalesAnalyticsTransactions] status:", err?.response?.status)
-        console.error("[getSalesAnalyticsTransactions] body:",   JSON.stringify(err?.response?.data))
-        return { success: false, message: handleApiError(err?.response?.data) }
-    }
+    return fetchFinancials<any>(
+        SALES_ANALYTICS_TRANSACTIONS_ENDPOINT,
+        CACHE_TAGS.FINANCIALS,
+        params as Record<string, string | number>,
+    )
 }

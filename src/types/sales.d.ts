@@ -1,24 +1,24 @@
 interface SalesAnalyticsCardsParams {
     date_range?: "day" | "week" | "month"
-    event?:      string // event UUID
+    event?: string // event UUID
 }
 
 interface SalesAnalyticsCardsData {
-    total_revenue:        string
+    total_revenue: string
     total_revenue_change: string
-    tickets_sold:         number
-    conversion_rate:      number
-    conversion_change:    number
-    average_order_value:  string
-    aov_change:           number
-    page_views:           number
-    refunds:              number
-    repeat_buyers:        number
+    tickets_sold: number
+    conversion_rate: number
+    conversion_change: number
+    average_order_value: string
+    aov_change: number
+    page_views: number
+    refunds: number
+    repeat_buyers: number
 }
 
 interface SalesAnalyticsCardsResult {
-    success:  boolean
-    data?:    SalesAnalyticsCardsData
+    success: boolean
+    data?: SalesAnalyticsCardsData
     message?: string
 }
 
@@ -29,81 +29,81 @@ type ChartFilter = "week" | "month" | "year"
 interface SalesAnalyticsGraphsParams {
     chart?: ChartFilter
     event?: string
-    year?:  number
+    year?: number
 }
 
 interface SalesBreakdownItem {
     ticket_type: string
-    count:       number
-    percentage:  number
+    count: number
+    percentage: number
 }
 
 interface SalesByPeriodItem {
-    period_label:  string
-    total:         number
+    period_label: string
+    total: number
     by_ticket_type: SalesBreakdownItem[]
 }
 
 interface RevenueChartPoint {
-    label:  string
+    label: string
     amount: string
 }
 
 interface WeekDay {
-    day:       string
-    date:      string
-    morning:   number
+    day: string
+    date: string
+    morning: number
     afternoon: number
-    evening:   number
-    total:     number
+    evening: number
+    total: number
 }
 
 interface WeekAnalysisData {
     change_vs_last_week: number
-    label:               string
-    days:                WeekDay[]
+    label: string
+    days: WeekDay[]
 }
 
 interface GeoLocation {
-    city:    string
-    state:   string
+    city: string
+    state: string
     tickets: number
     revenue: string
-    clicks:  number
+    clicks: number
 }
 
 interface GeoBreakdownData {
-    locations:     GeoLocation[]
+    locations: GeoLocation[]
     best_location: {
-        label:   string
+        label: string
         tickets: number
         revenue: string
-        clicks:  number
+        clicks: number
     }
 }
 
 interface SalesAnalyticsGraphsData {
     sales_breakdown: {
-        overall:   SalesBreakdownItem[]
+        overall: SalesBreakdownItem[]
         by_period: SalesByPeriodItem[]
     }
     revenue_chart: {
         locked: boolean
-        data:   RevenueChartPoint[]
+        data: RevenueChartPoint[]
     }
     week_analysis: {
         locked: boolean
-        data:   WeekAnalysisData
+        data: WeekAnalysisData
     }
     geo_breakdown: {
         locked: boolean
-        data:   GeoBreakdownData
+        data: GeoBreakdownData
     }
 }
 
 interface SalesAnalyticsGraphsResult {
-    success:  boolean
-    data?:    SalesAnalyticsGraphsData
+    success: boolean
+    data?: SalesAnalyticsGraphsData
     message?: string
 }
 
@@ -134,12 +134,12 @@ interface Transaction {
 
 
 interface SalesAnalyticsTransactionsResult {
-    success:  boolean
+    success: boolean
     data?: {
-        results:     Transaction[]
-        count:       number
-        next:        string | null
-        previous:    string | null
+        results: Transaction[]
+        count: number
+        next: number | null
+        previous: number | null
         total_pages?: number
     }
     message?: string
