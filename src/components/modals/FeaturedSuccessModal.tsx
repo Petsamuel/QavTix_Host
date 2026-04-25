@@ -4,7 +4,6 @@ import { space_grotesk } from "@/lib/fonts";
 import Image from "next/image";
 import { DialogDescription, DialogTitle } from "../ui/dialog";
 import { Icon } from "@iconify/react";
-import { useRouter } from "next/navigation";
 import { AnimatedDialog } from "../custom-utils/dialogs/AnimatedDialog";
 import ActionButton1 from "../custom-utils/buttons/ActionBtn1";
 import { EVENT_DETAILS_LINK } from "@/enums/navigation";
@@ -16,8 +15,7 @@ interface FeaturedSuccessModalProps {
 }
 
 export default function FeaturedSuccessModal({ onClose, eventSlug }: FeaturedSuccessModalProps) {
-    
-    const router = useRouter()
+
     const { status, resetSuccess } = useFeatureCheckout()
 
     const nextSteps = [
@@ -39,14 +37,14 @@ export default function FeaturedSuccessModal({ onClose, eventSlug }: FeaturedSuc
     ]
 
     return (
-        <AnimatedDialog 
-            open={status === "success"} 
+        <AnimatedDialog
+            open={status === "success"}
             onOpenChange={() => {
                 onClose()
                 resetSuccess()
             }}
-            showCloseButton={false} 
-            className="rounded-[40px] md:max-w-[32em]" 
+            showCloseButton={false}
+            className="rounded-[40px] md:max-w-[32em]"
             childrenContainerStyles="px-8 pt-0! pb-10"
         >
             <div className="text-center relative overflow-hidden">
@@ -67,8 +65,8 @@ export default function FeaturedSuccessModal({ onClose, eventSlug }: FeaturedSuc
                 <div className="relative z-10 mt-10">
                     {/* Featured Success Indicator Badge */}
                     <div className="relative mx-auto mb-6 w-fit">
-                         <Image
-                            src="/images/vectors/shield.png"
+                        <Image
+                            src="/images/vectors/publish-status.svg"
                             alt="Success"
                             width={122} height={131}
                             className=""
@@ -78,7 +76,7 @@ export default function FeaturedSuccessModal({ onClose, eventSlug }: FeaturedSuc
                     <DialogTitle className={`text-2xl lg:text-3xl font-bold text-brand-secondary-9 mb-2 ${space_grotesk.className}`}>
                         Congrats! Your event is now featured.
                     </DialogTitle>
-                    
+
                     <DialogDescription className="text-brand-secondary-9 text-sm max-w-[85%] mx-auto">
                         Your event has been added to the Featured Events section. It will remain featured for the selected duration.
                     </DialogDescription>
@@ -104,7 +102,7 @@ export default function FeaturedSuccessModal({ onClose, eventSlug }: FeaturedSuc
                             buttonText="View Featured Event"
                             icon="solar:arrow-right-linear"
                             iconPosition="right"
-                            action={() => router.push(EVENT_DETAILS_LINK.replace("[event_id]", eventSlug?.toString() || ""))}
+                            action={() => window.open(EVENT_DETAILS_LINK.replace("[event_id]", eventSlug?.toString() || ""), "_blank")}
                             className="w-full flex-1 text-sm! rounded-md!"
                         />
                         <button
