@@ -278,7 +278,7 @@ export function mapSalesAnalyticsCards(
             description: `${fmtChange(parseFloat(cards.total_revenue_change))} change`,
             icon: "/images/vectors/dollar-in.svg",
             iconColor: "text-[#359160]",
-            change: parseFloat(cards.total_revenue_change).
+            change: parseFloat(cards.total_revenue_change)
         },
         {
             id: "tickets-sold",
