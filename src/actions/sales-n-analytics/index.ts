@@ -19,7 +19,7 @@ async function fetchFinancials<T>(
 ): Promise<{ success: true; data: T } | { success: false; message: string }> {
     try {
         const cookieStore = await cookies()
-        const accessToken = cookieStore.get("access_token")?.value
+        const accessToken = cookieStore.get("host_access_token")?.value
 
         const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`)
         if (params) {

@@ -20,6 +20,8 @@ export async function getFinancials(
     try {
         const token = await getToken()
 
+        console.log("tokeb", token)
+
         const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${FINANCIALS_ENDPOINT}`)
         if (params.date_range) url.searchParams.set("date_range", params.date_range)
         if (params.start_date) url.searchParams.set("start_date", params.start_date)

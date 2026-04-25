@@ -46,7 +46,7 @@ export async function getEvents(
         const res = await fetch(url.toString(), {
             headers: authHeaders(token),
             cache: "force-cache",
-            next: { tags: [CACHE_TAGS.EVENTS], revalidate: 60 },
+            next: { tags: [CACHE_TAGS.EVENTS], revalidate: 500 },
         })
 
         if (!res.ok) {
@@ -79,8 +79,7 @@ export async function getEventDetails(eventID: string): Promise<GetEventDetailsR
         const res = await fetch(url, {
             headers: authHeaders(token),
             cache: "force-cache",
-            // ✅ Only per-event tag — no shared base tag to avoid write collision
-            next: { tags: [`event-${eventID}`], revalidate: 60 },
+            next: { tags: [`event-${eventID}`], revalidate: 500 },
         })
 
         const json = await res.json()
@@ -112,7 +111,7 @@ export async function getEditEventDetails(eventID: string): Promise<GetEditEvent
             headers: authHeaders(token),
             cache: "force-cache",
             // ✅ Separate tag from getEventDetails — prevents parallel write collision
-            next: { tags: [`event-edit-${eventID}`], revalidate: 60 },
+            next: { tags: [`event-edit-${eventID}`], revalidate: 500 },
         })
 
         const json = await res.json()
