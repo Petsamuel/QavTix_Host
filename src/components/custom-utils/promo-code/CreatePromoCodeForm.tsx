@@ -19,12 +19,12 @@ import SearchableEventSelect from "../inputs/CustomEventSearchableSelect";
 import ActionButton1 from "../buttons/ActionBtn1";
 import { useRevalidate } from "@/custom-hooks/UseRevalidate";
 
-export default function CreatePromoCodeForm({ 
-    openPromoModal, 
-    setOpenPromoModal ,
+export default function CreatePromoCodeForm({
+    openPromoModal,
+    setOpenPromoModal,
 }: {
-    openPromoModal: boolean, 
-    setOpenPromoModal: Dispatch<SetStateAction<boolean>> ,
+    openPromoModal: boolean,
+    setOpenPromoModal: Dispatch<SetStateAction<boolean>>,
 }) {
 
     const {
@@ -35,13 +35,17 @@ export default function CreatePromoCodeForm({
         handleSubmit,
     } = useForm<CreatePromoCodeSchemaType>({
         resolver: zodResolver(createPromoCodeSchema),
+        defaultValues: {
+            usage_limit: 1,
+            discount: 10
+        }
     })
 
     const dispatch = useAppDispatch()
 
     const { trigger } = useRevalidate("marketing")
 
-    const onSubmit : SubmitHandler<CreatePromoCodeSchemaType> = async (data) => {
+    const onSubmit: SubmitHandler<CreatePromoCodeSchemaType> = async (data) => {
         const result = await createPromoCode({
             code: data.promo_code,
             discount_percentage: data.discount.toString(),
@@ -53,16 +57,16 @@ export default function CreatePromoCodeForm({
         if (result.success) {
             reset()
             dispatch(showAlert({
-                title:       "Promo code created",
+                title: "Promo code created",
                 description: "Your promo code is now active and ready to use.",
-                variant:     "success"
+                variant: "success"
             }))
             trigger()
             setOpenPromoModal(false)
         } else {
             dispatch(showAlert({
-                variant:     "destructive",
-                title:       "Failed to create promo code",
+                variant: "destructive",
+                title: "Failed to create promo code",
                 description: result.message ?? "Please try again.",
             }))
         }
@@ -98,7 +102,7 @@ export default function CreatePromoCodeForm({
                                 required
                                 showAshk={false}
                                 type="number"
-                                inputMode="numeric" 
+                                inputMode="numeric"
                                 className="pr-12 h-11.25! border-0! rounded-e-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 error={errors.discount?.message}
                                 {...register('discount', { valueAsNumber: true })}
@@ -146,11 +150,19 @@ export default function CreatePromoCodeForm({
                                             <CalendarIcon className="h-4 w-4 text-brand-neutral-6" />
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
+                                    <PopoverContent
+                                        className="w-auto p-0 z-999"
+                                        align="start"
+                                        side="bottom"
+                                        sideOffset={4}
+                                        avoidCollisions={true}
+                                        collisionPadding={16}
+                                    >
                                         <Calendar
                                             mode="single"
                                             selected={field.value}
                                             onSelect={field.onChange}
+                                            disabled={(date) => date < new Date()}
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -161,7 +173,7 @@ export default function CreatePromoCodeForm({
                         )}
                     </div>
 
-                   <Controller
+                    <Controller
                         name="event_id"
                         control={control}
                         render={({ field }) => (
@@ -182,7 +194,7 @@ export default function CreatePromoCodeForm({
                             Cancel
                         </button>
 
-                        <ActionButton1 
+                        <ActionButton1
                             buttonText="Confirm"
                             buttonType="submit"
                             isLoading={isSubmitting}

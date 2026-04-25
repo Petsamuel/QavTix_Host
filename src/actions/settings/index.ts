@@ -15,26 +15,26 @@ import {
 } from "@/endpoints";
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
-import { updateTag } from "next/cache"
+import { revalidateTag } from "next/cache"
 import { cookies, headers } from "next/headers"
 import { CACHE_TAGS } from "@/cache-tags"
 import { resolveCountryLabel } from "@/helper-fns/resolveCountryCode";
 
 
 interface PrivacyResult {
-    success:  boolean
-    data?:    PrivacySettings
+    success: boolean
+    data?: PrivacySettings
     message?: string
 }
 
 
 export async function getUserLocation(): Promise<{ city: string; country: string }> {
     const headersList = await headers()
-    const city        = headersList.get("x-vercel-ip-city")    ?? "Lagos"
+    const city = headersList.get("x-vercel-ip-city") ?? "Lagos"
     const countryCode = headersList.get("x-vercel-ip-country") ?? "NG"
 
     return {
-        city:    decodeURIComponent(city),
+        city: decodeURIComponent(city),
         country: resolveCountryLabel(countryCode),
     }
 }
@@ -52,6 +52,7 @@ export async function getPrivacySettings(): Promise<PrivacyResult> {
                     "Content-Type": "application/json",
                     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
                 },
+                cache: "force-cache",
                 next: { tags: [CACHE_TAGS.PRIVACY_SETTINGS] },
             }
         )
@@ -76,7 +77,7 @@ export async function updatePrivacySettings(
     try {
         const axiosInstance = await getServerAxios()
         await axiosInstance.patch(SET_PRIVACY_SETTINGS_ENDPOINT, payload)
-        updateTag(CACHE_TAGS.PRIVACY_SETTINGS)
+        revalidateTag(CACHE_TAGS.PRIVACY_SETTINGS, "max")
         return { success: true }
     } catch (error: any) {
         console.log("[updatePrivacySettings] status:", error?.response?.status)
@@ -115,10 +116,8 @@ export async function deleteAccount(): Promise<{ success: boolean; message?: str
 }
 
 
-
-
 interface ChangePasswordResult {
-    success:  boolean
+    success: boolean
     message?: string
 }
 
@@ -132,7 +131,6 @@ export async function changePassword(
             old_password: oldPassword,
             new_password: newPassword,
         })
-        // No revalidation needed — password change doesn't affect cached data
         return { success: true }
     } catch (error: any) {
         console.log("[changePassword] status:", error?.response?.status)
@@ -140,7 +138,6 @@ export async function changePassword(
         return { success: false, message: handleApiError(error?.response?.data) }
     }
 }
-
 
 
 async function getToken(): Promise<string | undefined> {
@@ -159,6 +156,7 @@ export async function getSubscription(): Promise<GetSubscriptionResult> {
                     "Content-Type": "application/json",
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
+                cache: "force-cache",
                 next: { tags: [CACHE_TAGS.SUBSCRIPTION] },
             }
         )
@@ -184,7 +182,7 @@ export async function toggleAutoRenew(
     try {
         const axiosInstance = await getServerAxios()
         await axiosInstance.patch(TOGGLE_AUTO_RENEW_ENDPOINT, { auto_renew: enabled })
-        updateTag(CACHE_TAGS.SUBSCRIPTION)
+        revalidateTag(CACHE_TAGS.SUBSCRIPTION, "max")
         return { success: true }
     } catch (err: any) {
         console.error("[toggleAutoRenew] status:", err?.response?.status)
@@ -197,7 +195,7 @@ export async function renewSubscription(): Promise<RenewSubscriptionResult> {
     try {
         const axiosInstance = await getServerAxios()
         await axiosInstance.post(RENEW_SUBSCRIPTION_ENDPOINT)
-        updateTag(CACHE_TAGS.SUBSCRIPTION)
+        revalidateTag(CACHE_TAGS.SUBSCRIPTION, "max")
         return { success: true }
     } catch (err: any) {
         console.error("[renewSubscription] status:", err?.response?.status)
@@ -210,7 +208,7 @@ export async function cancelSubscription(): Promise<{ success: boolean; message?
     try {
         const axiosInstance = await getServerAxios()
         await axiosInstance.post(CANCEL_SUBSCRIPTION_ENDPOINT)
-        updateTag(CACHE_TAGS.SUBSCRIPTION)
+        revalidateTag(CACHE_TAGS.SUBSCRIPTION, "max")
         return { success: true }
     } catch (err: any) {
         console.error("[cancelSubscription] status:", err?.response?.status)
@@ -220,64 +218,48 @@ export async function cancelSubscription(): Promise<{ success: boolean; message?
 }
 
 
-
-// INITIALIZE A SUBSCRIPTION PAYMENT FOR A HOST
-// RETURNS A CHECKOUT URL CONTAINING THE PAYSTACK ACCESS CODE
 export async function initializeHostSubscription(payload: {
-    plan_slug:      string
-    billing_cycle:  "monthly" | "annual"
-    country:        string
-    currency:       string
+    plan_slug: string
+    billing_cycle: "monthly" | "annual"
+    country: string
+    currency: string
 }): Promise<{ success: boolean; checkout_url?: string; message?: string }> {
     try {
         const axiosInstance = await getServerAxios()
-
-        const { data } = await axiosInstance.post(HOST_PLAN_CHECKOUT_ENDPOINT, {...payload, currency: "NGN" })
-
+        const { data } = await axiosInstance.post(HOST_PLAN_CHECKOUT_ENDPOINT, { ...payload, currency: "NGN" })
         const checkout_url = data?.checkout_url ?? data?.data?.checkout_url
 
         if (!checkout_url) {
-            return { 
-                success: false, 
-                message: "No checkout URL returned from server." 
-            }
+            return { success: false, message: "No checkout URL returned from server." }
         }
 
         return { success: true, checkout_url }
-
     } catch (error: any) {
         console.error("[initializeHostSubscription] error:", error?.response?.data || error)
-        
         const status = error?.response?.status
         return {
             success: false,
-            message: status 
-                ? mapSubscriptionError(status) 
-                : "Network error. Please try again."
+            message: status ? mapSubscriptionError(status) : "Network error. Please try again."
         }
     }
 }
 
-// VERIFY A COMPLETED HOST SUBSCRIPTION PAYMENT
 export async function verifyHostSubscription(payload: {
-    reference:  string
-    save_card:  boolean
-    country:    string
+    reference: string
+    save_card: boolean
+    country: string
 }): Promise<{ success: boolean; message?: string; data?: any }> {
     try {
         const axiosInstance = await getServerAxios()
-
         const { data } = await axiosInstance.post(HOST_PLAN_CHECKOUT_VERIFY_ENDPOINT, payload)
 
-        return { 
-            success: true, 
+        return {
+            success: true,
             message: data?.message,
-            data: data?.data ?? data 
+            data: data?.data ?? data
         }
-
     } catch (error: any) {
         console.error("[verifyHostSubscription] error:", error?.response?.data || error)
-        
         return {
             success: false,
             message: error?.response?.data?.message ?? "Verification failed. Please contact support."
@@ -286,13 +268,14 @@ export async function verifyHostSubscription(payload: {
 }
 
 
-// MAPS HTTP STATUS CODES TO HUMAN-READABLE MESSAGES
 function mapSubscriptionError(status: number): string {
     switch (status) {
         case 400: return "You are already on this plan or this would be a downgrade."
         case 402: return "Your card charge failed. Please check your payment details."
         case 403: return "Your account type is not eligible for this plan."
         case 404: return "Plan not found. Please refresh and try again."
-        default:  return "Something went wrong. Please try again."
+        default: return "Something went wrong. Please try again."
     }
 }
+
+

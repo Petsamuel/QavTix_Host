@@ -13,17 +13,17 @@ import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 type FeaturedStatus = "idle" | "processing" | "success" | "error"
 
 interface FeatureCheckoutContextType {
-    selectedPlanId: string | null
-    successPlan: any | null
-    status: FeaturedStatus
-    activeCurrency: string
-    isRatesLoading: boolean
-    closeAddModal: boolean,
+    selectedPlanId:    string | null
+    successPlan:       any | null
+    status:            FeaturedStatus
+    activeCurrency:    string
+    isRatesLoading:    boolean
+    closeAddModal:     boolean
     setSelectedPlanId: (id: string | null) => void
-    setStatus: (status: FeaturedStatus) => void
-    convertedPrice: (amountNGN: number) => string
-    promoteToFeatured: (eventId: string) => Promise<void>
-    resetSuccess: () => void
+    setStatus:         (status: FeaturedStatus) => void
+    convertedPrice:    (amountNGN: number) => string
+    promoteToFeatured: (eventId: string, planIdOverride?: string) => Promise<void>
+    resetSuccess:      () => void
 }
 
 const FeatureCheckoutContext = createContext<FeatureCheckoutContextType | undefined>(undefined)
@@ -36,9 +36,9 @@ export function FeatureCheckoutProvider({ children }: { children: ReactNode }) {
     const { trigger } = useRevalidate("events")
 
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
-    const [successPlan, setSuccessPlan] = useState<any | null>(null)
-    const [closeAddModal, setCloseAddModal] = useState(false)
-    const [status, setStatus] = useState<FeaturedStatus>("idle")
+    const [successPlan,    setSuccessPlan]    = useState<any | null>(null)
+    const [closeAddModal,  setCloseAddModal]  = useState(false)
+    const [status,         setStatus]         = useState<FeaturedStatus>("idle")
 
     const { convert, isLoading: isRatesLoading } = useCurrencyConversion(currencyCode)
 
@@ -47,7 +47,6 @@ export function FeatureCheckoutProvider({ children }: { children: ReactNode }) {
         [convert]
     )
 
-
     const resetSuccess = useCallback(() => {
         setSuccessPlan(null)
         setStatus("idle")
@@ -55,18 +54,19 @@ export function FeatureCheckoutProvider({ children }: { children: ReactNode }) {
         setCloseAddModal(false)
     }, [])
 
-    const promoteToFeatured = async (eventId: string) => {
-        const plan = FEATURED_PLANS.find(p => p.id === selectedPlanId)
+    const promoteToFeatured = async (eventId: string, planIdOverride?: string) => {
+        const resolvedPlanId = planIdOverride ?? selectedPlanId
+        const plan = FEATURED_PLANS.find(p => p.id === resolvedPlanId)
         if (!plan || !eventId) return
 
         setStatus("processing")
-        
+
         try {
             const res = await initializeFeaturedPayment({
-                event_id: eventId,
+                event_id:  eventId,
                 plan_slug: plan.id,
-                country: user?.country || "NG",
-                currency: "NGN"
+                country:   user?.country || "NG",
+                currency:  "NGN"
             })
 
             if (!res.success) {
@@ -83,28 +83,28 @@ export function FeatureCheckoutProvider({ children }: { children: ReactNode }) {
 
             // FLOW: POPUP
             if (res.flow === "popup" && res.checkout_url) {
-                const PaystackPop = (await import("@paystack/inline-js")).default
-                const handler = new PaystackPop()
-                const accessCode = extractAccessCode(res.checkout_url)
+                const PaystackPop  = (await import("@paystack/inline-js")).default
+                const handler      = new PaystackPop()
+                const accessCode   = extractAccessCode(res.checkout_url)
                 setCloseAddModal(true)
                 handler.resumeTransaction(accessCode, {
                     onSuccess: async (transaction: { reference: string }) => {
                         const verify = await verifyFeaturedPayment({
                             reference: transaction.reference,
-                            event_id: eventId,
-                            country: user?.country || "NG",
+                            event_id:  eventId,
+                            country:   user?.country || "NG",
                         })
-                        
+
                         if (verify.success) {
                             setSuccessPlan(plan)
                             setStatus("success")
-                            trigger()
                         } else {
                             throw new Error(verify.message || "Verification failed")
                         }
                     },
                     onCancel: () => {
                         setStatus("idle")
+                        setCloseAddModal(false)
                         dispatch(showAlert({ title: "Cancelled", description: "Payment was not completed.", variant: "destructive" }))
                     }
                 })
@@ -112,10 +112,11 @@ export function FeatureCheckoutProvider({ children }: { children: ReactNode }) {
         } catch (error: any) {
             console.error(error)
             setStatus("error")
-            dispatch(showAlert({ 
-                title: "Error", 
-                description: error.message || "An unexpected error occurred", 
-                variant: "destructive" 
+            setCloseAddModal(false)
+            dispatch(showAlert({
+                title:       "Error",
+                description: error.message || "An unexpected error occurred",
+                variant:     "destructive"
             }))
         }
     }

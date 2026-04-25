@@ -4,7 +4,6 @@ import { useState, useRef } from "react"
 import { DateRange } from "react-day-picker"
 import { useAppSelector } from "@/lib/redux/hooks"
 import MetricCardsContainer1 from "../cards/MetricCardsContainer1"
-import DateFilter from "../custom-utils/TableDataDisplayAreas/filters/DateFilter"
 import ExportButton1 from "@/lib/features/export/ExportDataBtn1"
 import MainWithdrawalComponent from "../custom-utils/withdrawal/MainWithdrawalComponent"
 import PayoutHistoryTable from "../custom-utils/TableDataDisplayAreas/tables/PayoutHistory"
@@ -19,7 +18,7 @@ import FinancialPageLoader from "../loaders/FinancialPageLoader"
 import DateRangePresetFilter from "../custom-utils/TableDataDisplayAreas/filters/DateRangePresetFilter"
 
 interface Props {
-    initialCards:   FinancialCards
+    initialCards: FinancialCards
     initialHistory: WithdrawalHistoryPaginated
     payoutAccounts: PayoutAccountItem[]
 }
@@ -34,13 +33,13 @@ export default function FinancialsPageContentWrapper({
 
     const [datePreset, setDatePreset] = useState<DatePreset | null>(null)
 
-    const cardsRef           = useRef<FinancialCards>(initialCards)
+    const cardsRef = useRef<FinancialCards>(initialCards)
     const [cards, _setCards] = useState<FinancialCards>(initialCards)
-    const [history,          setHistory]         = useState<WithdrawalHistoryPaginated>(initialHistory)
-    const [payoutAccounts,   setPayoutAccounts]   = useState<PayoutAccountItem[]>(initialPayoutAccounts)
-    const [pageLoading,      setPageLoading]      = useState(false)
-    const [cardsLoading,     setCardsLoading]     = useState(false)
-    const [cardsError,       setCardsError]       = useState(false)
+    const [history, setHistory] = useState<WithdrawalHistoryPaginated>(initialHistory)
+    const [payoutAccounts, setPayoutAccounts] = useState<PayoutAccountItem[]>(initialPayoutAccounts)
+    const [pageLoading, setPageLoading] = useState(false)
+    const [cardsLoading, setCardsLoading] = useState(false)
+    const [cardsError, setCardsError] = useState(false)
 
     const setCards = (next: FinancialCards) => {
         cardsRef.current = next

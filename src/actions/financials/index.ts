@@ -1,11 +1,11 @@
 "use server"
 
+import { revalidateTag } from "next/cache"
 import { CACHE_TAGS } from "@/cache-tags"
 import { FINANCIALS_ENDPOINT, PAYOUT_ADD_ENDPOINT, PAYOUT_LIST_ENDPOINT, REMOVE_PAYOUT_ENDPOINT, WITHDRAWAL_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
 import { randomUUID } from "crypto"
-import { updateTag } from "next/cache"
 import { cookies } from "next/headers"
 
 async function getToken(): Promise<string | undefined> {
@@ -13,27 +13,28 @@ async function getToken(): Promise<string | undefined> {
     return cookieStore.get("host_access_token")?.value
 }
 
+
 export async function getFinancials(
     params: FinancialsParams = {}
 ): Promise<GetFinancialsResult> {
     try {
         const token = await getToken()
 
-        const url = new URL(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${FINANCIALS_ENDPOINT}`
-        )
+        console.log("tokeb", token)
 
+        const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${FINANCIALS_ENDPOINT}`)
         if (params.date_range) url.searchParams.set("date_range", params.date_range)
         if (params.start_date) url.searchParams.set("start_date", params.start_date)
-        if (params.end_date)   url.searchParams.set("end_date",   params.end_date)
-        if (params.page)       url.searchParams.set("page",       String(params.page))
+        if (params.end_date) url.searchParams.set("end_date", params.end_date)
+        if (params.page) url.searchParams.set("page", String(params.page))
 
         const res = await fetch(url.toString(), {
             headers: {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
-            next: { tags: [CACHE_TAGS.FINANCIALS] },
+            next: { tags: [CACHE_TAGS.FINANCIALS], revalidate: 1000 },
+            cache: "force-cache",
         })
 
         if (!res.ok) {
@@ -53,17 +54,15 @@ export async function getFinancials(
 export async function getPayoutAccounts(): Promise<{ success: boolean; data?: PayoutAccountItem[]; message?: string }> {
     try {
         const token = await getToken()
+        const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${PAYOUT_LIST_ENDPOINT}`)
 
-        const url = new URL(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${PAYOUT_LIST_ENDPOINT}`
-        )
-
-        const res = await fetch(url, {
+        const res = await fetch(url.toString(), {
             headers: {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
-            next: { tags: [CACHE_TAGS.FINANCIALS] },
+            next: { tags: [CACHE_TAGS.PAYOUT_ACCOUNTS], revalidate: 1000 },
+            cache: "force-cache",
         })
 
         if (!res.ok) {
@@ -80,55 +79,51 @@ export async function getPayoutAccounts(): Promise<{ success: boolean; data?: Pa
     }
 }
 
+
 export async function submitWithdrawal(
     payload: WithdrawPayload
 ): Promise<WithdrawResult & { freshData?: FinancialData }> {
     try {
-        const axios          = await getServerAxios()
+        const axios = await getServerAxios()
         const idempotencyKey = randomUUID()
 
-        await axios.post(
-            `/${WITHDRAWAL_ENDPOINT}`,
-            payload,
-            { headers: { "Idempotency-Key": idempotencyKey } }
-        )
+        await axios.post(`/${WITHDRAWAL_ENDPOINT}`, payload, {
+            headers: { "Idempotency-Key": idempotencyKey },
+        })
 
-        updateTag(CACHE_TAGS.FINANCIALS)
+        revalidateTag(CACHE_TAGS.FINANCIALS, "max")
 
-        // Return fresh data in the same round-trip
         const fresh = await getFinancials()
 
         return {
-            success:   true,
-            message:   "Withdrawal request submitted successfully.",
+            success: true,
+            message: "Withdrawal request submitted successfully.",
             freshData: fresh.data,
         }
-
     } catch (err: any) {
         console.error("[submitWithdrawal] status:", err?.response?.status)
-        console.error("[submitWithdrawal] body:",   JSON.stringify(err?.response?.data))
+        console.error("[submitWithdrawal] body:", JSON.stringify(err?.response?.data))
         return { success: false, message: handleApiError(err?.response?.data) }
     }
 }
 
 export async function addPayoutAccount(payload: {
-    bank_name:      string
-    account_name:   string
+    bank_name: string
+    account_name: string
     account_number: string
-    is_default?:    boolean
+    bank_code?: string
+    is_default?: boolean
 }): Promise<{ success: boolean; data?: PayoutAccountItem; message?: string }> {
     try {
         const axios = await getServerAxios()
-
         const { data } = await axios.post(`/${PAYOUT_ADD_ENDPOINT}`, payload)
 
-        updateTag(CACHE_TAGS.FINANCIALS)
+        revalidateTag(CACHE_TAGS.PAYOUT_ACCOUNTS, "max")
 
         return { success: true, data: data.data }
-
     } catch (err: any) {
         console.error("[addPayoutAccount] status:", err?.response?.status)
-        console.error("[addPayoutAccount] body:",   JSON.stringify(err?.response?.data))
+        console.error("[addPayoutAccount] body:", JSON.stringify(err?.response?.data))
         return { success: false, message: handleApiError(err?.response?.data) }
     }
 }
@@ -138,16 +133,14 @@ export async function removePayoutAccount(
 ): Promise<{ success: boolean; message?: string }> {
     try {
         const axios = await getServerAxios()
-
         await axios.delete(REMOVE_PAYOUT_ENDPOINT.replace("[payout_id]", accountId))
 
-        updateTag(CACHE_TAGS.FINANCIALS)
+        revalidateTag(CACHE_TAGS.PAYOUT_ACCOUNTS, "max")
 
         return { success: true, message: "Account removed successfully." }
-
     } catch (err: any) {
         console.error("[removePayoutAccount] status:", err?.response?.status)
-        console.error("[removePayoutAccount] body:",   JSON.stringify(err?.response?.data))
+        console.error("[removePayoutAccount] body:", JSON.stringify(err?.response?.data))
         return { success: false, message: handleApiError(err?.response?.data) }
     }
 }

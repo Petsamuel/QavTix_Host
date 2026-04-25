@@ -1,6 +1,6 @@
 "use client"
 
-import { Dispatch, SetStateAction, useState } from "react"
+import { Dispatch, SetStateAction, useMemo, useState } from "react"
 import DataDisplayTableWrapper from "../custom-utils/TableDataDisplayAreas/DataDisplayTableWrapper"
 import UpcomingEventsTable from "../custom-utils/TableDataDisplayAreas/tables/UpcomingEventsTable"
 import { DashboardUpcomingEventsFilters } from "../custom-utils/TableDataDisplayAreas/resources/avaliable-filters"
@@ -9,35 +9,43 @@ import { EVENT_CREATE, HOST_UPCOMING_EVENTS_ENDPOINT } from "@/endpoints"
 import { Icon } from "@iconify/react"
 import EmptyTicketsState from "../custom-utils/TableDataDisplayAreas/empty-state"
 import TableLoader from "../loaders/TableLoader"
+import { ApiCategory } from "@/actions/filters"
+import { deriveCategories } from "@/helper-fns/deriveCategories"
 
 const PAGE_SIZE = 10
 
 interface Props {
     initialData: TabSlice<UpcomingEvent>
+    categories: ApiCategory[]
 }
 
-export default function UpcomingEventsPW({ initialData }: Props) {
+export default function UpcomingEventsPW({ initialData, categories }: Props) {
 
     const { tabList, filterOptions } = DashboardUpcomingEventsFilters
 
     const [activeTab, setActiveTab] = useState<string>("upcoming")
-    const [filters,   setFilters]   = useState<Partial<FilterValues>>({
+    const [filters, setFilters] = useState<Partial<FilterValues>>({
         categories: [],
-        dateRange:  null,
-        status:     null,
+        dateRange: null,
+        status: null,
     })
 
     const { activeTabState } = useDataDisplay<UpcomingEvent>(
         {
             endpoint: HOST_UPCOMING_EVENTS_ENDPOINT,
             tabs: [{
-                key:          "upcoming",
+                key: "upcoming",
                 initialData,
                 staticParams: {},
             }],
             activeTab,
         },
         filters,
+    )
+
+    const availableCategories = useMemo(
+        () => deriveCategories(categories, activeTabState.cachedItems),
+        [categories?.length, activeTabState.cachedItems]
     )
 
     const {
@@ -49,7 +57,7 @@ export default function UpcomingEventsPW({ initialData }: Props) {
     } = activeTabState
 
     const startIndex = (currentPage - 1) * PAGE_SIZE + 1
-    const endIndex   = Math.min(currentPage * PAGE_SIZE, count)
+    const endIndex = Math.min(currentPage * PAGE_SIZE, count)
 
     const renderContent = () => {
 
@@ -126,6 +134,7 @@ export default function UpcomingEventsPW({ initialData }: Props) {
                 setActiveTab={setActiveTab as Dispatch<SetStateAction<string>>}
                 filterOptions={filterOptions}
                 filters={filters}
+                categories={availableCategories}
                 setFilters={setFilters}
                 showSearch={true}
                 searchPlaceholder="Search events..."

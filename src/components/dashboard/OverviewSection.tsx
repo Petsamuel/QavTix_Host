@@ -9,6 +9,7 @@ import { useAppSelector } from "@/lib/redux/hooks"
 import { mapToStatCards } from "@/helper-fns/mapToStatCards"
 import { useRouter } from "next/navigation"
 import { NAVIGATION_LINKS } from "@/enums/navigation"
+import { getGreeting } from "@/helper-fns/date-utils"
 
 interface OverviewSectionProps {
     cards: DashboardCardData
@@ -32,7 +33,7 @@ export default function OverviewSection({ cards }: OverviewSectionProps) {
             <div className="relative mt-12 grid grid-cols-1 py-0 xsm:grid-cols-2 items-stretch gap-6 px-6 md:px-10 bg-linear-to-br from-brand-primary-5.2 to-brand-primary min-h-35 w-full rounded-xl overflow-hidden">
                 <div className="text-white relative z-10 py-6 flex flex-col justify-center">
                     <h3 className={cn(space_grotesk.className, "capitalize text-lg md:text-2xl leading-tight font-bold wrap-break-words")}>
-                        Good Morning {user?.full_name.split(" ")[0]}!
+                        {getGreeting()} {user?.full_name.split(" ")[0]}!
                     </h3>
                     <p className="text-xs md:text-sm lg:text-base mt-2 opacity-90 wrap-break-words">
                         You have {cards.active_events} active event{cards.active_events !== 1 ? "s" : ""} and {cards.tickets_sold} tickets sold

@@ -9,7 +9,7 @@ import { ApiCategory } from "@/actions/filters"
 
 export function deriveCategories(
     apiCategories: ApiCategory[],
-    items: { category?: string | null }[],
+    items: { category?: string | null }[] = [],
 ): Category[] {
     // Build a count map keyed by lowercase category name
     const countMap = new Map<string, number>()
@@ -20,9 +20,9 @@ export function deriveCategories(
     }
 
     return apiCategories.map(cat => ({
-        id:    cat.id,
-        name:  cat.name,
-        value: String(cat.id), 
+        id: cat.id,
+        name: cat.name,
+        value: String(cat.id),
         label: cat.name.charAt(0).toUpperCase() + cat.name.slice(1),
         count: countMap.get(cat.name.toLowerCase()) ?? 0,   // 0 if no items match
     }))

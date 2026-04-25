@@ -1,7 +1,7 @@
 'use client'
 
 import { useForm, useFieldArray, FormProvider, Controller, SubmitHandler } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { Step4FormData, step4Schema } from '@/schemas/create-event.schema'
 import { Switch } from "@/components/ui/switch"
 import CustomPercentageInput from '../custom-utils/inputs/CustomPercentageInput'
@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { Icon } from '@iconify/react'
 import CustomAvatar from '../custom-utils/avatars/CustomAvatar'
 import MultiStepFormButtonDuo from '../custom-utils/buttons/MultiStepFormButtonDuo'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import AddCollaboratorForm from './AddCollaboratorForm'
 import { COLLABORATOR_ROLES } from '@/lib/features/create-event/resources/constants'
 import CollaboratorRoleEditSelect from './CollaboratorRoleEditSelect'
@@ -32,7 +32,7 @@ export default function CreateEventStep4() {
     const plan = usePlanRestrictions()
 
     const methods = useForm<Step4FormData>({
-        resolver: zodResolver(step4Schema) as any,
+        resolver: yupResolver(step4Schema) as any,
         defaultValues: {
             checkInSettings: eventData.settings?.checkInSettings ?? {
                 qrCodeEnabled: true,

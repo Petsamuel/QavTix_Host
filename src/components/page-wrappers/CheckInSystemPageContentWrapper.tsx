@@ -14,17 +14,23 @@ import { getCheckInMetrics } from "@/actions/checkin"
 import { Icon } from "@iconify/react"
 import MetricsContainerLoader from "../loaders/MetricsContainerLoader"
 import { EventFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventFilter"
+import { usePlanGate } from "@/custom-hooks/UsePlanGate"
+import UpgradePlanModal from "../modals/UpgradePlanModal"
+import { FEATURE_GATES } from "@/lib/features/plan-gate"
+import { useRouter } from "next/navigation"
 
 
 interface Props {
-    initialMetrics:   CheckInCards
+    initialMetrics: CheckInCards
     initialAttendees: TabSlice<CheckInAttendee>
 }
 
 export default function CheckInSystemPageContentWrapper({ initialMetrics, initialAttendees }: Props) {
 
-    const { user }    = useAppSelector(store => store.authUser)
-    const currency    = user?.currency || ""
+    const { user } = useAppSelector(store => store.authUser)
+    const currency = user?.currency || ""
+
+    const { allowed, modalOpen, setModalOpen, featureName, requiredPlan } = usePlanGate(FEATURE_GATES.QR_CHECKIN)
 
     const { tabList: tabListData, filterOptions } = SystemCheckInDataTableFilters
 
@@ -36,14 +42,15 @@ export default function CheckInSystemPageContentWrapper({ initialMetrics, initia
     // Internal attendee-list filters (ticket type, status)
     const [filters, setFilters] = useState<Partial<FilterValues>>({
         ticketType: [],
-        status:     undefined,
+        status: undefined,
     })
 
     // Metrics with rollback
-    const metricsRef                = useRef<CheckInCards>(initialMetrics)
-    const [metrics,   _setMetrics]  = useState<CheckInCards>(initialMetrics)
+    const metricsRef = useRef<CheckInCards>(initialMetrics)
+    const [metrics, _setMetrics] = useState<CheckInCards>(initialMetrics)
     const [metricsLoading, setMetricsLoading] = useState(false)
-    const [metricsError,   setMetricsError]   = useState(false)
+    const [metricsError, setMetricsError] = useState(false)
+    const router = useRouter()
 
     const setMetrics = (next: CheckInCards) => {
         metricsRef.current = metrics
@@ -60,8 +67,8 @@ export default function CheckInSystemPageContentWrapper({ initialMetrics, initia
         {
             endpoint: CHECKIN_ATTENDEES_ENDPOINT,
             tabs: [{
-                key:          "attendees",
-                initialData:  initialAttendees,
+                key: "attendees",
+                initialData: initialAttendees,
                 staticParams: {},
             }],
             activeTab: "attendees",
@@ -105,6 +112,17 @@ export default function CheckInSystemPageContentWrapper({ initialMetrics, initia
         label: s.replace("_", " "),
         color: s === "checked_in" ? "text-green-600" : "text-amber-500",
     }))
+
+    if (!allowed) {
+        return (
+            <UpgradePlanModal
+                open={modalOpen}
+                onClose={() => router.back()}
+                featureName={featureName}
+                requiredPlan={requiredPlan}
+            />
+        )
+    }
 
     return (
         <main className="pb-10">

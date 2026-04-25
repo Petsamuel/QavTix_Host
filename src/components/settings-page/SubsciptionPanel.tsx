@@ -6,7 +6,6 @@ import { Icon } from "@iconify/react"
 import { cn } from "@/lib/utils"
 import { useAppDispatch } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
-import { openPasswordModal } from "@/lib/redux/slices/passwordModalConfirmationSlice"
 import { ToggleItem } from "@/components/custom-utils/inputs/CustomToggleItem"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
@@ -16,40 +15,43 @@ import { usePricingCheckout } from "@/contexts/checkout/PricingCheckoutContext"
 import PricingCard from "../cards/PricingCard"
 import ActionButton1 from "../custom-utils/buttons/ActionBtn1"
 import PlanUpgradeSuccessMessage from "../modals/PlanUpgradeSuccessMessage"
-
-
+import CancelSubscriptionModal from "../modals/CancelPlanModal"
 
 const PLAN_ORDER: PlanSlug[] = ["standard", "pro", "enterprise"]
 
+// Only paid plans can cancel — free/standard are excluded
+const CANCELLABLE_PLANS: PlanSlug[] = ["pro", "enterprise"]
+
 const PLAN_STATUS_STYLES: Record<SubscriptionStatus, string> = {
-    active:    "bg-green-50/50  text-green-700  border-green-200",
-    trialing:  "bg-blue-50/50   text-blue-700   border-blue-200",
-    cancelled: "bg-neutral-100 text-neutral-500 border-neutral-200",
-    expired:   "bg-red-50/50    text-red-600    border-red-200",
+    active: "bg-green-50/50  text-green-700  border-green-200",
+    trialing: "bg-blue-50/50   text-blue-700   border-blue-200",
+    cancelled: "bg-neutral-100  text-neutral-500 border-neutral-200",
+    expired: "bg-red-50/50    text-red-600    border-red-200",
 }
 
 const PLAN_STATUS_LABEL: Record<SubscriptionStatus, string> = {
-    active:    "Active",
-    trialing:  "Trial",
+    active: "Active",
+    trialing: "Trial",
     cancelled: "Cancelled",
-    expired:   "Expired",
+    expired: "Expired",
 }
 
 interface SubscriptionPanelProps {
-    initialData:  SubscriptionData | null
-    fetchError:   string | null
+    initialData: SubscriptionData | null
+    fetchError: string | null
 }
 
 export default function SubscriptionPanel({ initialData, fetchError }: SubscriptionPanelProps) {
-    
-    const dispatch    = useAppDispatch()
-    const router      = useRouter()
+
+    const dispatch = useAppDispatch()
+    const router = useRouter()
     const { subscribe, status } = usePricingCheckout()
 
-    const [data,         setData]         = useState<SubscriptionData | null>(initialData)
-    const [isRenewing,   setIsRenewing]   = useState(false)
+    const [data, setData] = useState<SubscriptionData | null>(initialData)
+    const [isRenewing, setIsRenewing] = useState(false)
     const [isTogglingAR, setIsTogglingAR] = useState(false)
-    const [mounted,      setMounted]      = useState(false)
+    const [mounted, setMounted] = useState(false)
+    const [openCancelSubModal, setCancelOpenSubModal] = useState(false)
 
     useEffect(() => { setMounted(true) }, [])
 
@@ -58,89 +60,63 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
     })
 
     // Derived state
-    const currentPlanSlug  = data?.plan_slug ?? "standard"
+    const currentPlanSlug = (data?.plan_slug ?? "standard") as PlanSlug
     const currentPlanIndex = PLAN_ORDER.indexOf(currentPlanSlug)
-    const isHighestPlan    = currentPlanIndex === PLAN_ORDER.length - 1
-    const isExpired        = data?.is_expired ?? false
-    const isCancelled      = data?.status === "cancelled"
-    const isActive         = data?.status === "active" || data?.status === "trialing"
-    const canRenew         = isExpired || isCancelled
-    const canUpgrade       = !isHighestPlan && isActive
+    const isHighestPlan = currentPlanIndex === PLAN_ORDER.length - 1
+    const isExpired = data?.is_expired ?? false
+    const isCancelled = data?.status === "cancelled"
+    const isActive = data?.status === "active" || data?.status === "trialing"
+    const canRenew = isExpired || isCancelled
+    const canUpgrade = !isHighestPlan && isActive
 
-    // Find the current plan from pricing data
+    // Hide cancel button for free / standard plans
+    const canCancel = isActive && CANCELLABLE_PLANS.includes(currentPlanSlug)
+
     const currentPricingPlan = hostPricingData.plans.find(p => p.id === currentPlanSlug)
         ?? hostPricingData.plans[0]
 
     const handleAutoRenewToggle = useCallback(async () => {
-        if (isTogglingAR || !data) return;
-        
-        const previousValue = data.auto_renew;
-        const newValue = !previousValue;
-        
+        if (isTogglingAR || !data) return
+        const previousValue = data.auto_renew
+        const newValue = !previousValue
         setIsTogglingAR(true)
-        // Optimistic update
         setData(prev => prev ? { ...prev, auto_renew: newValue } : prev)
-
         try {
             const result = await toggleAutoRenew(newValue)
-            
-            if (!result.success) {
-                throw new Error(result.message)
-            }
-
-            dispatch(showAlert({
-                variant: "default",
-                title: "Auto-renewal updated",
-                description: newValue ? "Enabled." : "Disabled.",
-            }))
+            if (!result.success) throw new Error(result.message)
+            dispatch(showAlert({ variant: "default", title: "Auto-renewal updated", description: newValue ? "Enabled." : "Disabled." }))
             router.refresh()
         } catch (error: any) {
-            // Revert on failure
             setData(prev => prev ? { ...prev, auto_renew: previousValue } : prev)
-            dispatch(showAlert({
-                variant: "destructive",
-                title: "Update failed",
-                description: error.message ?? "Please try again.",
-            }))
+            dispatch(showAlert({ variant: "destructive", title: "Update failed", description: error.message ?? "Please try again." }))
         } finally {
             setIsTogglingAR(false)
         }
     }, [data, isTogglingAR, dispatch, router])
 
-
-    // Renew
     const handleRenew = useCallback(async () => {
         if (isRenewing) return
         setIsRenewing(true)
         const result = await renewSubscription()
         setIsRenewing(false)
-
         dispatch(showAlert({
-            variant:     result.success ? "default" : "destructive",
-            title:       result.success ? "Subscription renewed" : "Renewal failed",
-            description: result.success
-                ? "Your subscription has been renewed successfully."
-                : (result.message ?? "Please try again."),
+            variant: result.success ? "default" : "destructive",
+            title: result.success ? "Subscription renewed" : "Renewal failed",
+            description: result.success ? "Your subscription has been renewed successfully." : (result.message ?? "Please try again."),
         }))
-
         if (result.success) router.refresh()
     }, [isRenewing, dispatch, router])
 
-    // Upgrad
     const handleUpgrade = useCallback(() => {
         const nextPlan = hostPricingData.plans[currentPlanIndex + 1]
         if (!nextPlan) return
         subscribe(nextPlan)
     }, [currentPlanIndex, subscribe])
 
-    // Cancel — opens password moda
-    const handleCancel = useCallback(() => {
-        dispatch(openPasswordModal("cancel_plan"))
-    }, [dispatch])
+    const handleCancel = () => setCancelOpenSubModal(true)
 
     if (!mounted) return null
 
-    // Fetch error state
     if (fetchError || !data) {
         return (
             <main className="w-full pt-8 pb-16">
@@ -149,56 +125,46 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                         <Icon icon="hugeicons:alert-02" className="w-7 h-7 text-red-400" />
                     </div>
                     <div className="space-y-1">
-                        <p className="text-sm font-semibold text-brand-secondary-8">
-                            Failed to load subscription
-                        </p>
-                        <p className="text-xs text-brand-neutral-6">
-                            {fetchError ?? "Please refresh the page to try again."}
-                        </p>
+                        <p className="text-sm font-semibold text-brand-secondary-8">Failed to load subscription</p>
+                        <p className="text-xs text-brand-neutral-6">{fetchError ?? "Please refresh the page to try again."}</p>
                     </div>
                 </div>
             </main>
         )
     }
 
-    const expiresLabel = data.expires_at
-        ? format(new Date(data.expires_at), "dd/MM/yyyy")
-        : "—"
-
+    const expiresLabel = data.expires_at ? format(new Date(data.expires_at), "dd/MM/yyyy") : "—"
     const renewsLabel = data.auto_renew && data.expires_at
         ? `Your subscription will automatically renew on ${expiresLabel}`
         : `Your subscription expires on ${expiresLabel}`
 
     return (
         <>
-            {status === "success" && <PlanUpgradeSuccessMessage />} 
+            {status === "success" && <PlanUpgradeSuccessMessage />}
             <main className="w-full pt-8 pb-16">
                 <div className="space-y-12 max-w-4xl">
 
                     {/* Auto-Renewal */}
                     <section className="space-y-6">
                         <header>
-                            <h3 className="text-base font-bold text-brand-secondary-9">
-                                Subscription Renewal
-                            </h3>
-                            <p className="text-sm text-brand-secondary-9 font-medium">
-                                Control how your subscription is renewed
-                            </p>
+                            <h3 className="text-base font-bold text-brand-secondary-9">Subscription Renewal</h3>
+                            <p className="text-sm text-brand-secondary-9 font-medium">Control how your subscription is renewed</p>
                         </header>
                         <div className="w-full border-t-[1.5px] border-dashed border-brand-secondary-2" />
+                        {
+                            data.plan_slug !== "standard" && data.plan_slug !== "free" &&
+                            <div className="w-full max-w-sm space-y-2">
+                                <ToggleItem
+                                    control={control}
+                                    name="autoRenew"
+                                    label="Allow auto-renewal"
+                                    disabled={isTogglingAR}
+                                    onChange={handleAutoRenewToggle}
+                                />
+                                <p className="text-xs text-brand-neutral-6 pl-1">{renewsLabel}</p>
+                            </div>
+                        }
 
-                        <div className="w-full max-w-sm space-y-2">
-                            <ToggleItem
-                                control={control}
-                                name="autoRenew"
-                                label="Allow auto-renewal"
-                                disabled={isTogglingAR}
-                                onChange={handleAutoRenewToggle}
-                            />
-                            <p className="text-xs text-brand-neutral-6 pl-1">
-                                {renewsLabel}
-                            </p>
-                        </div>
                     </section>
 
                     {/* Plan Status */}
@@ -221,29 +187,21 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                         </header>
                         <div className="w-full border-t-[1.5px] border-dashed border-brand-secondary-2" />
 
-                        {/* Plan card + features */}
                         <div className="flex flex-col md:flex-row gap-6">
                             <div className="md:w-[20em]">
-                                <PricingCard 
-                                    plan={currentPricingPlan} 
-                                    index={currentPlanIndex} 
+                                <PricingCard
+                                    plan={currentPricingPlan}
+                                    index={currentPlanIndex}
                                     canUpgrade={canUpgrade}
                                     onUpgrade={handleUpgrade}
                                 />
                             </div>
-
-                            {/* Feature list */}
                             <div className="flex-1 bg-white border border-brand-neutral-2 rounded-2xl p-6">
                                 <ul className="columns-1 sm:columns-2 gap-x-8 space-y-0">
                                     {currentPricingPlan.features.map((feature, i) => (
                                         <li key={i} className="flex items-start gap-2.5 py-2 break-inside-avoid">
-                                            <Icon
-                                                icon="hugeicons:checkmark-circle-03"
-                                                className="w-5 h-5 text-brand-neutral-5 shrink-0 mt-0.5"
-                                            />
-                                            <span className="text-xs text-brand-secondary-9 font-medium">
-                                                {feature}
-                                            </span>
+                                            <Icon icon="hugeicons:checkmark-circle-03" className="w-5 h-5 text-brand-neutral-5 shrink-0 mt-0.5" />
+                                            <span className="text-xs text-brand-secondary-9 font-medium">{feature}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -251,6 +209,7 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                         </div>
                     </section>
                 </div>
+
                 {/* Actions */}
                 <div className="flex items-center gap-4 flex-wrap mt-8">
                     <ActionButton1
@@ -263,7 +222,8 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                         className="px-8 py-4 text-sm! font-semibold hover:bg-brand-primary-2 disabled:opacity-50!"
                     />
 
-                    {isActive && (
+                    {/* Only visible for pro / enterprise on an active subscription */}
+                    {canCancel && (
                         <button
                             onClick={handleCancel}
                             className={cn(
@@ -276,6 +236,15 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                     )}
                 </div>
             </main>
+
+            {canCancel && (
+                <CancelSubscriptionModal
+                    isOpen={openCancelSubModal}
+                    setIsOpen={setCancelOpenSubModal}
+                    planSlug={currentPlanSlug as "pro" | "enterprise"}
+                    expiresAt={data.expires_at}
+                />
+            )}
         </>
     )
 }

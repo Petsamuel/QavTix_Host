@@ -25,6 +25,7 @@ interface ProviderProps {
     categories:    ApiCategory[]
     initialData?:  Partial<CompleteEventFormData>
     eventID?:      string
+    isDuplicate?:  boolean
 }
 
 
@@ -34,6 +35,7 @@ export function EventCreationProvider({
     children,
     categories,
     initialData,
+    isDuplicate,
     eventID,
 }: ProviderProps) {
 
@@ -44,6 +46,7 @@ export function EventCreationProvider({
 
     // If editing, mark all steps that have data as complete so navigation is unlocked
     const [completedSteps, setCompletedSteps] = useState<StepNumber[]>(() => {
+        if (isDuplicate) return [1, 2, 3, 4]
         if (!initialData) return []
         const completed: StepNumber[] = []
         if (initialData.basicInformation) completed.push(1)
@@ -53,7 +56,9 @@ export function EventCreationProvider({
         return completed
     })
 
-    const [currentStep, setCurrentStep] = useState<StepNumber>(1)
+    const [currentStep, setCurrentStep] = useState<StepNumber>(
+        isDuplicate ? 5 : 1
+    )
 
     const isEditMode = !!eventID
 

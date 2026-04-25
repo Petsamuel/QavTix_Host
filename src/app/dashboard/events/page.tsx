@@ -10,11 +10,13 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.MY_EVENTS.description,
 }
 
+export const dynamic = "force-dynamic"
+
 
 export default async function EventsPage() {
     const [allRes, liveRes, draftRes, endedRes, cancelledRes, categoryResult] = await Promise.all([
         getEvents(),
-        getEvents({ status: "active" }), 
+        getEvents({ status: "active" }),
         getEvents({ status: "draft" }),
         getEvents({ status: "ended" }),
         getEvents({ status: "cancelled" }),
@@ -22,25 +24,25 @@ export default async function EventsPage() {
     ])
 
     const createInitialSlice = (result: any, defaultCards?: any) => ({
-        results:     result.success && result.data?.results ? result.data.results : [],
-        count:       result.success && result.data?.count ? result.data.count : 0,
-        next:        result.success && result.data?.next !== undefined ? result.data.next : null,
-        previous:    result.success && result.data?.previous !== undefined ? result.data.previous : null,
+        results: result.success && result.data?.results ? result.data.results : [],
+        count: result.success && result.data?.count ? result.data.count : 0,
+        next: result.success && result.data?.next !== undefined ? result.data.next : null,
+        previous: result.success && result.data?.previous !== undefined ? result.data.previous : null,
         total_pages: result.success && result.data?.total_pages ? result.data.total_pages : 1,
-        cards:       result.success && result.data?.cards ? result.data.cards : defaultCards,
+        cards: result.success && result.data?.cards ? result.data.cards : defaultCards,
     })
 
     const initialEvents = {
-        all:       createInitialSlice(allRes),
-        live:      createInitialSlice(liveRes),
-        draft:     createInitialSlice(draftRes),
-        ended:     createInitialSlice(endedRes),
+        all: createInitialSlice(allRes),
+        live: createInitialSlice(liveRes),
+        draft: createInitialSlice(draftRes),
+        ended: createInitialSlice(endedRes),
         cancelled: createInitialSlice(cancelledRes),
-        cards:     allRes.success && allRes.data?.cards 
-                   ? allRes.data.cards 
-                   : liveRes.success && liveRes.data?.cards 
-                   ? liveRes.data.cards 
-                   : { live: 0, draft: 0, ended: 0, sold_out: 0, cancelled: 0 },
+        cards: allRes.success && allRes.data?.cards
+            ? allRes.data.cards
+            : liveRes.success && liveRes.data?.cards
+                ? liveRes.data.cards
+                : { live: 0, draft: 0, ended: 0, sold_out: 0, cancelled: 0 },
     }
 
     return <EventsPageContentWrapper initialEvents={initialEvents} categories={categoryResult.data} />

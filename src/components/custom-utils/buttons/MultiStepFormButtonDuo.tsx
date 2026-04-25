@@ -5,7 +5,7 @@ import { useStepper } from "@/contexts/create-event/StepperProvider"
 import { useEventCreation } from "@/contexts/create-event/CreateEventProvider"
 
 
-export default function MultiStepFormButtonDuo(){
+export default function MultiStepFormButtonDuo() {
 
     const { currentStep } = useEventCreation()
     const { goToPreviousStep } = useStepper()
@@ -26,18 +26,18 @@ export default function MultiStepFormButtonDuo(){
     }
 
     return (
-        <div className="flex items-center gap-4 pt-4 max-w-full md:max-w-98">
+        <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 max-w-full md:max-w-98">
             <button
                 type="button"
                 onClick={() => goToPreviousStep()}
-                className="w-fit h-12 md:h-14 text-brand-secondary-8 bg-white hover:shadow flex items-center gap-2 justify-center px-10 md:px-14 py-3 rounded-[30px] border border-brand-secondary-6 font-medium text-sm hover:bg-brand-neutral-3 hover:border-brand-secondary-7 active:bg-brand-neutral-3 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-neutral-4 focus:ring-offset-2 transition-all duration-150"
+                className="w-full sm:w-fit h-12 md:h-14 text-brand-secondary-8 bg-white hover:shadow flex items-center gap-2 justify-center px-10 md:px-14 py-3 rounded-[30px] border border-brand-secondary-6 font-medium text-sm hover:bg-brand-neutral-3 hover:border-brand-secondary-7 active:bg-brand-neutral-3 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-neutral-4 focus:ring-offset-2 transition-all duration-150"
             >
                 Back
             </button>
 
-            <ActionButton1 
+            <ActionButton1
                 buttonText={getButtonText()}
-                className="flex-1 h-12! md:h-14! text-sm! px-5!"
+                className="flex-1 w-full sm:w-auto h-12! md:h-14! whitespace-nowrap text-sm! px-5!"
                 iconPosition="right"
                 buttonType="submit"
                 icon="gravity-ui:arrow-right"

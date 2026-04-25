@@ -34,7 +34,7 @@ export function AnimatedDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           className={cn(
-            "fixed inset-0 z-900 bg-black/60",
+            "fixed inset-0 z-50 bg-black/60",
             // Open
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-300 data-[state=open]:ease-out",
             // Close
@@ -44,7 +44,7 @@ export function AnimatedDialog({
 
         <DialogPrimitive.Content
           className={cn(
-            "fixed left-1/2 top-1/2 z-910 -translate-x-1/2 -translate-y-1/2 w-full max-w-[90%] sm:max-w-125 max-h-[95vh] bg-white rounded-4xl shadow-2xl border-0 outline-transparent outline-none! ring-0 overflow-hidden flex flex-col",
+            "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-full max-w-[90%] sm:max-w-125 max-h-[95vh] bg-white rounded-4xl shadow-2xl border-0 outline-transparent outline-none! ring-0 overflow-hidden flex flex-col",
             // Open animation
             "data-[state=open]:animate-in",
             "data-[state=open]:fade-in-0",
@@ -70,7 +70,7 @@ export function AnimatedDialog({
 
           {
             showCloseButton &&
-            <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-2 hover:bg-brand-neutral-3 transition-colors z-10 bg-white/80 backdrop-blur-sm">
+            <DialogPrimitive.Close className="fixed right-4 top-4 rounded-full p-2 hover:bg-brand-neutral-3 transition-colors z-10 bg-white/80 backdrop-blur-sm">
               <X className="h-5 w-5 text-brand-neutral-7" />
             </DialogPrimitive.Close>
           }

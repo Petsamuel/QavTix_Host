@@ -10,7 +10,7 @@ import { EVENT_DETAILS_LINK } from "@/enums/navigation"
 import EmailTemplateEditor from "../email-template-editor/EmailTemplateEditor"
 import DownloadAttendeesModal from "@/components/modals/DownloadAttendeesModal"
 import AddToFeaturedModal from "@/components/modals/AddToFeaturedEventsModal"
-import { FeatureCheckoutProvider } from "@/contexts/checkout/FeatureCheckoutProvider"
+import { FeatureCheckoutProvider, useFeatureCheckout } from "@/contexts/checkout/FeatureCheckoutProvider"
 import FeaturedSuccessModal from "@/components/modals/FeaturedSuccessModal"
 import { useAppDispatch } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
@@ -30,19 +30,19 @@ interface ItemActionDropdownProps {
     disabled?:  boolean
     eventID?:   string
     eventName?: string
-    onRefresh?: () => void   // optional — call this after a mutating action
+    onRefresh?: () => void
 }
 
-export default function ItemActionDropdown({ 
-    actions, 
-    disabled = false, 
-    eventID, 
+function ItemActionDropdownInner({
+    actions,
+    disabled = false,
+    eventID,
     eventName,
     onRefresh,
 }: ItemActionDropdownProps) {
-
     const dispatch = useAppDispatch()
     const { trigger: triggerRevalidation } = useRevalidate("events")
+    const { promoteToFeatured } = useFeatureCheckout()
 
     const [loadingAction,          setLoadingAction]          = useState<string | null>(null)
     const [isOpen,                 setIsOpen]                 = useState(false)
@@ -57,7 +57,6 @@ export default function ItemActionDropdown({
         setLoadingAction(action.id)
 
         try {
-            // ── Modal-based actions (open modal, don't close dropdown yet) ──────
             if (action.id === "share") {
                 setEventUrl(EVENT_DETAILS_LINK.replace("[event_id]", eventID || ""))
                 setShowShareModal(true)
@@ -126,6 +125,13 @@ export default function ItemActionDropdown({
         }
     }
 
+    // Don't close modal here — AddToFeaturedModal stays open during processing
+    // context status + closeAddModal controls visibility internally
+    const handleFeaturedConfirm = async (planId: string) => {
+        if (!eventID) return
+        await promoteToFeatured(eventID, planId)
+    }
+
     return (
         <>
             <DropdownMenu open={isOpen} onOpenChange={(v) => {
@@ -178,7 +184,12 @@ export default function ItemActionDropdown({
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <ShareEventModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} shareUrl={eventUrl} />
+            <ShareEventModal
+                isOpen={showShareModal}
+                onClose={() => setShowShareModal(false)}
+                shareUrl={eventUrl}
+            />
+
             <EmailTemplateEditor
                 open={openEmail && !!eventID}
                 setOpen={setOpenEmail}
@@ -187,11 +198,32 @@ export default function ItemActionDropdown({
                 mode="campaign"
                 onClose={() => setOpenEmail(false)}
             />
-            <DownloadAttendeesModal isOpen={openDownloadModal} onClose={() => setOpenDownloadModal(false)} />
-            <FeatureCheckoutProvider>
-                <AddToFeaturedModal eventId={eventID || ""} isOpen={openAddToFeaturedModal} onClose={() => setOpenAddToFeaturedModal(false)} />
-                <FeaturedSuccessModal eventSlug={eventID} onClose={() => setOpenAddToFeaturedModal(false)} />
-            </FeatureCheckoutProvider>
+
+            <DownloadAttendeesModal
+                isOpen={openDownloadModal}
+                onClose={() => setOpenDownloadModal(false)}
+            />
+
+            {/* Modal stays open during processing — its internal open prop uses context status */}
+            <AddToFeaturedModal
+                isOpen={openAddToFeaturedModal}
+                onClose={() => setOpenAddToFeaturedModal(false)}
+                onConfirm={handleFeaturedConfirm}
+            />
+
+            {/* Opens automatically when context status === "success" */}
+            <FeaturedSuccessModal
+                eventSlug={eventID}
+                onClose={() => setOpenAddToFeaturedModal(false)}
+            />
         </>
+    )
+}
+
+export default function ItemActionDropdown(props: ItemActionDropdownProps) {
+    return (
+        <FeatureCheckoutProvider>
+            <ItemActionDropdownInner {...props} />
+        </FeatureCheckoutProvider>
     )
 }

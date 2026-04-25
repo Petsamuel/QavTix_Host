@@ -9,16 +9,17 @@ import { useMediaQuery } from '@/custom-hooks/UseMediaQuery'
 import { MobileBottomSheet } from '../../dropdown/EventFilterDropdownMobileBottomSheet'
 
 const PRESETS: { label: string; value: DatePreset }[] = [
-    { label: 'Today',      value: 'day'   },
-    { label: 'This Week',  value: 'week'  },
+    { label: 'Today', value: 'day' },
+    { label: 'This Week', value: 'week' },
     { label: 'This Month', value: 'month' },
+    { label: 'This Year', value: 'year' },
 ]
 
 interface DateRangePresetFilterProps {
-    value?:    DatePreset | null
-    onChange:  (value: DatePreset | null) => void
-    icon?:     string
-    label?:    string
+    value?: DatePreset | null
+    onChange: (value: DatePreset | null) => void
+    icon?: string
+    label?: string
 }
 
 export default function DateRangePresetFilter({
@@ -28,12 +29,12 @@ export default function DateRangePresetFilter({
     label = 'Date Preset',
 }: DateRangePresetFilterProps) {
 
-    const [isOpen,    setIsOpen]    = useState(false)
-    const [selected,  setSelected]  = useState<DatePreset | null>(value ?? null)
+    const [isOpen, setIsOpen] = useState(false)
+    const [selected, setSelected] = useState<DatePreset | null>(value ?? null)
     const isTablet = useMediaQuery('(min-width: 768px)')
 
     const hasActiveFilter = !!value
-    const displayText     = value
+    const displayText = value
         ? PRESETS.find(p => p.value === value)?.label ?? label
         : label
 

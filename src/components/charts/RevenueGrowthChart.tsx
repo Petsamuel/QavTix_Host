@@ -13,8 +13,6 @@ import ChartLoader from "../loaders/ChartLoader"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { formatPrice } from "@/helper-fns/formatPrice"
 
-
-
 type TimeFilter = "annual" | "month" | "week"
 
 interface ChartDataPoint {
@@ -41,32 +39,21 @@ function toChartPoints(data: DashboardChartPoint[]): ChartDataPoint[] {
 }
 
 function buildParams(
-    timeFilter:  TimeFilter,
+    timeFilter:   TimeFilter,
     selectedYear: string,
-    chartFilter: "revenue" | "tickets",
+    chartFilter:  "revenue" | "tickets",
 ): DashboardOverviewParams {
     const params: DashboardOverviewParams = {
         chart_type: chartFilter,
         year:       parseInt(selectedYear),
     }
-
-    if (timeFilter === "month") {
-        params.month = new Date().getMonth() + 1
-    }
-
-    if (timeFilter === "week") {
-        params.week = true
-        delete params.year
-        delete params.month
-    }
-
+    if (timeFilter === "month") params.month = new Date().getMonth() + 1
+    if (timeFilter === "week") { params.week = true; delete params.year; delete params.month }
     return params
 }
 
 const CustomTooltip = ({ active, payload, chartFilter }: any) => {
-
     const { user } = useAppSelector(store => store.authUser)
-
     if (!active || !payload?.length) return null
     const point = payload[0].payload as ChartDataPoint
     return (
@@ -87,37 +74,41 @@ export default function RevenueGrowthChart({
     chartFilter,
     onChartDataChange,
 }: RevenueGrowthChartProps) {
-    const [timeFilter,    setTimeFilter]    = useState<TimeFilter>("annual")
-    const [selectedYear,  setSelectedYear]  = useState(CURRENT_YEAR)
-    const [chartData,     setChartData]     = useState<ChartDataPoint[]>(() => toChartPoints(initialChartData))
-    const [isPending,     startTransition]  = useTransition()
+    const [timeFilter,   setTimeFilter]   = useState<TimeFilter>("annual")
+    const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR)
+    const [chartData,    setChartData]    = useState<ChartDataPoint[]>(() => toChartPoints(initialChartData))
+    const [isPending,    startTransition] = useTransition()
 
-    // Skip fetch on first render — initialChartData is already loaded server-side
-    const isFirstRender = useRef(true)
+    const hasMountedRef = useRef(false)
+    const renderCount = useRef(0)
+    renderCount.current += 1
+    console.log(`[RevenueGrowthChart] render #${renderCount.current}`, {
+        timeFilter, selectedYear, chartFilter,
+        hasMounted: hasMountedRef.current,
+    })
 
     useEffect(() => {
-        if (isFirstRender.current) {
-            isFirstRender.current = false
+        if (!hasMountedRef.current) {
+            hasMountedRef.current = true
+            console.log("[RevenueGrowthChart] MOUNT — skipping fetch, using initialChartData")
             return
         }
 
+        console.log("[RevenueGrowthChart] FETCH triggered by:", { timeFilter, selectedYear, chartFilter })
         const params = buildParams(timeFilter, selectedYear, chartFilter)
 
         startTransition(async () => {
             const result = await getDashboardOverview(params)
-
             if (result.success && result.data?.chart) {
                 const points = toChartPoints(result.data.chart)
                 setChartData(points)
-                onChartDataChange?.(result.data.chart) 
+                onChartDataChange?.(result.data.chart)
             }
         })
     }, [timeFilter, selectedYear, chartFilter])
 
-
-    const maxValue      = Math.max(...chartData.map(d => d.value), 0)
+    const maxValue = Math.max(...chartData.map(d => d.value), 0)
     const { ticks, yMax } = getNiceTicks(maxValue)
-
     const chartTitle = chartFilter === "revenue" ? "Revenue Growth Chart" : "Tickets Sold Chart"
 
     return (
@@ -125,27 +116,19 @@ export default function RevenueGrowthChart({
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
                 <div className="flex items-center gap-3">
                     <h2 className="text-xs text-brand-secondary-5">{chartTitle}</h2>
-
-                    {/* Year picker — only relevant for annual filter */}
                     {timeFilter === "annual" && (
-                        <Select value={selectedYear} onValueChange={(y) => {
-                            setSelectedYear(y)
-                        }}>
+                        <Select value={selectedYear} onValueChange={setSelectedYear}>
                             <SelectTrigger className="w-20 text-xs h-9 border-brand-neutral-3 font-bold text-brand-secondary-9 rounded-lg">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                                 {YEARS.map(year => (
-                                    <SelectItem key={year} value={year} className="text-xs">
-                                        {year}
-                                    </SelectItem>
+                                    <SelectItem key={year} value={year} className="text-xs">{year}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     )}
                 </div>
-
-                {/* Time filter toggle */}
                 <div className="flex items-center gap-2 bg-brand-primary-1 rounded-lg py-1 px-2">
                     {(["annual", "month", "week"] as TimeFilter[]).map(f => (
                         <button
@@ -176,44 +159,11 @@ export default function RevenueGrowthChart({
                                 margin={{ top: 10, bottom: 30 }}
                                 barCategoryGap="45%"
                             >
-                                <CartesianGrid
-                                    strokeDasharray="4px"
-                                    vertical={false}
-                                    stroke="#d4d9e0"
-                                    strokeWidth={0.5}
-                                />
-                                <XAxis
-                                    dataKey="label"
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: "#9CA3AF", fontSize: 12, fontWeight: 500 }}
-                                    tickMargin={12}
-                                />
-                                <YAxis
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: "#9CA3AF", fontSize: 12 }}
-                                    tickFormatter={formatYTick}
-                                    domain={[0, yMax]}
-                                    ticks={ticks}
-                                    tickMargin={8}
-                                />
-                                <Tooltip
-                                    content={<CustomTooltip chartFilter={chartFilter} />}
-                                    cursor={{ fill: "transparent" }}
-                                />
-                                <Bar
-                                    dataKey="value"
-                                    fill="#FFAB73"
-                                    radius={[4, 4, 2, 2]}
-                                    maxBarSize={7}
-                                    barSize={8}
-                                    isAnimationActive={true}
-                                    animationBegin={0}
-                                    animationDuration={500}
-                                    animationEasing="ease-in-out"
-                                    background={{ fill: "#E5E7EB", radius: "16px" }}
-                                />
+                                <CartesianGrid strokeDasharray="4px" vertical={false} stroke="#d4d9e0" strokeWidth={0.5} />
+                                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "#9CA3AF", fontSize: 12, fontWeight: 500 }} tickMargin={12} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: "#9CA3AF", fontSize: 12 }} tickFormatter={formatYTick} domain={[0, yMax]} ticks={ticks} tickMargin={8} />
+                                <Tooltip content={<CustomTooltip chartFilter={chartFilter} />} cursor={{ fill: "transparent" }} />
+                                <Bar dataKey="value" fill="#FFAB73" radius={[4, 4, 2, 2]} maxBarSize={7} barSize={8} isAnimationActive={true} animationBegin={0} animationDuration={500} animationEasing="ease-in-out" background={{ fill: "#E5E7EB", radius: "16px" }} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

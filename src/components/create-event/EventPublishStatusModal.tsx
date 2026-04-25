@@ -60,7 +60,7 @@ export default function EventPublishStatusModal({
                 <div className="relative z-10 py-9 px-4 md:px-9 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-300">
                     <div className="relative size-20 md:size-24 mb-4">
                         <Image
-                            src={isSuccess ? "/images/vectors/shield.png" : "/images/vectors/scan-failed.svg"}
+                            src={isSuccess ? "/images/vectors/publish-status.svg" : "/images/vectors/scan-failed.svg"}
                             alt="Status Illustration"
                             fill
                             className="object-contain"
@@ -95,7 +95,7 @@ export default function EventPublishStatusModal({
                                     >
                                         <Icon icon="lucide:plus" className="size-5" /> Create Another
                                     </Button>
-                                    <Button 
+                                    <Button
                                         onClick={onViewDashboard}
                                         className={cn(
                                             "text-white w-42 bg-brand-primary-6 font-medium hover:bg-brand-primary-7 hover:shadow-sm text-center px-8 py-3 rounded-md hover:opacity-90 transition-opacity inline-flex items-center gap-1",
@@ -105,7 +105,7 @@ export default function EventPublishStatusModal({
                                     </Button>
                                 </>
                             ) : (
-                                <Button 
+                                <Button
                                     onClick={onRetry}
                                     className="w-48 text-sm bg-brand-primary-6 hover:bg-brand-primary-7 text-white h-12 rounded-xl font-medium"
                                 >

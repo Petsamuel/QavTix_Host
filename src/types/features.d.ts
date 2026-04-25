@@ -7,7 +7,7 @@ interface FilterValues {
     ticketType: string[],
     performance: EventPerformance | null
     purchaseDate?: Date | null
-    dateRangePreset?: "day" | "week" | "month" | null
+    dateRangePreset?: "day" | "week" | "month" | "year" | null
     priceRange?: PriceRange | null
     event?: string | null
     sortBy?: string | null

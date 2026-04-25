@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useStepper } from '@/contexts/create-event/StepperProvider';
 import { STEPS_CONFIG } from '@/lib/features/create-event/resources/constants';
@@ -11,10 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export function CreateEventStepperHeader() {
     const { currentStep, completedSteps, canNavigateToStep } = useEventCreation()
     const { goToStep } = useStepper()
-
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-    }, [currentStep])
+    const wrapperRef = useRef<HTMLDivElement>(null)
 
     const colors = {
         active: "var(--color-brand-accent-4)",
@@ -24,9 +21,14 @@ export function CreateEventStepperHeader() {
         lineBackground: "var(--color-brand-neutral-7)"
     }
 
+    useEffect(() => {
+        if (!wrapperRef.current) return;
+        wrapperRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, [currentStep, wrapperRef?.current])
+
     return (
         <div className="w-full">
-            <div className="max-w-3xl mx-auto md:mx-0">
+            <div className="max-w-3xl mx-auto md:mx-0" ref={wrapperRef}>
                 <div className="flex items-center justify-between">
                     {STEPS_CONFIG.map((step, index) => {
                         const isCompleted = completedSteps.includes(step.number);
@@ -85,18 +87,18 @@ export function CreateEventStepperHeader() {
                                             <div className="flex-1 h-0.5 mx-2 sm:mx-4 bg-brand-neutral-6 rounded-full overflow-hidden">
                                                 <motion.div
                                                     initial={{ width: "0%" }}
-                                                    animate={{ 
+                                                    animate={{
                                                         width: (isActive || isCompleted) ? "100%" : "0%",
-                                                        backgroundColor: isCompleted ? colors.completed : colors.activeLine 
+                                                        backgroundColor: isCompleted ? colors.completed : colors.activeLine
                                                     }}
-                                                    transition={{ 
+                                                    transition={{
                                                         width: { duration: 1, ease: "circOut" },
                                                         backgroundColor: { duration: 0.5 }
                                                     }}
                                                     className="h-full"
                                                 />
                                             </div>
-                                    )}
+                                        )}
                                     </div>
 
                                     {/* Labels: Hidden on mobile (hidden), shown on desktop (sm:flex) */}

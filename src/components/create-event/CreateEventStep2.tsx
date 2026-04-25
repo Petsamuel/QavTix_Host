@@ -1,5 +1,5 @@
 import { useForm, Controller, useFieldArray, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { yupResolver } from "@hookform/resolvers/yup";
 import CustomInput2 from "../custom-utils/inputs/CustomInput2";
 import { Label } from "../ui/label";
 import { Step2FormData, step2Schema } from "@/schemas/create-event.schema";
@@ -22,6 +22,7 @@ export default function CreateEventStep2() {
     const { goToNextStep } = useStepper()
     const { user } = useAppSelector(store => store.authUser)
 
+
     const {
         control,
         register,
@@ -29,19 +30,19 @@ export default function CreateEventStep2() {
         handleSubmit,
         formState: { errors },
     } = useForm<Step2FormData>({
-        resolver: zodResolver(step2Schema),
+        resolver: yupResolver(step2Schema) as any,
         // Restore previously saved data when navigating back
         defaultValues: {
-            shortDescription:      eventData?.detailsMedia?.shortDescription      ?? "",
-            fullDescription:       eventData?.detailsMedia?.fullDescription       ?? "",
-            organizerDisplayName:  user?.business_name  ?? "",
-            organizerDescription:  user?.description  ?? "",
-            publicEmail:           eventData?.detailsMedia?.publicEmail           ?? "",
-            phoneNumber:           eventData?.detailsMedia?.phoneNumber           ?? "",
-            featuredImage:         eventData?.detailsMedia?.featuredImage         ?? undefined,
-            additionalImages:      eventData?.detailsMedia?.additionalImages      ?? [],
-            eventVideo:            eventData?.detailsMedia?.eventVideo            ?? undefined,
-            socialMediaLinks:      eventData?.detailsMedia?.socialMediaLinks      ?? [],
+            shortDescription: eventData?.detailsMedia?.shortDescription ?? "",
+            fullDescription: eventData?.detailsMedia?.fullDescription ?? "",
+            organizerDisplayName: user?.business_name ?? "",
+            organizerDescription: user?.description ?? "",
+            publicEmail: eventData?.detailsMedia?.publicEmail ?? "",
+            phoneNumber: eventData?.detailsMedia?.phoneNumber ?? "",
+            featuredImage: eventData?.detailsMedia?.featuredImage ?? undefined,
+            additionalImages: eventData?.detailsMedia?.additionalImages ?? [],
+            eventVideo: eventData?.detailsMedia?.eventVideo ?? undefined,
+            socialMediaLinks: eventData?.detailsMedia?.socialMediaLinks ?? [],
         },
     })
 
@@ -54,7 +55,7 @@ export default function CreateEventStep2() {
     }
 
     const shortDescLen = watch("shortDescription")?.length ?? 0
-    const fullDescLen  = watch("fullDescription")?.length  ?? 0
+    const fullDescLen = watch("fullDescription")?.length ?? 0
 
     return (
         <form
@@ -188,7 +189,7 @@ export default function CreateEventStep2() {
                                     value={field.value}
                                     onChange={field.onChange}
                                     error={errors.phoneNumber?.message}
-                                    defaultCountry="NG"
+                                    defaultCountry="US"
                                     data-testid="input-phone-number"
                                 />
                             )}

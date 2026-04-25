@@ -10,16 +10,16 @@ import { getUpcomingEvents } from "@/actions/dashboard"
 
 
 interface EventOption {
-    id:       string
-    title:    string
+    id: string
+    title: string
     category: string
-    image:    string
+    image: string
 }
 
 interface SearchableEventSelectProps {
-    value?:        string
+    value?: string
     onValueChange: (value: string) => void
-    error?:        string
+    error?: string
 }
 
 export default function SearchableEventSelect({
@@ -28,9 +28,9 @@ export default function SearchableEventSelect({
     error,
 }: SearchableEventSelectProps) {
 
-    const [open,    setOpen]    = useState(false)
-    const [search,  setSearch]  = useState("")
-    const [events,  setEvents]  = useState<EventOption[]>([])
+    const [open, setOpen] = useState(false)
+    const [search, setSearch] = useState("")
+    const [events, setEvents] = useState<EventOption[]>([])
     const [loading, setLoading] = useState(false)
 
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -40,15 +40,19 @@ export default function SearchableEventSelect({
     const fetchEvents = async (query: string) => {
         setLoading(true)
         try {
-            const result = await getUpcomingEvents({ search: query })
+            const result = await getUpcomingEvents({
+                search: query,
+                page: 1,
+            })
             if (result.success) {
+                const all = result.data?.results ?? []
                 setEvents(
-                    result.data?.results ? 
-                    result.data?.results.map(v => {
-                        return { category: v.category, id: v.id, image: v.event_image.image_url, title: v.title }
-                    })
-                    :
-                    []
+                    (query ? all : all.slice(0, 3)).map(v => ({
+                        category: v.category,
+                        id: v.id,
+                        image: v.event_image?.image_url,
+                        title: v.title,
+                    }))
                 )
             }
         } finally {
@@ -56,18 +60,27 @@ export default function SearchableEventSelect({
         }
     }
 
-    // Load initial events when popover opens
+    const [hasInitialized, setHasInitialized] = useState(false)
+
     useEffect(() => {
-        if (open && events.length === 0) fetchEvents("")
+        if (open && !hasInitialized) {
+            fetchEvents("")
+            setHasInitialized(true)
+        }
     }, [open])
 
-    // Debounced search
+    // Debounced search — only fires when user actually types
     useEffect(() => {
-        if (!open) return
+        if (!open || !hasInitialized) return
+        if (search === "") {
+            // User cleared search — show initial results again
+            fetchEvents("")
+            return
+        }
         if (debounceRef.current) clearTimeout(debounceRef.current)
         debounceRef.current = setTimeout(() => fetchEvents(search), 400)
         return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
-    }, [search])
+    }, [search, open])
 
     return (
         <div className="w-full space-y-2">

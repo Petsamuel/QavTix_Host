@@ -27,13 +27,13 @@ export async function getCustomers(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMERS_ENDPOINT}`
         )
 
-        if (params.date_range  != null) url.searchParams.set("date_range",  params.date_range)
-        if (params.start_date  != null) url.searchParams.set("start_date",  params.start_date)
-        if (params.end_date    != null) url.searchParams.set("end_date",    params.end_date)
-        if (params.event       != null) url.searchParams.set("event",       params.event)
-        if (params.ordering    != null) url.searchParams.set("ordering",    params.ordering)
-        if (params.page        != null) url.searchParams.set("page",        String(params.page))
-        if (params.search      != null) url.searchParams.set("search",      params.search)
+        if (params.date_range != null) url.searchParams.set("date_range", params.date_range)
+        if (params.start_date != null) url.searchParams.set("start_date", params.start_date)
+        if (params.end_date != null) url.searchParams.set("end_date", params.end_date)
+        if (params.event != null) url.searchParams.set("event", params.event)
+        if (params.ordering != null) url.searchParams.set("ordering", params.ordering)
+        if (params.page != null) url.searchParams.set("page", String(params.page))
+        if (params.search != null) url.searchParams.set("search", params.search)
         if (params.ticket_type != null) url.searchParams.set("ticket_type", String(params.ticket_type))
 
         const res = await fetch(url.toString(), {
@@ -42,6 +42,7 @@ export async function getCustomers(
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             next: { tags: [CACHE_TAGS.CUSTOMERS] },
+            cache: "force-cache",
         })
 
         if (!res.ok) {
@@ -65,7 +66,7 @@ export async function getCustomerProfile(
     params: CustomerProfileParams
 ): Promise<GetCustomerProfileResult> {
     try {
-        const token  = await getToken()
+        const token = await getToken()
         const { user_id, ...rest } = params
 
         const url = new URL(
@@ -73,15 +74,15 @@ export async function getCustomerProfile(
         )
 
         const entries: [string, string | number | undefined][] = [
-            ["date_range",         rest.date_range],
-            ["event",              rest.event],
-            ["chart_range",        rest.chart_range],
+            ["date_range", rest.date_range],
+            ["event", rest.event],
+            ["chart_range", rest.chart_range],
             ["history_date_range", rest.history_date_range],
-            ["history_event",      rest.history_event],
-            ["ticket_type",        rest.ticket_type],
-            ["search",             rest.search],
-            ["ordering",           rest.ordering],
-            ["page",               rest.page],
+            ["history_event", rest.history_event],
+            ["ticket_type", rest.ticket_type],
+            ["search", rest.search],
+            ["ordering", rest.ordering],
+            ["page", rest.page],
         ]
 
         for (const [key, val] of entries) {
@@ -94,6 +95,7 @@ export async function getCustomerProfile(
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             next: { tags: [CACHE_TAGS.CUSTOMER] },
+            cache: "force-cache",
         })
 
         if (!res.ok) {
@@ -112,8 +114,8 @@ export async function getCustomerProfile(
 
 
 
-export async function getAttendeesExport(): Promise<{ 
-    success: boolean; 
+export async function getAttendeesExport(): Promise<{
+    success: boolean;
     message?: string;
     blob?: Blob;
 }> {
@@ -129,24 +131,24 @@ export async function getAttendeesExport(): Promise<{
 
         if (!res.ok) {
             const json = await res.json().catch(() => ({}))
-            return { 
-                success: false, 
-                message: handleApiError(json) || "Failed to export attendees" 
+            return {
+                success: false,
+                message: handleApiError(json) || "Failed to export attendees"
             }
         }
 
         const blob = await res.blob()
 
-        return { 
-            success: true, 
-            blob 
+        return {
+            success: true,
+            blob
         }
 
     } catch (err) {
         console.error("[getAttendeesExport] error:", err)
-        return { 
-            success: false, 
-            message: "Failed to download attendee list." 
+        return {
+            success: false,
+            message: "Failed to download attendee list."
         }
     }
 }

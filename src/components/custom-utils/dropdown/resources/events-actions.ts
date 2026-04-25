@@ -1,6 +1,6 @@
 "use client"
 
-import { EVENT_DETAILS_LINK } from "@/enums/navigation"
+import { EDIT_DRAFT_EVENT, EVENT_DETAILS_LINK, DUPLICATE_EVENT } from "@/enums/navigation"
 import { ItemAction } from "../ItemActionDropdown"
 
 export type LiveEventActionID =
@@ -33,16 +33,21 @@ export function buildLiveEventActions(
             id: "edit" as const,
             label: "Edit Event",
             icon: "hugeicons:pencil-edit-01",
-            onClick: () => router.push(EVENT_DETAILS_LINK.replace("[event_id]", eventID)),
+            onClick: () => router.push(EDIT_DRAFT_EVENT.href.replace("[event_id]", eventID)),
         },
-        { id: "duplicate" as const, label: "Duplicate Event", icon: "system-uicons:duplicate" },
+        { 
+            id: "duplicate" as const,
+            label: "Duplicate Event", 
+            icon: "system-uicons:duplicate" ,
+            onClick: () => router.push(DUPLICATE_EVENT.href.replace("[event_id]", eventID)),
+        },
         {
             id: "view" as const,
             label: "View On Site",
             icon: "uil:search",
             onClick: () => {
                 window.open(EVENT_DETAILS_LINK.replace("[event_id]", eventID), "_blank")
-            },
+            }
         },
         { id: "download" as const, label: "Download Attendee List", icon: "hugeicons:download-01" },
         { id: "send-update" as const, label: "Send Update to Buyers", icon: "lucide:mail" },

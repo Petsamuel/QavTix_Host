@@ -26,9 +26,9 @@ export async function getDashboardOverview(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${DASHBOARD_OVERVIEW_ENDPOINT}`
         )
 
-        if (params.year       != null) url.searchParams.set("year",       String(params.year))
-        if (params.month      != null) url.searchParams.set("month",      String(params.month))
-        if (params.week       != null) url.searchParams.set("week",       String(params.week))
+        if (params.year != null) url.searchParams.set("year", String(params.year))
+        if (params.month != null) url.searchParams.set("month", String(params.month))
+        if (params.week != null) url.searchParams.set("week", String(params.week))
         if (params.chart_type != null) url.searchParams.set("chart_type", params.chart_type)
 
         const res = await fetch(url.toString(), {
@@ -66,14 +66,14 @@ export async function getUpcomingEvents(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${HOST_UPCOMING_EVENTS_ENDPOINT}`
         )
 
-        if (params.page        != null) url.searchParams.set("page",        String(params.page))
-        if (params.search      != null) url.searchParams.set("search",      params.search)
-        if (params.ordering    != null) url.searchParams.set("ordering",    params.ordering)
-        if (params.status      != null) url.searchParams.set("status",      params.status)
-        if (params.category    != null) url.searchParams.set("category",    String(params.category))
+        if (params.page != null) url.searchParams.set("page", String(params.page))
+        if (params.search != null) url.searchParams.set("search", params.search)
+        if (params.ordering != null) url.searchParams.set("ordering", params.ordering)
+        if (params.status != null) url.searchParams.set("status", "active")
+        if (params.category != null) url.searchParams.set("category", String(params.category))
         if (params.performance != null) url.searchParams.set("performance", params.performance)
-        if (params.start_date  != null) url.searchParams.set("start_date",  params.start_date)
-        if (params.end_date    != null) url.searchParams.set("end_date",    params.end_date)
+        if (params.start_date != null) url.searchParams.set("start_date", params.start_date)
+        if (params.end_date != null) url.searchParams.set("end_date", params.end_date)
 
         const res = await fetch(url.toString(), {
             headers: {
@@ -111,9 +111,9 @@ export async function getDashboardFeed(
         )
 
         if (params.mark_read != null) url.searchParams.set("mark_read", String(params.mark_read))
-        if (params.page      != null) url.searchParams.set("page",      String(params.page))
-        if (params.search    != null) url.searchParams.set("search",     params.search)
-        if (params.ordering  != null) url.searchParams.set("ordering",   params.ordering)
+        if (params.page != null) url.searchParams.set("page", String(params.page))
+        if (params.search != null) url.searchParams.set("search", params.search)
+        if (params.ordering != null) url.searchParams.set("ordering", params.ordering)
 
         const res = await fetch(url.toString(), {
             headers: {

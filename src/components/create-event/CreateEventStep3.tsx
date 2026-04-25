@@ -1,7 +1,7 @@
 'use client'
 
 import { useForm, useFieldArray, FormProvider, Controller, SubmitHandler } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { Trash2, ChevronDown } from 'lucide-react'
 import CreateEventPricingSummary from './CreateEventPricingSummary'
 import { Step3FormData, step3Schema } from '@/schemas/create-event.schema'
@@ -20,6 +20,8 @@ import { useStepper } from '@/contexts/create-event/StepperProvider'
 import { cn } from '@/lib/utils'
 import { usePlanRestrictions } from '@/custom-hooks/useRestriction'
 import { PlanGateBanner } from './PlanGateBanner'
+import { CustomDateTimeInput } from '../custom-utils/inputs/CustomDateTimeInput'
+import { useEffect } from 'react'
 
 
 export default function CreateEventStep3() {
@@ -29,23 +31,23 @@ export default function CreateEventStep3() {
     const plan = usePlanRestrictions()
 
     const methods = useForm<Step3FormData>({
-        resolver: zodResolver(step3Schema) as any,
+        resolver: yupResolver(step3Schema, { abortEarly: false }) as any,
         mode: 'onTouched',
         defaultValues: {
             ticketTypes: eventData.ticketsPricing?.ticketTypes ?? [{ id: crypto.randomUUID(), ticketType: '', price: 0, currency: 'NGN', quantity: 1 }],
-            refundPolicy:           eventData.ticketsPricing?.refundPolicy           ?? 'no',
-            customRefundPercentage: eventData.ticketsPricing?.customRefundPercentage ?? undefined,
+            refundPolicy: eventData.ticketsPricing?.refundPolicy ?? 'no',
+            customRefundPercentage: eventData.ticketsPricing?.customRefundPercentage ?? 1,
             salesPeriod: eventData.ticketsPricing?.salesPeriod ?? {
                 startDateTime: "",
-                endDateTime:   "",
+                endDateTime: "",
             },
         },
     })
 
     const { register, control, watch, setValue, handleSubmit, formState: { errors } } = methods
     const { fields, append, remove } = useFieldArray({ control, name: "ticketTypes" })
-    const refundPolicy  = watch('refundPolicy')
-    const allTickets    = watch("ticketTypes") ?? []
+    const refundPolicy = watch('refundPolicy')
+    const allTickets = watch("ticketTypes") ?? []
 
     // How many promo codes are currently filled across all tickets
     const totalPromoCodes = allTickets.reduce((acc, t) => {
@@ -59,16 +61,20 @@ export default function CreateEventStep3() {
         goToNextStep()
     }
 
+
+    useEffect(() => {
+        console.log(errors)
+    }, [refundPolicy])
+
     return (
         <FormProvider {...methods}>
-            <div
+            <form
                 className="flex flex-col lg:flex-row gap-10 items-start"
-                data-testid="create-event-step-3"
+                onSubmit={handleSubmit(handleStep3Submit)}
+                data-testid="create-event-step-3-form"
             >
-                <form
+                <div
                     className="flex-1 w-full space-y-12"
-                    onSubmit={handleSubmit(handleStep3Submit)}
-                    data-testid="create-event-step-3-form"
                 >
                     {/* ── Ticket Info ─ */}
                     <section className="space-y-6" data-testid="section-ticket-info">
@@ -90,7 +96,7 @@ export default function CreateEventStep3() {
                         </div>
 
                         {fields.map((field, index) => {
-                            const existingCode  = allTickets[index]?.promoCode?.codeWord?.trim()
+                            const existingCode = allTickets[index]?.promoCode?.codeWord?.trim()
                             // This ticket can have a code if: plan allows it AND (it already has one OR limit not reached)
                             const promoEditable =
                                 plan.canUsePromoCodes &&
@@ -313,29 +319,24 @@ export default function CreateEventStep3() {
                                 name="salesPeriod.startDateTime"
                                 control={control}
                                 render={({ field }) => (
-                                    <CustomDatePicker
+                                    <CustomDateTimeInput
                                         label="Start Date & Time"
-                                        disabledPastDate
-                                        placeholder="Select"
-                                        icon={ChevronDown}
                                         value={field.value}
-                                        onChange={field.onChange}
+                                        onChange={(e) => field.onChange(e.target.value)}
                                         error={errors.salesPeriod?.startDateTime?.message}
                                         data-testid="input-sales-start"
                                     />
                                 )}
                             />
+
                             <Controller
                                 name="salesPeriod.endDateTime"
                                 control={control}
                                 render={({ field }) => (
-                                    <CustomDatePicker
+                                    <CustomDateTimeInput
                                         label="End Date & Time"
-                                        disabledPastDate
-                                        placeholder="Select"
-                                        icon={ChevronDown}
                                         value={field.value}
-                                        onChange={field.onChange}
+                                        onChange={(e) => field.onChange(e.target.value)}
                                         error={errors.salesPeriod?.endDateTime?.message}
                                         data-testid="input-sales-end"
                                     />
@@ -385,7 +386,7 @@ export default function CreateEventStep3() {
                                         onChange={(val) => field.onChange(val ? Number(val) : val)}
                                         inputContainerStyles="max-w-29.25"
                                         value={field.value as number}
-                                        error={errors.customRefundPercentage && "Invalid refund input"}
+                                        error={errors.customRefundPercentage?.message as string}
                                         data-testid="input-custom-refund-percentage"
                                     />
                                 )}
@@ -396,16 +397,16 @@ export default function CreateEventStep3() {
                     <div className='hidden md:block'>
                         <MultiStepFormButtonDuo />
                     </div>
-                </form>
+                </div>
 
-                <aside className="w-full lg:w-[320px] sticky top-6" data-testid="pricing-summary-sidebar">
+                <aside className="w-full lg:w-[320px] lg:sticky top-6" data-testid="pricing-summary-sidebar">
                     <CreateEventPricingSummary />
                 </aside>
-                
-                <div className='md:hidden'>
+
+                <div className='md:hidden w-full'>
                     <MultiStepFormButtonDuo />
                 </div>
-            </div>
+            </form>
         </FormProvider>
     )
 }

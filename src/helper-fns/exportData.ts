@@ -1,5 +1,3 @@
-// lib/features/export/exportData.ts
-
 type Primitive = string | number | boolean | null | undefined
 
 /**

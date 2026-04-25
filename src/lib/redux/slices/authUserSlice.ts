@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export type UserRole = "attendee" | "organizer" | "admin"
+export type UserRole = "attendee" | "host" | "admin"
 
 export interface AuthUserState {
     isAuthenticated: boolean
