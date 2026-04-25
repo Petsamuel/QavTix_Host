@@ -97,6 +97,7 @@ export default function AddBankAccountForm({
             account_name:   data.account_name,
             account_number: data.account_number,
             is_default:     data.is_default,
+            bank_code:      data.bank_code,
         })
 
         if (result.success) {

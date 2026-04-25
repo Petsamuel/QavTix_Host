@@ -111,6 +111,7 @@ export async function addPayoutAccount(payload: {
     bank_name: string
     account_name: string
     account_number: string
+    bank_code?: string
     is_default?: boolean
 }): Promise<{ success: boolean; data?: PayoutAccountItem; message?: string }> {
     try {
