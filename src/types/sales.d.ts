@@ -1,5 +1,5 @@
 interface SalesAnalyticsCardsParams {
-    date_range?: "day" | "week" | "month"
+    date_range?: "day" | "week" | "month" | "year"
     event?: string // event UUID
 }
 

@@ -19,59 +19,59 @@ interface EventImage {
     video_url: string | null
 }
 
-type EventStatus      = "active" | "draft" | "ended" | "sold-out" | "cancelled" | "banned"
+type EventStatus = "active" | "draft" | "ended" | "sold-out" | "cancelled" | "banned"
 type EventPerformance = "fully_booked" | "almost_full" | "moderate_sales" | "low_sales" | "no_sales"
 
 interface OrganizerEvent {
-    id:                      string
-    status:                  EventStatus
-    title:                   string
-    category:                string
-    event_image:             EventImage
-    start_datetime:          string
-    event_location:          string
+    id: string
+    status: EventStatus
+    title: string
+    category: string
+    event_image: EventImage
+    start_datetime: string
+    event_location: string
     tickets_sold_percentage: number
-    tickets_total_revenue:   number
-    tickets_listed:          number
-    tickets_sold:            number
-    views_count:             number
-    saves_count:             number
-    performance:             EventPerformance
-    is_featured:             boolean
+    tickets_total_revenue: number
+    tickets_listed: number
+    tickets_sold: number
+    views_count: number
+    saves_count: number
+    performance: EventPerformance
+    is_featured: boolean
 }
 
 interface EventCards {
-    live:     number
-    draft:    number
-    ended:    number
+    live: number
+    draft: number
+    ended: number
     sold_out: number
 }
 
 // Paginated response shape (data envelope)
 interface EventsData {
-    count:       number
+    count: number
     total_pages: number
-    page:        number
-    next:        number | null
-    previous:    number | null
-    cards:       EventCards
-    results:     OrganizerEvent[]
+    page: number
+    next: number | null
+    previous: number | null
+    cards: EventCards
+    results: OrganizerEvent[]
 }
 
 interface GetEventsParams {
-    category?:    number
-    end_date?:    string
-    ordering?:    string
-    page?:        number
+    category?: number
+    end_date?: string
+    ordering?: string
+    page?: number
     performance?: EventPerformance
-    search?:      string
-    start_date?:  string
-    status?:      EventStatus
+    search?: string
+    start_date?: string
+    status?: EventStatus
 }
 
 interface GetEventsResult {
-    success:  boolean
-    data?:    EventsData
+    success: boolean
+    data?: EventsData
     message?: string
 }
 
@@ -84,9 +84,9 @@ type BulkEventActionId =
     | "bulk-download"
 
 interface BulkEventAction {
-    id:       BulkEventActionId
-    label:    string
-    icon:     string
+    id: BulkEventActionId
+    label: string
+    icon: string
     variant?: "default" | "danger"
 }
 
@@ -94,42 +94,42 @@ interface BulkEventAction {
 
 ///
 interface EventTicket {
-    sn:             number
-    id:             string
-    qrcode_token:   string
-    event_name:     string
-    event_image:    string
-    category:       string
-    payment:        "Completed" | "Pending" | "Failed" | "Refunded"
-    event_status:   "active" | "cancelled" | "postponed" | "completed"
-    ticket_status:  "Active" | "Used" | "Cancelled" | "Expired"
-    ticket_type:    string
+    sn: number
+    id: string
+    qrcode_token: string
+    event_name: string
+    event_image: string
+    category: string
+    payment: "Completed" | "Pending" | "Failed" | "Refunded"
+    event_status: "active" | "cancelled" | "postponed" | "completed"
+    ticket_status: "Active" | "Used" | "Cancelled" | "Expired"
+    ticket_type: string
     event_datetime: string
     original_price: string
-    currency:       string
-    host:           string
+    currency: string
+    host: string
     event_location: EventLocation
 }
 
-type DatePreset = 'day' | 'week' | 'month'
+type DatePreset = 'day' | 'week' | 'month' | 'year'
 type ChartPreset = 'year' | 'week' | 'month'
 
 interface StatusOption {
-    value:  string
-    label:  string
-    color:  string
+    value: string
+    label: string
+    color: string
 }
 
 interface TrendingTicket {
-    ticket_id:       number
-    ticket_type:     string
-    event_name:      string
-    event_category:  string
-    event_image:     string
-    tickets_sold:    number
+    ticket_id: number
+    ticket_type: string
+    event_name: string
+    event_category: string
+    event_image: string
+    tickets_sold: number
     conversion_rate: number
-    quantity:        number
-    revenue:         string
+    quantity: number
+    revenue: string
 }
 
 
@@ -139,46 +139,46 @@ interface UpcomingEventImage {
 }
 
 interface UpcomingEventCards {
-    live:     number
-    draft:    number
-    ended:    number
+    live: number
+    draft: number
+    ended: number
     sold_out: number
 }
 
 interface UpcomingEvent {
-    id:                      string
-    status:                  EventStatus
-    title:                   string
-    category:                string
-    event_image:             UpcomingEventImage
-    start_datetime:          string
-    event_location:          string
+    id: string
+    status: EventStatus
+    title: string
+    category: string
+    event_image: UpcomingEventImage
+    start_datetime: string
+    event_location: string
     tickets_sold_percentage: number
-    tickets_total_revenue:   number
-    tickets_listed:          number
-    tickets_sold:            number
-    views_count:             number
-    performance?:            EventPerformance
-    saves_count:             number
+    tickets_total_revenue: number
+    tickets_listed: number
+    tickets_sold: number
+    views_count: number
+    performance?: EventPerformance
+    saves_count: number
 }
 
 interface UpcomingEventsData {
-    count:       number
+    count: number
     total_pages: number
-    page:        number
-    next:        number | null
-    previous:    number | null
-    cards:       UpcomingEventCards
-    results:     UpcomingEvent[]
+    page: number
+    next: number | null
+    previous: number | null
+    cards: UpcomingEventCards
+    results: UpcomingEvent[]
 }
 
 type EventPerformance = "fully_booked" | "almost_full" | "moderate_sales" | "low_sales" | "no_sales"
-type EventStatus      = "active" | "draft" | "ended" | "sold-out" | "cancelled" | "banned"
+type EventStatus = "active" | "draft" | "ended" | "sold-out" | "cancelled" | "banned"
 
 
 interface GetUpcomingEventsResult {
-    success:  boolean
-    data?:    UpcomingEventsData
+    success: boolean
+    data?: UpcomingEventsData
     message?: string
 }
 
@@ -238,7 +238,7 @@ interface UserTicketSummary {
 interface EventDetails {
     id: string
     title: string
-    category: number 
+    category: number
     tags: string[]
     event_type: "single" | "recurring"
     start_datetime: string
@@ -272,7 +272,7 @@ interface EventDetails {
     social_links: EventSocialLink[]
     tickets: EventTicket[]
     event_status: string
-    media: EventMedia[]            
+    media: EventMedia[]
     attendees_count?: number
     is_following?: boolean
     online_link?: string
@@ -283,74 +283,74 @@ interface EventDetails {
 
 
 interface EditEventDetails {
-    id:                     string
-    event_name:             string
-    category:               number
-    tags:                   string[]
-    event_type:             'single' | 'recurring'
-    start_datetime:         string
-    end_datetime:           string
-    location_type:          'physical' | 'online' | 'tba'
-    short_description:      string
-    full_description:       string
+    id: string
+    event_name: string
+    category: number
+    tags: string[]
+    event_type: 'single' | 'recurring'
+    start_datetime: string
+    end_datetime: string
+    location_type: 'physical' | 'online' | 'tba'
+    short_description: string
+    full_description: string
     organizer_display_name: string
-    organizer_description:  string
-    public_email:           string
-    phone_number:           string
-    refund_policy:          'no' | 'partial' | 'full' | 'custom'
-    refund_percentage:      number | null
-    qr_enabled:             boolean
-    age_restriction:        boolean
-    minimum_age:            number | null
-    order_confirmation:     boolean
-    ticket_delivery:        boolean
-    reminders:              boolean
-    post_event_emails:      boolean
-    customize_sender_name:  boolean
-    affiliate_enabled:      boolean
-    commission_percentage:  string
-    affiliate_start:        string | null
-    affiliate_end:          string | null
+    organizer_description: string
+    public_email: string
+    phone_number: string
+    refund_policy: 'no' | 'partial' | 'full' | 'custom'
+    refund_percentage: number | null
+    qr_enabled: boolean
+    age_restriction: boolean
+    minimum_age: number | null
+    order_confirmation: boolean
+    ticket_delivery: boolean
+    reminders: boolean
+    post_event_emails: boolean
+    customize_sender_name: boolean
+    affiliate_enabled: boolean
+    commission_percentage: string
+    affiliate_start: string | null
+    affiliate_end: string | null
     event_location: {
-        venue_name:  string
-        address:     string
-        country:     string
-        state:       string
-        city:        string
+        venue_name: string
+        address: string
+        country: string
+        state: string
+        city: string
         postal_code: string
     }
     social_links: {
         url: string
     }[]
     tickets: {
-        id:            number
-        ticket_type:   string
-        description:   string
-        price:         string
-        quantity:      number
+        id: number
+        ticket_type: string
+        description: string
+        price: string
+        quantity: number
         per_person_max: number | null
-        sales_start:   string | null
-        sales_end:     string | null
+        sales_start: string | null
+        sales_end: string | null
         promo_codes: {
-            code:                string
+            code: string
             discount_percentage: number
-            maximum_users:       number | null
-            valid_till:          string | null
+            maximum_users: number | null
+            valid_till: string | null
         }[]
     }[]
     permissions: {
-        id:     number
-        email:  string
-        role:   "manager" | "financials" | "customers" | "marketing" | "sales" | "checkin" | "host"
+        id: number
+        email: string
+        role: "manager" | "financials" | "customers" | "marketing" | "sales" | "checkin" | "host"
         status: 'active' | 'disabled' | 'pending'
     }[]
     media: {
-        image_url:   string
-        video_url:   string | null
+        image_url: string
+        video_url: string | null
         is_featured: boolean
     }[]
-    currency:       string
-    event_status:   'draft' | 'active' | 'cancelled' | 'completed'
-    is_scheduled:   boolean
-    schedule_time:  string | null
+    currency: string
+    event_status: 'draft' | 'active' | 'cancelled' | 'completed'
+    is_scheduled: boolean
+    schedule_time: string | null
 }
