@@ -253,7 +253,7 @@ export default function CreateEventStep1() {
                 {eventType === "recurring" && (
                     <div className="space-y-6 max-w-lg" data-testid="recurring-event-dates">
                         {fields.map((field, index) => (
-                            <div key={field.id} className="flex flex-wrap flex-row items-start sm:items-end gap-4" data-testid={`recurring-date-row-${index}`}>
+                            <div key={field.id} className="flex flex-wrap md:flex-nowrap flex-row items-start sm:items-end gap-4" data-testid={`recurring-date-row-${index}`}>
 
                                 {/* Mobile remove */}
                                 {index > 0 && (
