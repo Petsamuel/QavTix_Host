@@ -150,6 +150,15 @@ export default function CreateEventReviewStep() {
         }
     }
 
+    const handleOnclose = () => {
+        if (statusModal.type === "FAILED") {
+            setStatusModal(prev => ({ ...prev, isOpen: false }))
+            return
+        }
+        resetForm()
+        router.push(NAVIGATION_LINKS.MY_EVENTS.href)
+    }
+
 
     return (
         <div className="mt-8 md:pb-16" data-testid="create-event-review-step">
@@ -325,11 +334,7 @@ export default function CreateEventReviewStep() {
 
             <EventPublishStatusModal
                 isOpen={statusModal.isOpen}
-                onClose={() => {
-                    setStatusModal(prev => ({ ...prev, isOpen: false }))
-                    resetForm()
-                    router.push(NAVIGATION_LINKS.MY_EVENTS.href)
-                }}
+                onClose={handleOnclose}
                 type={statusModal.type}
                 onViewDashboard={() => router.push(NAVIGATION_LINKS.DASHBOARD.href)}
                 eventId={statusModal.eventId}
