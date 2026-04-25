@@ -47,13 +47,7 @@ interface Props {
 }
 
 
-export default function SalesAnalyticsPageContentWrapper({
-    initialCards,
-    initialGraphs,
-    initialTransactions,
-}: Props) {
-    const { user } = useAppSelector(store => store.authUser)
-    const currency = user?.currency || ""
+export default function SalesAnalyticsPageContentWrapper(props: Props) {
     const router = useRouter()
     const { allowed, modalOpen } = useHostGate()
 
@@ -67,6 +61,18 @@ export default function SalesAnalyticsPageContentWrapper({
             />
         )
     }
+
+    return <SalesAnalyticsPageClient {...props} />
+}
+
+
+function SalesAnalyticsPageClient({
+    initialCards,
+    initialGraphs,
+    initialTransactions,
+}: Props) {
+    const { user } = useAppSelector(store => store.authUser)
+    const currency = user?.currency || ""
 
     // External filters (drive BOTH cards + graphs)
     const [date, setDate] = useState<DatePreset | null>(null)
