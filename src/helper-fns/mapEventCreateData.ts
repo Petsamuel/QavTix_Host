@@ -211,8 +211,8 @@ export function buildEventPayload(
         category: Number(info?.eventCategory), // backend accepts slug or numeric id — adjust if needed
         tags_input: info?.additionalTags ?? [],
         event_type: info?.eventType ?? "single",
-        start_datetime: info?.startDateTime ?? null,
-        end_datetime: info?.endDateTime ?? null,
+        start_datetime: info?.eventType === "recurring" && info?.dates?.length ? info.dates[0].startDateTime : (info?.startDateTime ?? null),
+        end_datetime: info?.eventType === "recurring" && info?.dates?.length ? info.dates[info.dates.length - 1].endDateTime : (info?.endDateTime ?? null),
         // Recurring event dates are included as nested objects
         ...(info?.eventType === "recurring" && info.dates?.length
             ? {
