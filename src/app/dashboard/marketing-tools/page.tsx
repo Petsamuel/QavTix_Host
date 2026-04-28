@@ -5,6 +5,7 @@ import MarketingToolsPageContentWrapper from "@/components/page-wrappers/Marketi
 import { TabSlice } from "@/custom-hooks/UseDataDisplay"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
     ...hostSiteMetadata,
@@ -33,11 +34,13 @@ const emptyCampaigns: TabSlice<EmailCampaign> = {
 }
 
 export default async function MarketingToolsPage() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("host_access_token")?.value;
     const [profileResult, promoResult, affiliateResult, campaignResult] = await Promise.allSettled([
-        getHostProfile(),
-        getPromoCodes(),
-        getAffiliateLinks(),
-        getEmailCampaigns(),
+        getHostProfile(token),
+        getPromoCodes(token),
+        getAffiliateLinks(token),
+        getEmailCampaigns(token),
     ])
 
     const profile = profileResult.status === "fulfilled" ? profileResult.value : null

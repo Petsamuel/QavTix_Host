@@ -5,34 +5,30 @@ import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
 import { updateTag } from "next/cache"
 import { CACHE_TAGS } from "@/cache-tags"
-import { cookies } from "next/headers"
-
-
+import { cacheTag } from "next/cache";
 
 interface PaymentMethodsResult {
-    success:  boolean
-    data?:    PaymentMethod[]
+    success: boolean
+    data?: PaymentMethod[]
     message?: string
 }
 
 interface MutateResult {
-    success:  boolean
+    success: boolean
     message?: string
 }
 
-export async function getPaymentMethods(): Promise<PaymentMethodsResult> {
+export async function getPaymentMethods(token: string | undefined): Promise<PaymentMethodsResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.PAYMENT_METHODS);
     try {
-        const cookieStore = await cookies()
-        const accessToken = cookieStore.get("host_access_token")?.value
-
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${PAYMENT_METHODS_ENDPOINT}`,
             {
                 headers: {
                     "Content-Type": "application/json",
-                    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-                },
-                next: { tags: [CACHE_TAGS.PAYMENT_METHODS] },
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                }
             }
         )
 
@@ -67,15 +63,15 @@ export async function setDefaultPaymentMethod(methodID: number): Promise<MutateR
 
 
 interface InitializePaymentMethodResult {
-    success:      boolean
+    success: boolean
     checkout_url?: string
-    message?:     string
+    message?: string
 }
 
 interface VerifyPaymentPayload {
     reference: string
     save_card: boolean
-    country:   string
+    country: string
 }
 
 export async function addPaymentMethod(country: string): Promise<InitializePaymentMethodResult> {
@@ -136,10 +132,10 @@ interface InitializeFeaturedResult {
 
 
 export async function initializeFeaturedPayment(payload: {
-    event_id:  string
+    event_id: string
     plan_slug: string
-    country:   string
-    currency:  string
+    country: string
+    currency: string
 }): Promise<InitializeFeaturedResult> {
     try {
         const axiosInstance = await getServerAxios()
@@ -150,11 +146,11 @@ export async function initializeFeaturedPayment(payload: {
         const flow = data?.flow || "popup"
         const checkout_url = data?.checkout_url ?? data?.data?.checkout_url
 
-        return { 
-            success: true, 
-            flow, 
+        return {
+            success: true,
+            flow,
             checkout_url,
-            message: data?.message 
+            message: data?.message
         }
 
     } catch (error: any) {
@@ -169,18 +165,18 @@ export async function initializeFeaturedPayment(payload: {
 
 export async function verifyFeaturedPayment(payload: {
     reference: string
-    event_id:  string
-    country:   string
+    event_id: string
+    country: string
 }): Promise<{ success: boolean; message?: string; data?: any }> {
     try {
         const axiosInstance = await getServerAxios()
 
         const { data } = await axiosInstance.post(FEATURED_PLAN_VERIFY_ENDPOINT, payload)
 
-        return { 
-            success: true, 
+        return {
+            success: true,
             message: data?.message ?? "Event successfully promoted!",
-            data: data?.data ?? data 
+            data: data?.data ?? data
         }
 
     } catch (error: any) {
@@ -225,10 +221,10 @@ export async function startFreeTrial(): Promise<{
 }
 
 
-export async function getPlans() {
+export async function getPlans(token: string | undefined) {
+    'use cache';
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${PLANS_ENDPOINT}`, {
-            next: { revalidate: 3600 }
         })
         if (res.ok) {
             return await res.json()

@@ -1,10 +1,7 @@
-"use server"
-
 import { CACHE_TAGS } from "@/cache-tags"
 import { CUSTOMER_DETAILS_ENDPOINT, CUSTOMER_LIST_DOWNLOAD_ENDPOINT, CUSTOMERS_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { cookies } from "next/headers"
-
+import { cacheTag } from "next/cache";
 
 interface GetCustomersResult {
     success: boolean
@@ -12,17 +9,12 @@ interface GetCustomersResult {
     message?: string
 }
 
-async function getToken(): Promise<string | undefined> {
-    const cookieStore = await cookies()
-    return cookieStore.get("host_access_token")?.value
-}
-
-
 export async function getCustomers(
-    params: CustomersParams = {}
+    token: string | undefined, params: CustomersParams = {}
 ): Promise<GetCustomersResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.CUSTOMERS);
     try {
-        const token = await getToken()
         const url = new URL(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMERS_ENDPOINT}`
         )
@@ -40,9 +32,7 @@ export async function getCustomers(
             headers: {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            next: { tags: [CACHE_TAGS.CUSTOMERS] },
-            cache: "force-cache",
+            }
         })
 
         if (!res.ok) {
@@ -60,13 +50,12 @@ export async function getCustomers(
     }
 }
 
-
-
 export async function getCustomerProfile(
-    params: CustomerProfileParams
+    token: string | undefined, params: CustomerProfileParams
 ): Promise<GetCustomerProfileResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.CUSTOMER);
     try {
-        const token = await getToken()
         const { user_id, ...rest } = params
 
         const url = new URL(
@@ -93,9 +82,7 @@ export async function getCustomerProfile(
             headers: {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            next: { tags: [CACHE_TAGS.CUSTOMER] },
-            cache: "force-cache",
+            }
         })
 
         if (!res.ok) {
@@ -112,15 +99,13 @@ export async function getCustomerProfile(
     }
 }
 
-
-
-export async function getAttendeesExport(): Promise<{
+export async function getAttendeesExport(token: string | undefined): Promise<{
     success: boolean;
     message?: string;
     blob?: Blob;
 }> {
+    'use cache';
     try {
-        const token = await getToken()
         const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMER_LIST_DOWNLOAD_ENDPOINT}`
 
         const res = await fetch(url, {

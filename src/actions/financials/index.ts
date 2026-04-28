@@ -6,20 +6,14 @@ import { FINANCIALS_ENDPOINT, PAYOUT_ADD_ENDPOINT, PAYOUT_LIST_ENDPOINT, REMOVE_
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
 import { randomUUID } from "crypto"
-import { cookies } from "next/headers"
-
-async function getToken(): Promise<string | undefined> {
-    const cookieStore = await cookies()
-    return cookieStore.get("host_access_token")?.value
-}
-
+import { cacheTag } from "next/cache";
 
 export async function getFinancials(
-    params: FinancialsParams = {}
+    token: string | undefined, params: FinancialsParams = {}
 ): Promise<GetFinancialsResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.FINANCIALS);
     try {
-        const token = await getToken()
-
         const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${FINANCIALS_ENDPOINT}`)
         if (params.date_range) url.searchParams.set("date_range", params.date_range)
         if (params.start_date) url.searchParams.set("start_date", params.start_date)
@@ -30,9 +24,7 @@ export async function getFinancials(
             headers: {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            next: { tags: [CACHE_TAGS.FINANCIALS], revalidate: 1000 },
-            cache: "force-cache",
+            }
         })
 
         if (!res.ok) {
@@ -49,18 +41,17 @@ export async function getFinancials(
     }
 }
 
-export async function getPayoutAccounts(): Promise<{ success: boolean; data?: PayoutAccountItem[]; message?: string }> {
+export async function getPayoutAccounts(token: string | undefined): Promise<{ success: boolean; data?: PayoutAccountItem[]; message?: string }> {
+    'use cache';
+    cacheTag(CACHE_TAGS.PAYOUT_ACCOUNTS);
     try {
-        const token = await getToken()
         const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${PAYOUT_LIST_ENDPOINT}`)
 
         const res = await fetch(url.toString(), {
             headers: {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            next: { tags: [CACHE_TAGS.PAYOUT_ACCOUNTS], revalidate: 1000 },
-            cache: "force-cache",
+            }
         })
 
         if (!res.ok) {
@@ -77,7 +68,6 @@ export async function getPayoutAccounts(): Promise<{ success: boolean; data?: Pa
     }
 }
 
-
 export async function submitWithdrawal(
     payload: WithdrawPayload
 ): Promise<WithdrawResult & { freshData?: FinancialData }> {
@@ -91,7 +81,7 @@ export async function submitWithdrawal(
 
         revalidateTag(CACHE_TAGS.FINANCIALS, "max")
 
-        const fresh = await getFinancials()
+        const fresh = await getFinancials(undefined)
 
         return {
             success: true,

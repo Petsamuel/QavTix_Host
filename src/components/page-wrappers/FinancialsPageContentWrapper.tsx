@@ -13,7 +13,7 @@ import { Icon } from "@iconify/react"
 import { mapFinancialCards } from "@/helper-fns/mapToStatCards"
 import MetricsContainerLoader from "../loaders/MetricsContainerLoader"
 import { useOnRevalidate } from "@/custom-hooks/UseRevalidate"
-import { getFinancials, getPayoutAccounts } from "@/actions/financials"
+import { getFinancialsClient as getFinancials, getPayoutAccountsClient as getPayoutAccounts } from "@/actions/financials/client"
 import FinancialPageLoader from "../loaders/FinancialPageLoader"
 import DateRangePresetFilter from "../custom-utils/TableDataDisplayAreas/filters/DateRangePresetFilter"
 

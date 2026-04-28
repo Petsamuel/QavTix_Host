@@ -7,20 +7,17 @@ import {
     HOST_UPCOMING_EVENTS_ENDPOINT,
 } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { cookies } from "next/headers"
-
-async function getToken(): Promise<string | undefined> {
-    const cookieStore = await cookies()
-    return cookieStore.get("host_access_token")?.value
-}
+import { cacheTag } from "next/cache";
 
 // Dashboard Overview
 
 export async function getDashboardOverview(
+    token: string | undefined,
     params: DashboardOverviewParams = {}
 ): Promise<GetDashboardOverviewResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.DASHBOARD_OVERVIEW);
     try {
-        const token = await getToken()
 
         const url = new URL(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${DASHBOARD_OVERVIEW_ENDPOINT}`
@@ -35,8 +32,7 @@ export async function getDashboardOverview(
             headers: {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            next: { tags: [CACHE_TAGS.DASHBOARD_OVERVIEW] },
+            }
         })
 
         if (!res.ok) {
@@ -57,10 +53,12 @@ export async function getDashboardOverview(
 
 // Upcoming Events
 export async function getUpcomingEvents(
+    token: string | undefined,
     params: UpcomingEventsParams = {}
 ): Promise<GetUpcomingEventsResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.UPCOMING_EVENTS);
     try {
-        const token = await getToken()
 
         const url = new URL(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${HOST_UPCOMING_EVENTS_ENDPOINT}`
@@ -79,8 +77,7 @@ export async function getUpcomingEvents(
             headers: {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            next: { tags: [CACHE_TAGS.UPCOMING_EVENTS] },
+            }
         })
 
         if (!res.ok) {
@@ -101,10 +98,12 @@ export async function getUpcomingEvents(
 
 
 export async function getDashboardFeed(
+    token: string | undefined,
     params: DashboardFeedParams = {}
 ): Promise<GetDashboardFeedResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.DASHBOARD_FEED);
     try {
-        const token = await getToken()
 
         const url = new URL(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${DASHBOARD_FEED_ENDPOINT}`
@@ -123,7 +122,7 @@ export async function getDashboardFeed(
             // mark_read mutates state on the server — skip cache when marking as read
             ...(params.mark_read
                 ? { cache: "no-store" }
-                : { next: { tags: [CACHE_TAGS.DASHBOARD_FEED] } }
+                : {}
             ),
         })
 

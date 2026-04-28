@@ -15,11 +15,10 @@ import {
 } from "@/endpoints";
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
-import { revalidateTag } from "next/cache"
+import { revalidateTag, cacheTag } from "next/cache"
 import { cookies, headers } from "next/headers"
 import { CACHE_TAGS } from "@/cache-tags"
 import { resolveCountryLabel } from "@/helper-fns/resolveCountryCode";
-
 
 interface PrivacyResult {
     success: boolean
@@ -27,12 +26,12 @@ interface PrivacyResult {
     message?: string
 }
 
-
+// getUserLocation reads headers — headers are per-request so we do NOT cache this.
+// Call it from the page outside cached scope and pass values down if needed.
 export async function getUserLocation(): Promise<{ city: string; country: string }> {
     const headersList = await headers()
     const city = headersList.get("x-vercel-ip-city") ?? "Lagos"
     const countryCode = headersList.get("x-vercel-ip-country") ?? "NG"
-
     return {
         city: decodeURIComponent(city),
         country: resolveCountryLabel(countryCode),
@@ -40,20 +39,17 @@ export async function getUserLocation(): Promise<{ city: string; country: string
 }
 
 
-export async function getPrivacySettings(): Promise<PrivacyResult> {
+export async function getPrivacySettings(token: string | undefined): Promise<PrivacyResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.PRIVACY_SETTINGS);
     try {
-        const cookieStore = await cookies()
-        const accessToken = cookieStore.get("host_access_token")?.value
-
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${GET_PRIVACY_SETTINGS_ENDPOINT}`,
             {
                 headers: {
                     "Content-Type": "application/json",
-                    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-                },
-                cache: "force-cache",
-                next: { tags: [CACHE_TAGS.PRIVACY_SETTINGS] },
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                }
             }
         )
 
@@ -139,25 +135,17 @@ export async function changePassword(
     }
 }
 
-
-async function getToken(): Promise<string | undefined> {
-    const cookieStore = await cookies()
-    return cookieStore.get("host_access_token")?.value
-}
-
-export async function getSubscription(): Promise<GetSubscriptionResult> {
+export async function getSubscription(token: string | undefined): Promise<GetSubscriptionResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.SUBSCRIPTION);
     try {
-        const token = await getToken()
-
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${GET_SUBSCRIPTION_ENDPOINT}`,
             {
                 headers: {
                     "Content-Type": "application/json",
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                },
-                cache: "force-cache",
-                next: { tags: [CACHE_TAGS.SUBSCRIPTION] },
+                }
             }
         )
 
@@ -277,5 +265,3 @@ function mapSubscriptionError(status: number): string {
         default: return "Something went wrong. Please try again."
     }
 }
-
-

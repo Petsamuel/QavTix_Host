@@ -10,7 +10,7 @@ import SystemCheckInScanCodeInputArea from "../custom-utils/scan-code/SystemChec
 import { mapCheckInMetricsCards } from "@/helper-fns/mapToStatCards"
 import { TabSlice, useDataDisplay } from "@/custom-hooks/UseDataDisplay"
 import { CHECKIN_ATTENDEES_ENDPOINT } from "@/endpoints"
-import { getCheckInMetrics } from "@/actions/checkin"
+import { getCheckInMetricsClient as getCheckInMetrics } from "@/actions/checkin/client"
 import { Icon } from "@iconify/react"
 import MetricsContainerLoader from "../loaders/MetricsContainerLoader"
 import { EventFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventFilter"

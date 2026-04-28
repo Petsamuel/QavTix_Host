@@ -7,6 +7,7 @@ import { Icon } from '@iconify/react'
 import { useRouter } from 'next/navigation'
 import { AnimatedDialogForPrompt } from '../custom-utils/dialogs/AnimatedDialogForPrompts'
 import ActionButton1 from '../custom-utils/buttons/ActionBtn1'
+import { NAVIGATION_LINKS } from '@/enums/navigation'
 
 
 export interface PromptModalConfig {
@@ -44,12 +45,12 @@ export const VERIFICATION_REQUIRED_CONFIG: PromptModalConfig = {
     title: "Verification Required",
     description: (
         <>
-            You need to <span className="font-medium text-brand-secondary-9">verify your account</span> before
-            accessing this section. Complete your profile to get verified.
+            You need to wait till your <span className="font-medium text-brand-secondary-9">account is verified</span> before
+            accessing this section.
         </>
     ),
-    primaryLabel: "Complete Profile",
-    primaryAction: (router) => router.push("/dashboard/settings/account"),
+    primaryLabel: "Dashboard",
+    primaryAction: (router) => router.push(NAVIGATION_LINKS.DASHBOARD.href),
     secondaryLabel: "Go back",
 }
 

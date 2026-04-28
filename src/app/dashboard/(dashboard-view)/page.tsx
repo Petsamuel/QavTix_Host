@@ -1,4 +1,5 @@
 import { getDashboardOverview } from "@/actions/dashboard"
+import { cookies } from "next/headers"
 import DashboardPagePW from "@/components/page-wrappers/DashboardPagePW"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
@@ -9,11 +10,12 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.DASHBOARD.description,
 }
 
-export const dynamic = 'force-dynamic';
 
 
 export default async function DashboardPage() {
-    const result = await getDashboardOverview()
+    const cookieStore = await cookies()
+    const token = cookieStore.get("host_access_token")?.value
+    const result = await getDashboardOverview(token)
 
     if (!result.success || !result.data) {
         throw new Error("Failed to load dashboard")

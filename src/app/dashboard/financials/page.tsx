@@ -4,6 +4,7 @@ import GatedPageModal from "@/components/modals/GatedPageModal"
 import FinancialsPageContentWrapper from "@/components/page-wrappers/FinancialsPageContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
     ...hostSiteMetadata,
@@ -12,14 +13,16 @@ export const metadata: Metadata = {
 }
 
 
-export const dynamic = "force-dynamic"
+
 
 
 export default async function FinancialsPage() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("host_access_token")?.value;
     const [profile, financialsResult, accountsResult] = await Promise.all([
-        getHostProfile(),
-        getFinancials(),
-        getPayoutAccounts(),
+        getHostProfile(token),
+        getFinancials(token),
+        getPayoutAccounts(token),
     ])
 
     if (!profile?.verified) {

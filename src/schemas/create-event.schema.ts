@@ -45,7 +45,7 @@ function toOptionalNumber(value: unknown) {
 
 const eventDateSchema = yup.object({
     startDateTime: yup.string().required('Start date & time is required'),
-    endDateTime:   yup.string().required('End date & time is required'),
+    endDateTime: yup.string().required('End date & time is required'),
 }).test('start-in-future', 'Start date must be in the future', function (value) {
     if (!value?.startDateTime) return true;
     return new Date(value.startDateTime) > new Date();
@@ -55,102 +55,102 @@ const eventDateSchema = yup.object({
 });
 
 export const step1Schema = yup.object({
-    eventTitle:     yup.string().required('Event title is required').max(100, 'Title cannot exceed 100 characters'),
-    eventCategory:  yup.string().required('Please select an event category'),
+    eventTitle: yup.string().required('Event title is required').max(100, 'Title cannot exceed 100 characters'),
+    eventCategory: yup.string().required('Please select an event category'),
     additionalTags: yup.array(yup.string().defined()).max(5, 'You can add a maximum of 5 tags').default([]),
-    eventType:      yup.string().oneOf(['single', 'recurring'] as const).required(),
+    eventType: yup.string().oneOf(['single', 'recurring'] as const).required(),
 
     // Date fields — conditionally validated below
     startDateTime: yup.string().default(''),
-    endDateTime:   yup.string().default(''),
+    endDateTime: yup.string().default(''),
     dates: yup.array(eventDateSchema).default([]),
 
     // Location
     locationType: yup.string().oneOf(['physical', 'online', 'tba'] as const).required(),
-    venueName:    yup.string().optional()
+    venueName: yup.string().optional()
         .test('max-words', 'Venue name cannot exceed 15 words', v => !v || v.split(/\s+/).filter(Boolean).length <= 15),
-    address:      yup.string().optional()
+    address: yup.string().optional()
         .test('max-words', 'Address cannot exceed 30 words', v => !v || v.split(/\s+/).filter(Boolean).length <= 30),
-    country:      yup.string().optional(),
-    state:        yup.string().optional(),
-    city:         yup.string().optional()
+    country: yup.string().optional(),
+    state: yup.string().optional(),
+    city: yup.string().optional()
         .test('max-words', 'City cannot exceed 10 words', v => !v || v.split(/\s+/).filter(Boolean).length <= 10),
-    postalCode:   yup.string().optional(),
-    onlineLink:   yup.string().optional(),
+    postalCode: yup.string().optional(),
+    onlineLink: yup.string().optional(),
 })
-// ── Single: start date required ──
-.test('single-start-required', 'Please select a start date & time', function (values) {
-    if (values.eventType !== 'single') return true;
-    if (!values.startDateTime) return this.createError({ path: 'startDateTime', message: 'Please select a start date & time' });
-    return true;
-})
-// ── Single: start must be future ──
-.test('single-start-future', 'Start date & time must be in the future', function (values) {
-    if (values.eventType !== 'single' || !values.startDateTime) return true;
-    if (new Date(values.startDateTime) <= new Date())
-        return this.createError({ path: 'startDateTime', message: 'Start date & time must be in the future' });
-    return true;
-})
-// ── Single: end required ──
-.test('single-end-required', 'Please select an end date & time', function (values) {
-    if (values.eventType !== 'single') return true;
-    if (!values.endDateTime) return this.createError({ path: 'endDateTime', message: 'Please select an end date & time' });
-    return true;
-})
-// ── Single: end after start ──
-.test('single-end-after-start', 'End date & time must be after the start date', function (values) {
-    if (values.eventType !== 'single' || !values.startDateTime || !values.endDateTime) return true;
-    if (new Date(values.endDateTime) <= new Date(values.startDateTime))
-        return this.createError({ path: 'endDateTime', message: 'End date & time must be after the start date' });
-    return true;
-})
-// ── Recurring: at least one date ──
-.test('recurring-has-dates', 'Please add at least one date for this recurring event', function (values) {
-    if (values.eventType !== 'recurring') return true;
-    if (!values.dates || values.dates.length === 0)
-        return this.createError({ path: 'dates', message: 'Please add at least one date for this recurring event' });
-    return true;
-})
-// ── Physical: venue required ──
-.test('physical-venue', 'Venue details are required', function (values) {
-    if (values.locationType !== 'physical') return true;
-    if (!values.venueName) return this.createError({ path: 'venueName', message: 'Venue name is required' });
-    return true;
-})
-.test('physical-address', 'Address is required', function (values) {
-    if (values.locationType !== 'physical') return true;
-    if (!values.address) return this.createError({ path: 'address', message: 'Street address is required' });
-    return true;
-})
-.test('physical-city', 'City is required', function (values) {
-    if (values.locationType !== 'physical') return true;
-    if (!values.city) return this.createError({ path: 'city', message: 'City is required' });
-    return true;
-})
-.test('physical-country', 'Country is required', function (values) {
-    if (values.locationType !== 'physical') return true;
-    if (!values.country) return this.createError({ path: 'country', message: 'Country is required' });
-    return true;
-})
-// ── Online: link required & valid ──
-.test('online-link-required', 'Event link is required', function (values) {
-    if (values.locationType !== 'online') return true;
-    if (!values.onlineLink) return this.createError({ path: 'onlineLink', message: 'Please provide the online event link (e.g. Zoom, Google Meet)' });
-    return true;
-})
-.test('online-link-url', 'Event link must be a valid URL', function (values) {
-    if (values.locationType !== 'online' || !values.onlineLink) return true;
-    try { new URL(values.onlineLink); return true; }
-    catch { return this.createError({ path: 'onlineLink', message: 'Please enter a valid URL (e.g. https://zoom.us/j/...)' }); }
-});
+    // ── Single: start date required ──
+    .test('single-start-required', 'Please select a start date & time', function (values) {
+        if (values.eventType !== 'single') return true;
+        if (!values.startDateTime) return this.createError({ path: 'startDateTime', message: 'Please select a start date & time' });
+        return true;
+    })
+    // ── Single: start must be future ──
+    .test('single-start-future', 'Start date & time must be in the future', function (values) {
+        if (values.eventType !== 'single' || !values.startDateTime) return true;
+        if (new Date(values.startDateTime) <= new Date())
+            return this.createError({ path: 'startDateTime', message: 'Start date & time must be in the future' });
+        return true;
+    })
+    // ── Single: end required ──
+    .test('single-end-required', 'Please select an end date & time', function (values) {
+        if (values.eventType !== 'single') return true;
+        if (!values.endDateTime) return this.createError({ path: 'endDateTime', message: 'Please select an end date & time' });
+        return true;
+    })
+    // ── Single: end after start ──
+    .test('single-end-after-start', 'End date & time must be after the start date', function (values) {
+        if (values.eventType !== 'single' || !values.startDateTime || !values.endDateTime) return true;
+        if (new Date(values.endDateTime) <= new Date(values.startDateTime))
+            return this.createError({ path: 'endDateTime', message: 'End date & time must be after the start date' });
+        return true;
+    })
+    // ── Recurring: at least one date ──
+    .test('recurring-has-dates', 'Please add at least one date for this recurring event', function (values) {
+        if (values.eventType !== 'recurring') return true;
+        if (!values.dates || values.dates.length === 0)
+            return this.createError({ path: 'dates', message: 'Please add at least one date for this recurring event' });
+        return true;
+    })
+    // ── Physical: venue required ──
+    .test('physical-venue', 'Venue details are required', function (values) {
+        if (values.locationType !== 'physical') return true;
+        if (!values.venueName) return this.createError({ path: 'venueName', message: 'Venue name is required' });
+        return true;
+    })
+    .test('physical-address', 'Address is required', function (values) {
+        if (values.locationType !== 'physical') return true;
+        if (!values.address) return this.createError({ path: 'address', message: 'Street address is required' });
+        return true;
+    })
+    .test('physical-city', 'City is required', function (values) {
+        if (values.locationType !== 'physical') return true;
+        if (!values.city) return this.createError({ path: 'city', message: 'City is required' });
+        return true;
+    })
+    .test('physical-country', 'Country is required', function (values) {
+        if (values.locationType !== 'physical') return true;
+        if (!values.country) return this.createError({ path: 'country', message: 'Country is required' });
+        return true;
+    })
+    // ── Online: link required & valid ──
+    .test('online-link-required', 'Event link is required', function (values) {
+        if (values.locationType !== 'online') return true;
+        if (!values.onlineLink) return this.createError({ path: 'onlineLink', message: 'Please provide the online event link (e.g. Zoom, Google Meet)' });
+        return true;
+    })
+    .test('online-link-url', 'Event link must be a valid URL', function (values) {
+        if (values.locationType !== 'online' || !values.onlineLink) return true;
+        try { new URL(values.onlineLink); return true; }
+        catch { return this.createError({ path: 'onlineLink', message: 'Please enter a valid URL (e.g. https://zoom.us/j/...)' }); }
+    });
 
 
 // ─── Step 2: Details & Media ──────────────────────────────────────────────────
 
 const socialMediaLinkSchema = yup.object({
-    id:       yup.string().required(),
+    id: yup.string().required(),
     platform: yup.string().required(),
-    url:      yup.string().url(VALIDATION_MESSAGES.invalidUrl).required(),
+    url: yup.string().url(VALIDATION_MESSAGES.invalidUrl).required(),
 });
 
 export const step2Schema = yup.object({
@@ -175,11 +175,11 @@ export const step2Schema = yup.object({
 
     eventVideo: optionalFileOrUrl,
 
-    organizerDisplayName:    yup.string().required('Organiser display name is required'),
-    organizerDescription:    yup.string().max(500, 'Organiser description cannot exceed 500 characters').optional(),
-    publicEmail:             yup.string().email('Please enter a valid email address').required('Public email is required'),
-    phoneNumber:             yup.string().optional(),
-    countryCode:             yup.string().optional(),
+    organizerDisplayName: yup.string().required('Organiser display name is required'),
+    organizerDescription: yup.string().max(500, 'Organiser description cannot exceed 500 characters').optional(),
+    publicEmail: yup.string().email('Please enter a valid email address').required('Public email is required'),
+    phoneNumber: yup.string().optional(),
+    countryCode: yup.string().optional(),
 
     socialMediaLinks: yup.array(socialMediaLinkSchema).default([]),
 });
@@ -189,12 +189,12 @@ export const step2Schema = yup.object({
 
 const promoCodeSchema = yup.object({
     // Fields are optional individually — the .test below decides when they're required
-    codeWord:       yup.string().optional(),
+    codeWord: yup.string().optional(),
     discountAmount: yup.number()
         .typeError('Please enter a valid discount amount')
         .min(0, 'Discount cannot be negative')
         .optional(),
-    maximumUsers:   yup.number()
+    maximumUsers: yup.number()
         .typeError('Please enter a valid number of users')
         .min(1, 'At least 1 user must be allowed')
         .optional(),
@@ -231,14 +231,14 @@ const promoCodeSchema = yup.object({
 }).optional();
 
 const ticketTypeSchema = yup.object({
-    id:           yup.string().required(),
-    ticketType:   yup.string().required('Ticket type name is required'),
-    description:  yup.string().optional(),
-    price:        yup.number().typeError('Please enter a valid price').min(0, 'Price cannot be negative').required('Price is required'),
-    currency:     yup.string().required('Please select a currency'),
-    quantity:     yup.number().typeError('Please enter a valid quantity').min(1, 'Quantity must be at least 1').required('Quantity is required'),
+    id: yup.string().required(),
+    ticketType: yup.string().required('Ticket type name is required'),
+    description: yup.string().optional(),
+    price: yup.number().typeError('Please enter a valid price').min(0, 'Price cannot be negative').required('Price is required'),
+    currency: yup.string().required('Please select a currency'),
+    quantity: yup.number().typeError('Please enter a valid quantity').min(1, 'Quantity must be at least 1').required('Quantity is required'),
     perPersonMax: yup.number().typeError('Please enter a valid limit').min(1).max(750, 'Limit cannot exceed 750 attendees').optional(),
-    promoCode:    promoCodeSchema,
+    promoCode: promoCodeSchema,
 });
 
 export type TicketType = yup.InferType<typeof ticketTypeSchema>;
@@ -250,20 +250,26 @@ export const step3Schema = yup.object({
 
     salesPeriod: yup.object({
         startDateTime: yup.string().required('Sales start date & time is required'),
-        endDateTime:   yup.string().required('Sales end date & time is required'),
+        endDateTime: yup.string().required('Sales end date & time is required'),
     })
-    .test('sales-start-future', 'Sales start date must be in the future', function (value) {
-        if (!value?.startDateTime) return true;
-        if (new Date(value.startDateTime) <= new Date())
-            return this.createError({ path: 'startDateTime', message: 'Sales start date must be in the future' });
-        return true;
-    })
-    .test('sales-end-after-start', 'Sales end date must be after the start date', function (value) {
-        if (!value?.startDateTime || !value?.endDateTime) return true;
-        if (new Date(value.endDateTime) <= new Date(value.startDateTime))
-            return this.createError({ path: 'endDateTime', message: 'Sales end date must be after the start date' });
-        return true;
-    }),
+        .test('sales-start-future', 'Sales start date must be in the future', function (value) {
+            if (!value?.startDateTime) return true;
+            if (new Date(value.startDateTime) <= new Date())
+                return this.createError({
+                    path: `${this.path}.startDateTime`,  // ← absolute path
+                    message: 'Sales start date must be in the future'
+                });
+            return true;
+        })
+        .test('sales-end-after-start', 'Sales end date must be after the start date', function (value) {
+            if (!value?.startDateTime || !value?.endDateTime) return true;
+            if (new Date(value.endDateTime) <= new Date(value.startDateTime))
+                return this.createError({
+                    path: `${this.path}.endDateTime`,  // ← absolute path
+                    message: 'Sales end date must be after the start date'
+                });
+            return true;
+        }),
 
     refundPolicy: yup.string()
         .oneOf(['no', 'partial', 'full', 'custom'] as const)
@@ -272,34 +278,34 @@ export const step3Schema = yup.object({
     // Only validated when refundPolicy === 'custom'
     customRefundPercentage: yup.mixed().transform(toOptionalNumber),
 })
-.test('custom-refund-pct', 'Custom refund percentage is required', function (values) {
-    if (values.refundPolicy !== 'custom') return true;
-    const val = toOptionalNumber(values.customRefundPercentage);
-    if (typeof val !== 'number' || isNaN(val) || val < 1 || val > 100) {
-        return this.createError({
-            path: 'customRefundPercentage',
-            message: 'Please enter a refund percentage between 1% and 100%',
-        });
-    }
-    return true;
-});
+    .test('custom-refund-pct', 'Custom refund percentage is required', function (values) {
+        if (values.refundPolicy !== 'custom') return true;
+        const val = toOptionalNumber(values.customRefundPercentage);
+        if (typeof val !== 'number' || isNaN(val) || val < 1 || val > 100) {
+            return this.createError({
+                path: 'customRefundPercentage',
+                message: 'Please enter a refund percentage between 1% and 100%',
+            });
+        }
+        return true;
+    });
 
 
 // ─── Step 4: Settings ─────────────────────────────────────────────────────────
 
 const collaboratorSchema = yup.object({
-    id:          yup.string().required(),
-    name:        yup.string().required(),
-    email:       yup.string().email().required(),
-    avatar:      yup.string().optional(),
-    role:        yup.string().oneOf([...ROLE_IDS, 'host'] as const).required(),
+    id: yup.string().required(),
+    name: yup.string().required(),
+    email: yup.string().email().required(),
+    avatar: yup.string().optional(),
+    role: yup.string().oneOf([...ROLE_IDS, 'host'] as const).required(),
     permissions: yup.array(yup.string().defined()).default([]),
-    status:      yup.string().oneOf(['active', 'disabled', 'pending'] as const).required(),
+    status: yup.string().oneOf(['active', 'disabled', 'pending'] as const).required(),
 });
 
 export const step4Schema = yup.object({
     checkInSettings: yup.object({
-        qrCodeEnabled:  yup.boolean().required(),
+        qrCodeEnabled: yup.boolean().required(),
         ageRestriction: yup.boolean().required(),
         // Validated directly on the field so the error path is checkInSettings.minimumAge
         minimumAge: yup.mixed()
@@ -320,10 +326,10 @@ export const step4Schema = yup.object({
     }),
 
     emailNotifications: yup.object({
-        orderConfirmation:   yup.boolean().required(),
-        ticketDelivery:      yup.boolean().required(),
-        reminders:           yup.boolean().required(),
-        postEventEmails:     yup.boolean().required(),
+        orderConfirmation: yup.boolean().required(),
+        ticketDelivery: yup.boolean().required(),
+        reminders: yup.boolean().required(),
+        postEventEmails: yup.boolean().required(),
         customizeSenderName: yup.boolean().required(),
     }),
 
@@ -346,7 +352,7 @@ export const step4Schema = yup.object({
                 otherwise: (schema) => schema.optional(),
             }),
         startDate: yup.date().optional(),
-        endDate:   yup.date().optional(),
+        endDate: yup.date().optional(),
     }),
 
     permissions: yup.object({
@@ -359,11 +365,11 @@ export const step4Schema = yup.object({
 
 export const completeEventSchema = yup.object({
     basicInformation: step1Schema,
-    detailsMedia:     step2Schema,
-    ticketsPricing:   step3Schema,
-    settings:         step4Schema,
+    detailsMedia: step2Schema,
+    ticketsPricing: step3Schema,
+    settings: step4Schema,
     reviewPublish: yup.object({
-        status:      yup.string().oneOf(['draft', 'published'] as const).required(),
+        status: yup.string().oneOf(['draft', 'published'] as const).required(),
         publishedAt: yup.date().optional(),
     }),
 });
@@ -371,8 +377,8 @@ export const completeEventSchema = yup.object({
 
 // ─── Type exports ─────────────────────────────────────────────────────────────
 
-export type Step1FormData         = yup.InferType<typeof step1Schema>;
-export type Step2FormData         = yup.InferType<typeof step2Schema>;
-export type Step3FormData         = yup.InferType<typeof step3Schema>;
-export type Step4FormData         = yup.InferType<typeof step4Schema>;
+export type Step1FormData = yup.InferType<typeof step1Schema>;
+export type Step2FormData = yup.InferType<typeof step2Schema>;
+export type Step3FormData = yup.InferType<typeof step3Schema>;
+export type Step4FormData = yup.InferType<typeof step4Schema>;
 export type CompleteEventFormData = yup.InferType<typeof completeEventSchema>;

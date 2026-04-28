@@ -4,6 +4,7 @@ import GatedPageModal from "@/components/modals/GatedPageModal"
 import CheckInSystemPageContentWrapper from "@/components/page-wrappers/CheckInSystemPageContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
     ...hostSiteMetadata,
@@ -11,14 +12,16 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.CHECK_IN_SYSTEM.description,
 }
 
-export const dynamic = "force-dynamic"
+
 
 
 export default async function CheckInSystemPage() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("host_access_token")?.value;
     const [profileResult, metricsResult, attendeesResult] = await Promise.allSettled([
-        getHostProfile(),
-        getCheckInMetrics(),
-        getCheckInAttendees(),
+        getHostProfile(token),
+        getCheckInMetrics(token),
+        getCheckInAttendees(token),
     ])
 
     const profile = profileResult.status === "fulfilled" ? profileResult.value : null

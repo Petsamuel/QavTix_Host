@@ -3,6 +3,7 @@ import { getPrivacySettings } from "@/actions/settings"
 import AccountSettingsContentWrapper from "@/components/page-wrappers/AccountSettingsContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
     ...hostSiteMetadata,
@@ -13,9 +14,11 @@ export const metadata: Metadata = {
 
 
 export default async function SettingsPage() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("host_access_token")?.value;
     const [privacyResult, paymentResult] = await Promise.all([
-        getPrivacySettings(),
-        getPaymentMethods(),
+        getPrivacySettings(token),
+        getPaymentMethods(token),
     ])
 
     return (

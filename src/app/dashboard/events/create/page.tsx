@@ -2,6 +2,7 @@ import { getCategories } from "@/actions/filters";
 import CreateEventPageContentWrapper from "@/components/page-wrappers/CreateEventPageContentWrapper";
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
     ...hostSiteMetadata,
@@ -9,11 +10,12 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.CREATE_EVENT.description,
 }
 
-export const dynamic = 'force-dynamic';
 
-export default async function CreateEventPage(){
+export default async function CreateEventPage() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("host_access_token")?.value;
 
-    const categoryResult = await getCategories()
+    const categoryResult = await getCategories(token)
 
     if (!categoryResult.success) {
         throw new Error("Failed to load page")

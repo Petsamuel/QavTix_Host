@@ -1,16 +1,19 @@
 import { getCustomerProfile } from "@/actions/customers"
 import CustomersProfilePagContentWrapper from "@/components/page-wrappers/CustomerProfilePageContentWrapper"
 import { notFound } from "next/navigation"
+import { cookies } from "next/headers";
 
 interface Props {
     params: Promise<{ customer_id: string }>
 }
 
 export default async function CustomerProfilePage({ params }: Props) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("host_access_token")?.value;
 
     const userID = parseInt((await params).customer_id)
 
-    const result = await getCustomerProfile({ user_id: userID })
+    const result = await getCustomerProfile(token, { user_id: userID })
 
     if (!result.success || !result.data) return notFound()
 

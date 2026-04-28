@@ -4,19 +4,15 @@ import { CACHE_TAGS } from "@/cache-tags"
 import { CHECKIN_OVERVIEW_ENDPOINT, CHECKIN_ATTENDEES_ENDPOINT, CHECKIN_SCAN_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
-import { cookies } from "next/headers"
-
-async function getToken(): Promise<string | undefined> {
-    const cookieStore = await cookies()
-    return cookieStore.get("host_access_token")?.value
-}
+import { cacheTag } from "next/cache";
 
 export async function getCheckInMetrics(
-    params: CheckInParams = {}
+    token: string | undefined, params: CheckInParams = {}
 ): Promise<GetCheckInResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.CHECKIN);
     try {
-        const token = await getToken()
-        const url   = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${CHECKIN_OVERVIEW_ENDPOINT}`)
+        const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${CHECKIN_OVERVIEW_ENDPOINT}`)
 
         if (params.event) url.searchParams.set("event", params.event)
 
@@ -24,8 +20,7 @@ export async function getCheckInMetrics(
             headers: {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            next: { tags: [CACHE_TAGS.CHECKIN] },
+            }
         })
 
         if (!res.ok) {
@@ -43,24 +38,24 @@ export async function getCheckInMetrics(
 }
 
 export async function getCheckInAttendees(
-    params: CheckInParams = {}
+    token: string | undefined, params: CheckInParams = {}
 ): Promise<GetAttendeesResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.CHECKIN);
     try {
-        const token = await getToken()
-        const url   = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${CHECKIN_ATTENDEES_ENDPOINT}`)
+        const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${CHECKIN_ATTENDEES_ENDPOINT}`)
 
-        if (params.event)       url.searchParams.set("event",       params.event)
-        if (params.page)        url.searchParams.set("page",        String(params.page))
-        if (params.search)      url.searchParams.set("search",      params.search)
-        if (params.status)      url.searchParams.set("status",      params.status)
+        if (params.event) url.searchParams.set("event", params.event)
+        if (params.page) url.searchParams.set("page", String(params.page))
+        if (params.search) url.searchParams.set("search", params.search)
+        if (params.status) url.searchParams.set("status", params.status)
         if (params.ticket_type) url.searchParams.set("ticket_type", String(params.ticket_type))
 
         const res = await fetch(url.toString(), {
             headers: {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            next: { tags: [CACHE_TAGS.CHECKIN] },
+            }
         })
 
         if (!res.ok) {
@@ -79,7 +74,7 @@ export async function getCheckInAttendees(
 
 export async function scanCheckIn(token: string): Promise<ScanCheckInResult> {
     try {
-        const axios  = await getServerAxios()
+        const axios = await getServerAxios()
         const { data } = await axios.post(CHECKIN_SCAN_ENDPOINT, { token })
         return { success: true, data: data.data }
     } catch (err: any) {

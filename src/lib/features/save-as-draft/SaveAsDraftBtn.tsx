@@ -1,25 +1,26 @@
 "use client"
 
-import { cn }              from "@/lib/utils"
-import { Icon }            from "@iconify/react"
-import { useState }        from "react"
+import { cn } from "@/lib/utils"
+import { Icon } from "@iconify/react"
+import { useState } from "react"
 import { useEventCreation } from "@/contexts/create-event/CreateEventProvider"
-import { useAppDispatch }  from "@/lib/redux/hooks"
-import { showAlert }       from "@/lib/redux/slices/alertSlice"
-import { useRevalidate }   from "@/custom-hooks/UseRevalidate"
+import { useAppDispatch } from "@/lib/redux/hooks"
+import { showAlert } from "@/lib/redux/slices/alertSlice"
+import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 import { saveEventAsDraft } from "@/actions/event/creation"
 import { delay } from "@/helper-fns/delay"
 import { useRouter } from "next/navigation"
 import { NAVIGATION_LINKS } from "@/enums/navigation"
 import { uploadEventMedia } from "@/helper-fns/uploadEventMedia"
+import { sanitizeEventDataForServer } from "@/lib/cloudinary"
 
 
 export default function SaveAsDraftBtn() {
 
-    const { eventData }  = useEventCreation()
-    const dispatch       = useAppDispatch()
+    const { eventData } = useEventCreation()
+    const dispatch = useAppDispatch()
     const router = useRouter()
-    const { trigger }    = useRevalidate("events")
+    const { trigger } = useRevalidate("events")
     const [saving, setSaving] = useState(false)
 
     const handleSave = async () => {
@@ -27,12 +28,13 @@ export default function SaveAsDraftBtn() {
         setSaving(true)
         try {
             const media = await uploadEventMedia(eventData.detailsMedia)
-            const result = await saveEventAsDraft({ eventData, media })
+            const sanitizedEventData = sanitizeEventDataForServer(eventData, media)
+            const result = await saveEventAsDraft({ eventData: sanitizedEventData, media })
             if (result.success) {
                 dispatch(showAlert({
-                    title:       "Draft Saved",
+                    title: "Draft Saved",
                     description: "Your event progress has been saved.",
-                    variant:     "success",
+                    variant: "success",
                 }))
                 trigger()
                 delay(1000).then(() => {
@@ -40,16 +42,16 @@ export default function SaveAsDraftBtn() {
                 })
             } else {
                 dispatch(showAlert({
-                    title:       "Save Failed",
+                    title: "Save Failed",
                     description: result.message ?? "Could not save your draft. Please try again.",
-                    variant:     "destructive",
+                    variant: "destructive",
                 }))
             }
         } catch {
             dispatch(showAlert({
-                title:       "Save Failed",
+                title: "Save Failed",
                 description: "An unexpected error occurred.",
-                variant:     "destructive",
+                variant: "destructive",
             }))
         } finally {
             setSaving(false)
@@ -72,7 +74,7 @@ export default function SaveAsDraftBtn() {
             <span className="size-9 md:size-7 rounded-sm flex justify-center items-center bg-brand-primary-4 text-white shrink-0">
                 {saving
                     ? <Icon icon="lucide:loader-2" className="size-6 animate-spin" />
-                    : <Icon icon="ri:draft-line"   className="size-4" />
+                    : <Icon icon="ri:draft-line" className="size-4" />
                 }
             </span>
             <span className="hidden md:inline">

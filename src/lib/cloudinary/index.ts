@@ -1,3 +1,6 @@
+import { UploadedMediaItem } from "@/helper-fns/uploadEventMedia"
+import { CompleteEventFormData } from "@/schemas/create-event.schema"
+
 export interface CloudinaryUploadResult {
 	public_id: string
 	secure_url: string
@@ -55,4 +58,41 @@ export function getCloudinaryUrl(publicId: string, options?: {
 
 	const transformation = params.length > 0 ? params.join(",") + "/" : ""
 	return `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${transformation}${publicId}`
+}
+
+
+export function sanitizeEventDataForServer(
+	eventData: Partial<CompleteEventFormData>,
+	media: UploadedMediaItem[]
+): Partial<CompleteEventFormData> {
+	const featuredImage = media.find(m => m.resource_type === 'image' && m.is_featured)
+	const additionalImages = media.filter(m => m.resource_type === 'image' && !m.is_featured)
+	const video = media.find(m => m.resource_type === 'video')
+
+	const resolvedFeatured = featuredImage?.secure_url
+		?? (typeof eventData.detailsMedia?.featuredImage === 'string'
+			? eventData.detailsMedia.featuredImage
+			: undefined)
+
+	const resolvedAdditional = additionalImages.length > 0
+		? additionalImages.map(m => m.secure_url)
+		: (eventData.detailsMedia?.additionalImages ?? [])
+			.filter((img: any) => typeof img === 'string') as string[]
+
+	const resolvedVideo = video?.secure_url
+		?? (typeof eventData.detailsMedia?.eventVideo === 'string'
+			? eventData.detailsMedia.eventVideo
+			: undefined)
+
+	return {
+		...eventData,
+		detailsMedia: eventData.detailsMedia
+			? {
+				...eventData.detailsMedia,
+				featuredImage: resolvedFeatured as any,
+				additionalImages: resolvedAdditional as any,
+				eventVideo: resolvedVideo as any,
+			}
+			: eventData.detailsMedia,
+	}
 }

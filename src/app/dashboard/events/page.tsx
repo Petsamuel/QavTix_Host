@@ -3,6 +3,7 @@ import { getCategories } from "@/actions/filters"
 import EventsPageContentWrapper from "@/components/page-wrappers/EventsPageContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
     ...hostSiteMetadata,
@@ -10,17 +11,19 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.MY_EVENTS.description,
 }
 
-export const dynamic = "force-dynamic"
+
 
 
 export default async function EventsPage() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("host_access_token")?.value;
     const [allRes, liveRes, draftRes, endedRes, cancelledRes, categoryResult] = await Promise.all([
-        getEvents(),
-        getEvents({ status: "active" }),
-        getEvents({ status: "draft" }),
-        getEvents({ status: "ended" }),
-        getEvents({ status: "cancelled" }),
-        getCategories()
+        getEvents(token),
+        getEvents(token, { status: "active" }),
+        getEvents(token, { status: "draft" }),
+        getEvents(token, { status: "ended" }),
+        getEvents(token, { status: "cancelled" }),
+        getCategories(token)
     ])
 
     const createInitialSlice = (result: any, defaultCards?: any) => ({
