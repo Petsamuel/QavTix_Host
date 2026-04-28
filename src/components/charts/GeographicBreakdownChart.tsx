@@ -26,36 +26,36 @@ const PLACEHOLDER_BARS = [
 ]
 
 interface GeographicBreakdownChartProps {
-    data:      GeoBreakdownData | null
+    data: GeoBreakdownData | null
     isPending: boolean
-    locked?:   boolean
+    locked?: boolean
 }
 
 export default function GeographicBreakdownChart({ data, isPending, locked }: GeographicBreakdownChartProps) {
     if (isPending) return <GeographicBreakdownChartLoader />
 
-    const { user }  = useAppSelector(store => store.authUser)
-    const currency  = user?.currency || ""
+    const { user } = useAppSelector(store => store.authUser)
+    const currency = user?.currency || ""
 
     const locations = data?.locations ?? []
-    const best      = data?.best_location
-    const hasData   = locations.length > 0
+    const best = data?.best_location
+    const hasData = locations.length > 0
 
     const chartData = hasData
         ? locations.map(l => ({ location: l.city, tickets: l.tickets }))
         : PLACEHOLDER_BARS
 
-    const maxTickets = hasData ? Math.max(...locations.map(l => l.tickets),               1) : 1
-    const maxRevenue = hasData ? Math.max(...locations.map(l => parseFloat(l.revenue)),   1) : 1
-    const maxClicks  = hasData ? Math.max(...locations.map(l => l.clicks),                1) : 1
+    const maxTickets = hasData ? Math.max(...locations.map(l => l.tickets), 1) : 1
+    const maxRevenue = hasData ? Math.max(...locations.map(l => parseFloat(l.revenue)), 1) : 1
+    const maxClicks = hasData ? Math.max(...locations.map(l => l.clicks), 1) : 1
 
-    const bestTickets = best?.tickets             ?? 0
-    const bestRevenue = parseFloat(best?.revenue  ?? "0")
-    const bestClicks  = best?.clicks              ?? 0
+    const bestTickets = best?.tickets ?? 0
+    const bestRevenue = best?.revenue ? parseFloat(best.revenue) : 0
+    const bestClicks = best?.clicks ?? 0
 
     const ticketsPct = hasData ? Math.round((bestTickets / maxTickets) * 100) : 0
     const revenuePct = hasData ? Math.round((bestRevenue / maxRevenue) * 100) : 0
-    const clicksPct  = hasData ? Math.round((bestClicks  / maxClicks)  * 100) : 0
+    const clicksPct = hasData ? Math.round((bestClicks / maxClicks) * 100) : 0
 
     return (
         <div className="w-full bg-white rounded-[32px] p-8 shadow-sm border border-neutral-50 relative overflow-hidden">
@@ -84,11 +84,11 @@ export default function GeographicBreakdownChart({ data, isPending, locked }: Ge
                                 <Tooltip
                                     cursor={{ fill: "rgba(255,255,255,0.1)" }}
                                     contentStyle={{
-                                        borderRadius:    "12px",
-                                        border:          "none",
+                                        borderRadius: "12px",
+                                        border: "none",
                                         backgroundColor: "#FFFFFF",
-                                        fontSize:        "11px",
-                                        boxShadow:       "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                                        fontSize: "11px",
+                                        boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
                                     }}
                                     itemStyle={{ color: "#0F172A", fontWeight: 600, padding: 0, textTransform: "capitalize" }}
                                     labelStyle={{ color: "#64748B", marginBottom: "4px", textTransform: "capitalize" }}
