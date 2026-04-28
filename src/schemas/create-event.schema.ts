@@ -67,11 +67,14 @@ export const step1Schema = yup.object({
 
     // Location
     locationType: yup.string().oneOf(['physical', 'online', 'tba'] as const).required(),
-    venueName:    yup.string().optional(),
-    address:      yup.string().optional(),
+    venueName:    yup.string().optional()
+        .test('max-words', 'Venue name cannot exceed 15 words', v => !v || v.split(/\s+/).filter(Boolean).length <= 15),
+    address:      yup.string().optional()
+        .test('max-words', 'Address cannot exceed 30 words', v => !v || v.split(/\s+/).filter(Boolean).length <= 30),
     country:      yup.string().optional(),
     state:        yup.string().optional(),
-    city:         yup.string().optional(),
+    city:         yup.string().optional()
+        .test('max-words', 'City cannot exceed 10 words', v => !v || v.split(/\s+/).filter(Boolean).length <= 10),
     postalCode:   yup.string().optional(),
     onlineLink:   yup.string().optional(),
 })
@@ -234,7 +237,7 @@ const ticketTypeSchema = yup.object({
     price:        yup.number().typeError('Please enter a valid price').min(0, 'Price cannot be negative').required('Price is required'),
     currency:     yup.string().required('Please select a currency'),
     quantity:     yup.number().typeError('Please enter a valid quantity').min(1, 'Quantity must be at least 1').required('Quantity is required'),
-    perPersonMax: yup.number().typeError('Please enter a valid limit').min(1).optional(),
+    perPersonMax: yup.number().typeError('Please enter a valid limit').min(1).max(750, 'Limit cannot exceed 750 attendees').optional(),
     promoCode:    promoCodeSchema,
 });
 

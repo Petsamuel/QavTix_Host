@@ -8,7 +8,7 @@ function CustomAvatar({ profileImg, name, id, size }: { profileImg?: string | nu
     return (
         <Avatar className={cn(size, "ring-4 ring-brand-neutral-2")}>
             {profileImg ? (
-                <AvatarImage src={profileImg} />
+                <AvatarImage src={profileImg} className="object-cover" />
             ) : null}
             <AvatarFallback className={`${getAvatarColor(id)} text-white text-xl font-semibold`}>
                 {getInitialsFromName(name)}

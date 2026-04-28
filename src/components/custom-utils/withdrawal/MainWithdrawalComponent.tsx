@@ -230,7 +230,7 @@ export default function MainWithdrawalComponent({
                     Choose withdrawal account
                 </label>
 
-                {payoutAccounts.length === 0 ? (
+                {payoutAccounts && payoutAccounts.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-6 gap-2 bg-brand-neutral-3 rounded-lg">
                         <Icon icon="hugeicons:bank" className="w-6 h-6 text-brand-neutral-6" />
                         <p className="text-xs text-brand-secondary-6">No accounts added yet.</p>

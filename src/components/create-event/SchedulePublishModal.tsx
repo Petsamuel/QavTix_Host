@@ -54,6 +54,24 @@ export default function SchedulePublishModal({ open, setOpen, onSchedule }: Sche
         }
     }
 
+    const isPM = schedule.time ? parseInt(schedule.time.split(':')[0], 10) >= 12 : false;
+    const currentAmpm = isPM ? "PM" : "AM";
+
+    const handleAmpmChange = (newAmpm: 'AM' | 'PM') => {
+        if (!schedule.time) {
+            handleChange('time', newAmpm === 'PM' ? '12:00' : '00:00');
+            return;
+        }
+        let [h, m] = schedule.time.split(':');
+        let hours = parseInt(h, 10);
+        if (newAmpm === 'PM' && hours < 12) {
+            hours += 12;
+        } else if (newAmpm === 'AM' && hours >= 12) {
+            hours -= 12;
+        }
+        handleChange('time', `${String(hours).padStart(2, '0')}:${m}`);
+    }
+
     return (
         <AnimatedDialog 
             showCloseButton={false} 
@@ -76,8 +94,8 @@ export default function SchedulePublishModal({ open, setOpen, onSchedule }: Sche
                     </label>
                     
                     <div className={cn(
-                        "flex items-center w-full border rounded-md overflow-hidden transition-all duration-200",
-                        hasErrors // Updated logic check here
+                        "flex items-center w-full border rounded-md overflow-hidden transition-all duration-200 bg-white",
+                        hasErrors
                             ? "border-red-500 ring-1 ring-red-500" 
                             : "border-slate-300 focus-within:ring-1 focus-within:ring-brand-primary focus-within:border-brand-primary"
                     )}>
@@ -86,20 +104,43 @@ export default function SchedulePublishModal({ open, setOpen, onSchedule }: Sche
                             value={schedule.date}
                             min={new Date().toISOString().split('T')[0]}
                             onChange={(e) => handleChange('date', e.target.value)}
-                            className="flex-1 px-4 py-3 outline-none text-brand-secondary-7 text-sm bg-transparent border-none appearance-none cursor-pointer"
+                            className="flex-1 px-3 py-3 outline-none text-brand-secondary-7 text-sm bg-transparent border-none appearance-none cursor-pointer w-full min-w-0"
                         />
 
                         <div className={cn(
                             "w-px h-8 shrink-0", 
-                            hasErrors ? "bg-red-500" : "bg-slate-300" // Updated logic check here
+                            hasErrors ? "bg-red-500" : "bg-slate-300"
                         )} />
 
                         <input 
                             type="time"
                             value={schedule.time}
                             onChange={(e) => handleChange('time', e.target.value)}
-                            className="flex-1 px-4 py-3 outline-none text-brand-secondary-7 text-sm bg-transparent border-none appearance-none cursor-pointer"
+                            className="flex-1 px-3 py-3 outline-none text-brand-secondary-7 text-sm bg-transparent border-none appearance-none cursor-pointer w-full min-w-0"
                         />
+                        
+                        <div className="flex border-l border-slate-300">
+                            <button
+                                type="button"
+                                onClick={() => handleAmpmChange('AM')}
+                                className={cn(
+                                    "px-3 py-3 text-xs font-medium transition-colors border-r border-slate-300",
+                                    currentAmpm === 'AM' ? "bg-brand-primary-1 text-brand-primary" : "text-brand-secondary-6 hover:bg-slate-50"
+                                )}
+                            >
+                                AM
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleAmpmChange('PM')}
+                                className={cn(
+                                    "px-3 py-3 text-xs font-medium transition-colors",
+                                    currentAmpm === 'PM' ? "bg-brand-primary-1 text-brand-primary" : "text-brand-secondary-6 hover:bg-slate-50"
+                                )}
+                            >
+                                PM
+                            </button>
+                        </div>
                     </div>
                     
                     {(errors.date || errors.time) && (

@@ -20,8 +20,6 @@ export async function getFinancials(
     try {
         const token = await getToken()
 
-        console.log("tokeb", token)
-
         const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${FINANCIALS_ENDPOINT}`)
         if (params.date_range) url.searchParams.set("date_range", params.date_range)
         if (params.start_date) url.searchParams.set("start_date", params.start_date)
@@ -71,7 +69,7 @@ export async function getPayoutAccounts(): Promise<{ success: boolean; data?: Pa
         }
 
         const json = await res.json()
-        return { success: true, data: json.data }
+        return { success: true, data: Array.isArray(json.data) ? json.data : [] }
 
     } catch (err) {
         console.error("[getPayoutAccounts] error:", err)

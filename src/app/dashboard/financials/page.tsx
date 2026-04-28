@@ -1,4 +1,6 @@
 import { getFinancials, getPayoutAccounts } from "@/actions/financials"
+import { getHostProfile } from "@/actions/auth"
+import GatedPageModal from "@/components/modals/GatedPageModal"
 import FinancialsPageContentWrapper from "@/components/page-wrappers/FinancialsPageContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
@@ -14,10 +16,19 @@ export const dynamic = "force-dynamic"
 
 
 export default async function FinancialsPage() {
-    const [financialsResult, accountsResult] = await Promise.all([
+    const [profile, financialsResult, accountsResult] = await Promise.all([
+        getHostProfile(),
         getFinancials(),
         getPayoutAccounts(),
     ])
+
+    if (!profile?.verified) {
+        return <GatedPageModal type="verification" />
+    }
+
+    if (!profile.plan_type) {
+        return <GatedPageModal type="plan" featureName="Financials" requiredPlan="Free" />
+    }
 
     if (!financialsResult.success || !financialsResult.data) {
         throw new Error("Failed to load page")

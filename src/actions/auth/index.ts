@@ -1,10 +1,23 @@
 "use server"
 
-import { LOGIN_ENDPOINT } from "@/endpoints"
+import { LOGIN_ENDPOINT, GET_PROFILE_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+
+export async function getHostProfile(): Promise<AuthUser | null> {
+    try {
+        const axiosInstance = await getServerAxios()
+        const { data } = await axiosInstance.get(GET_PROFILE_ENDPOINT)
+        return data.host
+            ? { ...data.host, subscription: data.subscription, verified_badge: data.verified_badge, payout_available: data.payout_available } as AuthUser
+            : null
+    } catch {
+        return null
+    }
+}
+
 
 export const logOut = async () => {
     const cookiesStore = await cookies()

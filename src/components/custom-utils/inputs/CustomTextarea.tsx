@@ -19,9 +19,9 @@ const CustomTextArea = forwardRef<HTMLTextAreaElement, FormTextAreaProps>(
                 <textarea
                     ref={ref}
                     className={`
-                        w-full resize-none px-4 py-3 text-sm rounded-lg transition-all h-40
-                        ${error 
-                            ? 'border border-red-400 focus:border-red-500' 
+                        w-full resize-none px-4 py-3 text-sm rounded-lg transition-all h-60
+                        ${error
+                            ? 'border border-red-400 focus:border-red-500'
                             : 'border border-brand-secondary-5 focus:border-[1.5px] focus:border-brand-accent-4 hover:border-brand-secondary-6'
                         }
                         outline-none bg-white text-brand-neutral-9 placeholder:text-brand-secondary-5

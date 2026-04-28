@@ -36,7 +36,7 @@ import { SALES_ANALYTICS_TRANSACTIONS_ENDPOINT } from "@/endpoints"
 import ChartPresetFilter from "../custom-utils/TableDataDisplayAreas/filters/ChartPresetFilter"
 import { exportSalesAnalyticsFull } from "@/helper-fns/exportData"
 import { useHostGate } from "@/custom-hooks/UseRoleGate"
-import UpgradePlanModal from "../modals/UpgradePlanModal"
+import UpgradePlanModal from "../modals/ContentGatePromptModal"
 import { useRouter } from "next/navigation"
 
 

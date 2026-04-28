@@ -1,4 +1,6 @@
 import { getCheckInMetrics, getCheckInAttendees } from "@/actions/checkin"
+import { getHostProfile } from "@/actions/auth"
+import GatedPageModal from "@/components/modals/GatedPageModal"
 import CheckInSystemPageContentWrapper from "@/components/page-wrappers/CheckInSystemPageContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
@@ -13,10 +15,21 @@ export const dynamic = "force-dynamic"
 
 
 export default async function CheckInSystemPage() {
-    const [metricsResult, attendeesResult] = await Promise.allSettled([
+    const [profileResult, metricsResult, attendeesResult] = await Promise.allSettled([
+        getHostProfile(),
         getCheckInMetrics(),
         getCheckInAttendees(),
     ])
+
+    const profile = profileResult.status === "fulfilled" ? profileResult.value : null
+
+    if (!profile?.verified) {
+        return <GatedPageModal type="verification" />
+    }
+
+    if (profile.plan_type !== "pro" && profile.plan_type !== "enterprise") {
+        return <GatedPageModal type="plan" featureName="QR Check-in" requiredPlan="Pro" />
+    }
 
     const metrics = metricsResult.status === "fulfilled" && metricsResult.value.success
         ? metricsResult.value.data!

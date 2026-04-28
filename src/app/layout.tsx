@@ -21,6 +21,7 @@ async function getLayoutData() {
     try {
         const axiosInstance = await getServerAxios()
         const { data } = await axiosInstance.get(GET_PROFILE_ENDPOINT)
+        console.log("data", data)
         const hostData = data.host
             ? { ...data.host, subscription: data.subscription, verified_badge: data.verified_badge, payout_available: data.payout_available } as AuthUser
             : null

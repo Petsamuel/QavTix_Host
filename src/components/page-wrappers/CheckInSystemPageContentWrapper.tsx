@@ -15,7 +15,7 @@ import { Icon } from "@iconify/react"
 import MetricsContainerLoader from "../loaders/MetricsContainerLoader"
 import { EventFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventFilter"
 import { usePlanGate } from "@/custom-hooks/UsePlanGate"
-import UpgradePlanModal from "../modals/UpgradePlanModal"
+import UpgradePlanModal from "../modals/ContentGatePromptModal"
 import { FEATURE_GATES } from "@/lib/features/plan-gate"
 import { useRouter } from "next/navigation"
 

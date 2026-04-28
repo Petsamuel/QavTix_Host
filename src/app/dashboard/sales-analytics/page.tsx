@@ -1,4 +1,6 @@
 import { getSalesAnalyticsCards, getSalesAnalyticsGraphs, getSalesAnalyticsTransaction } from "@/actions/sales-n-analytics"
+import { getHostProfile } from "@/actions/auth"
+import GatedPageModal from "@/components/modals/GatedPageModal"
 import SalesAnalyticsPageContentWrapper from "@/components/page-wrappers/SalesAnalyticsPageContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
@@ -65,11 +67,22 @@ export const dynamic = "force-dynamic"
 
 
 export default async function SalesAndAnalyticsPage() {
-    const [cardsResult, graphsResult, transactionsResult] = await Promise.allSettled([
+    const [profileResult, cardsResult, graphsResult, transactionsResult] = await Promise.allSettled([
+        getHostProfile(),
         getSalesAnalyticsCards(),
         getSalesAnalyticsGraphs(),
         getSalesAnalyticsTransaction(),
     ])
+
+    const profile = profileResult.status === "fulfilled" ? profileResult.value : null
+
+    if (!profile?.verified) {
+        return <GatedPageModal type="verification" />
+    }
+
+    if (!profile.plan_type) {
+        return <GatedPageModal type="plan" featureName="Sales & Analytics" requiredPlan="Free" />
+    }
 
     const cards = cardsResult.status === "fulfilled" && cardsResult.value.success
         ? cardsResult.value.data!
