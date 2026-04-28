@@ -9,7 +9,7 @@ export default async function UpcomingEventsSlot() {
     const token = cookieStore.get("host_access_token")?.value
 
     const [upcomingEventsResult, categoriesResult] = await Promise.all([
-        getUpcomingEvents(token, token),
+        getUpcomingEvents(token),
         getCategories(token)
     ])
 
@@ -17,7 +17,7 @@ export default async function UpcomingEventsSlot() {
     if (!upcomingEventsResult.success || !upcomingEventsResult.data || !categoriesResult.success || !categoriesResult.data) {
         return <UpcomingEventsError />
     }
-    
+
 
     return <UpcomingEventsPW initialData={upcomingEventsResult.data} categories={categoriesResult.data} />
 }

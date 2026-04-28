@@ -5,16 +5,16 @@ import ActivitySectionPW from "@/components/page-wrappers/ActivitySectionPW"
 
 export default async function ActivitySection() {
     const cookieStore = await cookies()
-    const token = cookieStore.get("host_access_token")?.value
-    const result = await getDashboardFeed(token, token)
+    const token = cookieStore.get("host_access_token")?.value;
+    const result = await getDashboardFeed(token)
 
     if (!result.success || !result.data) {
         return (
-			<ActivitySectionError 
-				title="Failed to load activity"
-				desc=""
-			/>
-		)
+            <ActivitySectionError
+                title="Failed to load activity"
+                desc=""
+            />
+        )
     }
 
     return (

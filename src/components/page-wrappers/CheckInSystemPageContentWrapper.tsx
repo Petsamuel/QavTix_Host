@@ -1,6 +1,6 @@
 "use client"
 
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react"
 import { useAppSelector } from "@/lib/redux/hooks"
 import MetricCardsContainer1 from "../cards/MetricCardsContainer1"
 import DataDisplayTableWrapper from "../custom-utils/TableDataDisplayAreas/DataDisplayTableWrapper"
@@ -14,9 +14,6 @@ import { getCheckInMetricsClient as getCheckInMetrics } from "@/actions/checkin/
 import { Icon } from "@iconify/react"
 import MetricsContainerLoader from "../loaders/MetricsContainerLoader"
 import { EventFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventFilter"
-import { usePlanGate } from "@/custom-hooks/UsePlanGate"
-import UpgradePlanModal from "../modals/ContentGatePromptModal"
-import { FEATURE_GATES } from "@/lib/features/plan-gate"
 import { useRouter } from "next/navigation"
 
 
@@ -29,8 +26,6 @@ export default function CheckInSystemPageContentWrapper({ initialMetrics, initia
 
     const { user } = useAppSelector(store => store.authUser)
     const currency = user?.currency || ""
-
-    const { allowed, modalOpen, setModalOpen, featureName, requiredPlan } = usePlanGate(FEATURE_GATES.QR_CHECKIN)
 
     const { tabList: tabListData, filterOptions } = SystemCheckInDataTableFilters
 
@@ -112,17 +107,6 @@ export default function CheckInSystemPageContentWrapper({ initialMetrics, initia
         label: s.replace("_", " "),
         color: s === "checked_in" ? "text-green-600" : "text-amber-500",
     }))
-
-    if (!allowed) {
-        return (
-            <UpgradePlanModal
-                open={modalOpen}
-                onClose={() => router.back()}
-                featureName={featureName}
-                requiredPlan={requiredPlan}
-            />
-        )
-    }
 
     return (
         <main className="pb-10">
