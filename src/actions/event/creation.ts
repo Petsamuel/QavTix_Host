@@ -44,8 +44,6 @@ export async function publishEvent({
 
         const json = await res.json().catch(() => ({}))
 
-        console.log(json)
-
         if (!res.ok) {
             return { success: false, message: handleApiError(json) || "Failed to publish event." }
         }

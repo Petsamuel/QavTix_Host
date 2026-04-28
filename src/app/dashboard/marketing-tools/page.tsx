@@ -1,8 +1,11 @@
 import { getPromoCodes, getAffiliateLinks, getEmailCampaigns } from "@/actions/marketing"
+import { getHostProfile } from "@/actions/auth"
+import GatedPageModal from "@/components/modals/GatedPageModal"
 import MarketingToolsPageContentWrapper from "@/components/page-wrappers/MarketingToolsPageContentWrapper"
 import { TabSlice } from "@/custom-hooks/UseDataDisplay"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
     ...hostSiteMetadata,
@@ -31,11 +34,24 @@ const emptyCampaigns: TabSlice<EmailCampaign> = {
 }
 
 export default async function MarketingToolsPage() {
-    const [promoResult, affiliateResult, campaignResult] = await Promise.allSettled([
-        getPromoCodes(),
-        getAffiliateLinks(),
-        getEmailCampaigns(),
+    const cookieStore = await cookies();
+    const token = cookieStore.get("host_access_token")?.value;
+    const [profileResult, promoResult, affiliateResult, campaignResult] = await Promise.allSettled([
+        getHostProfile(token),
+        getPromoCodes(token),
+        getAffiliateLinks(token),
+        getEmailCampaigns(token),
     ])
+
+    const profile = profileResult.status === "fulfilled" ? profileResult.value : null
+
+    if (!profile?.verified) {
+        return <GatedPageModal type="verification" />
+    }
+
+    if (profile.plan_type !== "pro" && profile.plan_type !== "enterprise") {
+        return <GatedPageModal type="plan" featureName="Marketing Tools" requiredPlan="Pro" />
+    }
 
     const promos = promoResult.status === "fulfilled" && promoResult.value.success
         ? promoResult.value.data!

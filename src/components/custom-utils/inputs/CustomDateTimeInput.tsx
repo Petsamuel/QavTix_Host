@@ -42,6 +42,10 @@ const HOURS_12 = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, 
 const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"))
 const VISIBLE_YEARS = 12
 
+const B1 = "#e6eefa"  // brand-primary-1
+const B2 = "#c2d5f3"  // brand-primary-2
+const B6 = "#0052cc"  // brand-primary-6
+const B7 = "#0046ba"  // brand-primary-7
 
 function getDaysInMonth(y: number, m: number) { return new Date(y, m + 1, 0).getDate() }
 function getFirstDayOfWeek(y: number, m: number) { const d = new Date(y, m, 1).getDay(); return d === 0 ? 6 : d - 1 }
@@ -88,9 +92,7 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
         const [open, setOpen] = useState(false)
         const [calMonth, setCalMonth] = useState(today.getMonth())
         const [calYear, setCalYear] = useState(today.getFullYear())
-        // pending = what the user is currently selecting inside the popover
         const [selectedDate, setSelectedDate] = useState<{ day: number; month: number; year: number } | null>(null)
-        // committed = what was last confirmed via Done (drives display text + form value)
         const [committedDate, setCommittedDate] = useState<{ day: number; month: number; year: number } | null>(null)
         const [committedTime, setCommittedTime] = useState<{ hour: string; minute: string; ampm: string; timezone: string } | null>(null)
         const [yearPage, setYearPage] = useState(0)
@@ -103,28 +105,22 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
 
         const tzRef = useRef<HTMLDivElement>(null)
 
-
         useEffect(() => {
             if (!value || typeof value !== 'string') return
             if (committedDate) return
-
             try {
                 const date = new Date(value)
                 if (isNaN(date.getTime())) return
-
                 const day = date.getDate()
                 const month = date.getMonth()
                 const year = date.getFullYear()
-
                 let h = date.getHours()
                 const min = date.getMinutes()
                 const ap = h >= 12 ? "PM" : "AM"
                 if (h > 12) h -= 12
                 if (h === 0) h = 12
-
                 const hourStr = String(h).padStart(2, "0")
                 const minuteStr = String(Math.round(min / 5) * 5).padStart(2, "0")
-
                 setSelectedDate({ day, month, year })
                 setCommittedDate({ day, month, year })
                 setCalMonth(month)
@@ -133,8 +129,7 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                 setMinute(minuteStr)
                 setAmpm(ap)
                 setCommittedTime({ hour: hourStr, minute: minuteStr, ampm: ap, timezone })
-            } catch {
-            }
+            } catch { }
         }, [value])
 
         const yearsList = useMemo(() => {
@@ -144,19 +139,14 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
 
         useEffect(() => {
             function handle(e: MouseEvent) {
-                if (tzRef.current && !tzRef.current.contains(e.target as Node)) {
-                    setShowTzDropdown(false)
-                }
+                if (tzRef.current && !tzRef.current.contains(e.target as Node)) setShowTzDropdown(false)
             }
             document.addEventListener("mousedown", handle)
             return () => document.removeEventListener("mousedown", handle)
         }, [])
 
         useEffect(() => {
-            if (!open) {
-                setPanelOpen(false)
-                setShowTzDropdown(false)
-            }
+            if (!open) { setPanelOpen(false); setShowTzDropdown(false) }
         }, [open])
 
         const firstDay = getFirstDayOfWeek(calYear, calMonth)
@@ -169,8 +159,7 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
 
         const isPastDate = useCallback((day: number) => {
             if (!disablePastDate) return false
-            const d = new Date(calYear, calMonth, day)
-            d.setHours(0, 0, 0, 0)
+            const d = new Date(calYear, calMonth, day); d.setHours(0, 0, 0, 0)
             const t = new Date(); t.setHours(0, 0, 0, 0)
             return d < t
         }, [calYear, calMonth, disablePastDate])
@@ -187,7 +176,6 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
         const handleDone = () => {
             if (!selectedDate) return
             const iso = buildISO(selectedDate, hour, minute, ampm, timezone)
-            // Commit the selection — this is what drives the display text
             setCommittedDate(selectedDate)
             setCommittedTime({ hour, minute, ampm, timezone })
             fireChange(iso)
@@ -195,7 +183,6 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
         }
 
         const handleCancel = () => {
-            // Restore pending state to the last committed value (don't wipe it)
             setSelectedDate(committedDate)
             if (committedTime) {
                 setHour(committedTime.hour)
@@ -206,16 +193,15 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
             setOpen(false)
         }
 
-        // Display text is driven by committed state only — not pending selection
         const displayValue = committedDate && committedTime
             ? formatDisplay(committedDate, committedTime.hour, committedTime.minute, committedTime.ampm, committedTime.timezone)
             : ""
 
         const chipStyle = (active: boolean): React.CSSProperties => ({
             padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 500,
-            border: active ? "1.5px solid #1a3fe4" : "1px solid #d1d5db",
-            background: active ? "#eef1fd" : "#fff",
-            color: active ? "#1a3fe4" : "#374151",
+            border: active ? `1.5px solid ${B6}` : "1px solid #d1d5db",
+            background: active ? B1 : "#fff",
+            color: active ? B6 : "#374151",
             cursor: "pointer", transition: "all 0.12s", outline: "none", whiteSpace: "nowrap" as const,
         })
 
@@ -229,17 +215,15 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
             <div className="w-full">
                 <style>{`
                     .dtp-cal-day:hover { background: #f3f4f6 !important; }
-                    .dtp-chip-c:hover { border-color: #0052cc !important; color: #1a3fe4 !important; }
+                    .dtp-chip-c:hover { border-color: ${B6} !important; color: ${B6} !important; }
                     .dtp-nav-c:hover { background: #f3f4f6; }
                     .tz-scroll-c::-webkit-scrollbar { display: none; }
                 `}</style>
 
-                {/* Label */}
                 <label className="block text-sm font-medium text-brand-secondary-9 mb-2">
                     {label}
                 </label>
 
-                {/* Shadcn Popover — portal renders into body, escaping all overflow constraints */}
                 <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
                         <button
@@ -257,7 +241,6 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                         </button>
                     </PopoverTrigger>
 
-                    {/* Hidden input for ref/form compat */}
                     <input
                         ref={ref}
                         type="hidden"
@@ -275,18 +258,17 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                     >
                         {/* Calendar grid */}
                         <div style={{ padding: "16px 18px 12px" }}>
-                            {/* Month/Year header */}
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                                 <button type="button" onClick={() => setPanelOpen(o => !o)} style={{
                                     display: "flex", alignItems: "center", gap: 5,
-                                    background: panelOpen ? "#eef1fd" : "transparent",
-                                    border: panelOpen ? "1.5px solid #1a3fe4" : "1.5px solid transparent",
+                                    background: panelOpen ? B1 : "transparent",
+                                    border: panelOpen ? `1.5px solid ${B6}` : "1.5px solid transparent",
                                     borderRadius: 8, padding: "3px 8px 3px 6px", cursor: "pointer", outline: "none",
                                 }}>
-                                    <span style={{ fontSize: 14, fontWeight: 600, color: panelOpen ? "#1a3fe4" : "#111827" }}>
+                                    <span style={{ fontSize: 14, fontWeight: 600, color: panelOpen ? B6 : "#111827" }}>
                                         {MONTHS[calMonth]} {calYear}
                                     </span>
-                                    <ChevronDownIcon className={cn("size-4 transition-transform duration-200", panelOpen && "rotate-180")} style={{ color: "#1a3fe4" }} />
+                                    <ChevronDownIcon className={cn("size-4 transition-transform duration-200", panelOpen && "rotate-180")} style={{ color: B6 }} />
                                 </button>
                                 <div style={{ display: "flex", gap: 2 }}>
                                     <button type="button" className="dtp-nav-c" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }}
@@ -296,12 +278,10 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                                 </div>
                             </div>
 
-                            {/* Day headers */}
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 2, marginBottom: 4 }}>
                                 {DAYS.map(d => <div key={d} style={{ textAlign: "center", fontSize: 10, fontWeight: 500, color: "#9ca3af" }}>{d}</div>)}
                             </div>
 
-                            {/* Days grid */}
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 2 }}>
                                 {calCells.map((cell, i) => {
                                     const sel = cell.cur && isSelected(cell.day)
@@ -313,11 +293,11 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                                             onClick={() => cell.cur && !past && setSelectedDate({ day: cell.day, month: calMonth, year: calYear })}
                                             style={{
                                                 height: 32, borderRadius: 7,
-                                                border: !sel && tod ? "1.5px solid #1a3fe4" : "none",
+                                                border: !sel && tod ? `1.5px solid ${B6}` : "none",
                                                 cursor: cell.cur && !past ? "pointer" : "default",
                                                 fontSize: 12, fontWeight: sel ? 600 : 400,
-                                                background: sel ? "#1a3fe4" : "transparent",
-                                                color: sel ? "#fff" : past ? "#d1d5db" : cell.cur ? (tod ? "#1a3fe4" : "#111827") : "#d1d5db",
+                                                background: sel ? B6 : "transparent",
+                                                color: sel ? "#fff" : past ? "#d1d5db" : cell.cur ? (tod ? B6 : "#111827") : "#d1d5db",
                                                 transition: "all 0.12s",
                                             }}>
                                             {cell.day}
@@ -376,8 +356,8 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                             {/* Timezone dropdown */}
                             <div style={{ position: "relative", marginLeft: 2 }} ref={tzRef}>
                                 <button type="button" onClick={() => setShowTzDropdown(v => !v)} style={{
-                                    padding: "6px 10px", borderRadius: 8, border: "1.5px solid #1a3fe4",
-                                    fontSize: 12, fontWeight: 500, background: "#eef1fd", color: "#1a3fe4",
+                                    padding: "6px 10px", borderRadius: 8, border: `1.5px solid ${B6}`,
+                                    fontSize: 12, fontWeight: 500, background: B1, color: B6,
                                     cursor: "pointer", outline: "none", display: "flex", alignItems: "center", gap: 4,
                                 }}>
                                     {timezone}
@@ -392,7 +372,7 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                                     }}>
                                         {TIMEZONES.map(tz => (
                                             <div key={tz.value} onClick={() => { setTimezone(tz.value); setShowTzDropdown(false) }}
-                                                style={{ padding: "8px 12px", fontSize: 12, cursor: "pointer", fontWeight: tz.value === timezone ? 600 : 400, color: tz.value === timezone ? "#1a3fe4" : "#111827", background: tz.value === timezone ? "#eef1fd" : "transparent" }}>
+                                                style={{ padding: "8px 12px", fontSize: 12, cursor: "pointer", fontWeight: tz.value === timezone ? 600 : 400, color: tz.value === timezone ? B6 : "#111827", background: tz.value === timezone ? B1 : "transparent" }}>
                                                 {tz.label}
                                             </div>
                                         ))}
@@ -412,7 +392,7 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                                 <button type="button" onClick={handleCancel} style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: "none", color: "#6b7280", fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Cancel</button>
                                 <button type="button" onClick={handleDone} style={{
                                     padding: "7px 18px", borderRadius: 8, border: "none",
-                                    background: selectedDate ? "#0052cc" : "#c5cce6",
+                                    background: selectedDate ? B6 : B2,
                                     color: "#fff", fontSize: 12, fontWeight: 600,
                                     cursor: selectedDate ? "pointer" : "not-allowed", transition: "background 0.2s"
                                 }}>Done</button>
@@ -421,7 +401,6 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                     </PopoverContent>
                 </Popover>
 
-                {/* Error */}
                 {error && (
                     <p className="text-xs text-red-500 mt-1.5 ml-1 font-medium" role="alert">{error}</p>
                 )}

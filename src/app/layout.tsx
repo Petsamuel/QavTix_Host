@@ -7,6 +7,7 @@ import ReduxStoreProvider from "@/lib/redux/ReduxStoreProvider"
 import { ReactNode } from "react"
 import PopUpsRenderer from "@/components/modals/"
 import { getServerAxios } from "@/lib/axios"
+import { Suspense } from "react"
 import { GET_PROFILE_ENDPOINT } from "@/endpoints"
 import AuthPersistor from "@/persistors/AuthPersistor"
 import { hostSiteMetadata } from "@/lib/metadata"
@@ -31,7 +32,6 @@ async function getLayoutData() {
 }
 
 export default async function Layout({ children }: LayoutProps) {
-    const profileData = await getLayoutData()
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
@@ -41,23 +41,32 @@ export default async function Layout({ children }: LayoutProps) {
                 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
             </head>
             <body className={`${inter.className} min-h-screen`}>
-                <ReduxStoreProvider>
-                    <div className="flex justify-end min-h-screen bg-gray-100/70">
-                        <DesktopSideNav />
-                        <div className="w-full lg:w-[calc(100%-240px)]">
-                            <div className="w-full">
-                                <MobileHeaderSection />
-                                <div id="step-top" className="relative w-full lg:pt-28 px-4 md:px-6">
-                                    <DesktopHeaderSection />
-                                    {children}
+                <Suspense fallback={null}>
+                    <ReduxStoreProvider>
+                        <div className="flex justify-end min-h-screen bg-gray-100/70">
+                            <DesktopSideNav />
+                            <div className="w-full lg:w-[calc(100%-240px)]">
+                                <div className="w-full">
+                                    <MobileHeaderSection />
+                                    <div id="step-top" className="relative w-full lg:pt-28 px-4 md:px-6">
+                                        <DesktopHeaderSection />
+                                        {children}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <AuthPersistor userData={profileData || null} />
-                    <PopUpsRenderer />
-                </ReduxStoreProvider>
+                        <Suspense fallback={null}>
+                            <AuthPersistorLoader />
+                        </Suspense>
+                        <PopUpsRenderer />
+                    </ReduxStoreProvider>
+                </Suspense>
             </body>
         </html>
     )
+}
+
+async function AuthPersistorLoader() {
+    const profileData = await getLayoutData()
+    return <AuthPersistor userData={profileData} />
 }

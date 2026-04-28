@@ -5,12 +5,13 @@ import DataDisplayTableWrapper from "../custom-utils/TableDataDisplayAreas/DataD
 import UpcomingEventsTable from "../custom-utils/TableDataDisplayAreas/tables/UpcomingEventsTable"
 import { DashboardUpcomingEventsFilters } from "../custom-utils/TableDataDisplayAreas/resources/avaliable-filters"
 import { TabSlice, useDataDisplay } from "@/custom-hooks/UseDataDisplay"
-import { EVENT_CREATE, HOST_UPCOMING_EVENTS_ENDPOINT } from "@/endpoints"
+import { HOST_UPCOMING_EVENTS_ENDPOINT } from "@/endpoints"
 import { Icon } from "@iconify/react"
 import EmptyTicketsState from "../custom-utils/TableDataDisplayAreas/empty-state"
 import TableLoader from "../loaders/TableLoader"
 import { ApiCategory } from "@/actions/filters"
 import { deriveCategories } from "@/helper-fns/deriveCategories"
+import { CREATE_EVENT } from "@/enums/navigation"
 
 const PAGE_SIZE = 10
 
@@ -76,7 +77,7 @@ export default function UpcomingEventsPW({ initialData, categories }: Props) {
         if (items.length === 0 && !isLoading) return (
             <div className="mt-10">
                 <EmptyTicketsState
-                    href={EVENT_CREATE}
+                    href={CREATE_EVENT.href}
                     text="Create your first event and it will appear here once published."
                     title="No Upcoming Events"
                     btnText="Create Event"

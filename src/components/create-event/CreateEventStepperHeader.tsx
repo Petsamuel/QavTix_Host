@@ -10,7 +10,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export function CreateEventStepperHeader() {
     const { currentStep, completedSteps, canNavigateToStep } = useEventCreation()
-    const { goToStep } = useStepper()
     const wrapperRef = useRef<HTMLDivElement>(null)
 
     const colors = {
@@ -43,8 +42,7 @@ export function CreateEventStepperHeader() {
                                     <div className="flex items-center w-full">
                                         {/* Indicator Circle */}
                                         <button
-                                            onClick={() => goToStep(step.number)}
-                                            disabled={!canNavigateToStep(step.number)}
+                                            disabled={true}
                                             className="relative focus:outline-none shrink-0"
                                         >
                                             <motion.div

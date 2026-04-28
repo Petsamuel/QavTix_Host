@@ -1,29 +1,25 @@
-"use server"
-
 import { CATEGORIES_ENDPOINT } from "@/endpoints"
 import { CACHE_TAGS } from "@/cache-tags"
-import { cookies } from "next/headers"
+import { cacheTag } from "next/cache";
 
 export interface ApiCategory {
-    id:   number
+    id: number
     name: string
 }
 
 export interface GetCategoriesResult {
-    success:    boolean
-    data:       ApiCategory[]
-    message?:   string
+    success: boolean
+    data: ApiCategory[]
+    message?: string
 }
 
-export async function getCategories(): Promise<GetCategoriesResult> {
+export async function getCategories(token: string | undefined): Promise<GetCategoriesResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.EVENTS);
     try {
-        const cookieStore = await cookies()
-        const token = cookieStore.get("host_access_token")?.value
-
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CATEGORIES_ENDPOINT}`,
             {
-                next: { revalidate: 60 * 60 * 6, tags: [CACHE_TAGS.EVENTS] },
                 headers: { ...(token && { Authorization: `Bearer ${token}` }) },
             }
         )
@@ -33,4 +29,4 @@ export async function getCategories(): Promise<GetCategoriesResult> {
     } catch {
         return { success: false, data: [] }
     }
-}
+}

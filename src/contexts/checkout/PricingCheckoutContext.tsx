@@ -13,7 +13,7 @@ import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { extractAccessCode } from "@/helper-fns/extractAccessCode"
 import { PLATFORM_CURRENCY } from "@/components-data/currencies"
 import { useCurrencyConversion } from "../../custom-hooks/useCurrencyConversion"
-import { getUserLocation, initializeHostSubscription, verifyHostSubscription } from "@/actions/settings"
+import { getUserLocationClient as getUserLocation, initializeHostSubscription, verifyHostSubscription } from "@/actions/settings/client"
 
 
 type BillingCycle   = "monthly" | "annual"

@@ -1,11 +1,12 @@
 import { getCustomers } from "@/actions/customers";
 import CustomersPagePw from "@/components/page-wrappers/CustomersPagePw";
+import { cookies } from "next/headers";
 
-export const dynamic = 'force-dynamic';
+export default async function CustomersPage() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("host_access_token")?.value;
 
-export default async function CustomersPage(){
-
-    const customersResult = await getCustomers()
+    const customersResult = await getCustomers(token)
 
     if (!customersResult.success || !customersResult.data) {
         throw new Error("Failed to load customers data")

@@ -1,26 +1,19 @@
-"use server"
-
-import { cookies } from "next/headers"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { CACHE_TAGS } from "@/cache-tags"
-
+import { cacheTag } from "next/cache";
 import {
     SALES_ANALYTICS_CARDS_ENDPOINT,
     SALES_ANALYTICS_GRAPHS_ENDPOINT,
     SALES_ANALYTICS_TRANSACTIONS_ENDPOINT,
 } from "@/endpoints"
 
-const FINANCIALS_REVALIDATE_SECONDS = 300
-
 async function fetchFinancials<T>(
+    token: string | undefined,
     endpoint: string,
     tag: string,
     params?: Record<string, string | number>,
 ): Promise<{ success: true; data: T } | { success: false; message: string }> {
     try {
-        const cookieStore = await cookies()
-        const accessToken = cookieStore.get("host_access_token")?.value
-
         const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`)
         if (params) {
             Object.entries(params).forEach(([k, v]) => {
@@ -31,12 +24,7 @@ async function fetchFinancials<T>(
         const res = await fetch(url.toString(), {
             headers: {
                 "Content-Type": "application/json",
-                ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-            },
-            cache: "force-cache",
-            next: {
-                tags: [tag],
-                revalidate: FINANCIALS_REVALIDATE_SECONDS,
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
         })
 
@@ -57,9 +45,12 @@ async function fetchFinancials<T>(
 
 
 export async function getSalesAnalyticsCards(
-    params: SalesAnalyticsCardsParams = {}
+    token: string | undefined, params: SalesAnalyticsCardsParams = {}
 ): Promise<SalesAnalyticsCardsResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.FINANCIALS);
     return fetchFinancials<SalesAnalyticsCardsData>(
+        token,
         SALES_ANALYTICS_CARDS_ENDPOINT,
         CACHE_TAGS.FINANCIALS,
         params as Record<string, string | number>,
@@ -67,9 +58,12 @@ export async function getSalesAnalyticsCards(
 }
 
 export async function getSalesAnalyticsGraphs(
-    params: SalesAnalyticsGraphsParams = {}
+    token: string | undefined, params: SalesAnalyticsGraphsParams = {}
 ): Promise<SalesAnalyticsGraphsResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.FINANCIALS);
     return fetchFinancials<SalesAnalyticsGraphsData>(
+        token,
         SALES_ANALYTICS_GRAPHS_ENDPOINT,
         CACHE_TAGS.FINANCIALS,
         params as Record<string, string | number>,
@@ -77,9 +71,12 @@ export async function getSalesAnalyticsGraphs(
 }
 
 export async function getSalesAnalyticsTransaction(
-    params: SalesAnalyticsGraphsParams = {}
+    token: string | undefined, params: SalesAnalyticsGraphsParams = {}
 ): Promise<SalesAnalyticsTransactionsResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.FINANCIALS);
     return fetchFinancials<any>(
+        token,
         SALES_ANALYTICS_TRANSACTIONS_ENDPOINT,
         CACHE_TAGS.FINANCIALS,
         params as Record<string, string | number>,

@@ -20,6 +20,7 @@ import { useEventCreation } from '@/contexts/create-event/CreateEventProvider'
 import { publishEvent, saveEventAsDraft } from '@/actions/event/creation'
 import { useRouter } from 'next/navigation'
 import { uploadEventMedia } from '@/helper-fns/uploadEventMedia'
+import { sanitizeEventDataForServer } from '@/lib/cloudinary'
 
 
 
@@ -85,7 +86,8 @@ export default function CreateEventReviewStep() {
             setIsPublishing(true)
             try {
                 const media = await uploadEventMedia(eventData.detailsMedia)
-                const result = await publishEvent({ eventData, media })
+                const sanitizedEventData = sanitizeEventDataForServer(eventData, media)
+                const result = await publishEvent({ eventData: sanitizedEventData, media })
                 if (result.success) {
                     setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: result.eventId })
                     dispatch(finishConfirmAction())
@@ -125,7 +127,8 @@ export default function CreateEventReviewStep() {
         setIsSavingDraft(true)
         try {
             const media = await uploadEventMedia(eventData.detailsMedia)
-            const result = await saveEventAsDraft({ eventData, scheduledAt: new Date(`${v.date}T${v.time}`).toISOString(), media })
+            const sanitizedEventData = sanitizeEventDataForServer(eventData, media)
+            const result = await saveEventAsDraft({ eventData: sanitizedEventData, scheduledAt: new Date(`${v.date}T${v.time}`).toISOString(), media })
             if (result.success) {
                 dispatch(triggerPopupAlert({
                     id: `schedule-${Date.now()}`,
@@ -336,7 +339,7 @@ export default function CreateEventReviewStep() {
                 isOpen={statusModal.isOpen}
                 onClose={handleOnclose}
                 type={statusModal.type}
-                onViewDashboard={() => router.push(NAVIGATION_LINKS.DASHBOARD.href)}
+                onViewDashboard={() => router.push(NAVIGATION_LINKS.MY_EVENTS.href)}
                 eventId={statusModal.eventId}
                 errorMessage={statusModal.errorMsg}
                 onShare={() => {

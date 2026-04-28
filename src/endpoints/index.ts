@@ -41,6 +41,7 @@ export const CHECKIN_SCAN_ENDPOINT = "host/checkin/scan/"
 
 
 export const HOST_PLAN_CHECKOUT_ENDPOINT = "payments/plans/subscribe/"
+export const PLANS_ENDPOINT = "payments/plans/"
 export const HOST_PLAN_CHECKOUT_VERIFY_ENDPOINT = "payments/plans/complete/"
 
 

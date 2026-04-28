@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Icon } from "@iconify/react"
 import { format, parseISO } from "date-fns"
 import PaginationControls from "../tools/PaginationControl"
-import { getFinancials } from "@/actions/financials"
+import { getFinancialsClient as getFinancials } from "@/actions/financials/client"
 import { payoutStatusConfig } from "../resources/status-config"
 import TableLoader from "@/components/loaders/TableLoader"
 

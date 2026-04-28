@@ -1,7 +1,10 @@
 import { getSalesAnalyticsCards, getSalesAnalyticsGraphs, getSalesAnalyticsTransaction } from "@/actions/sales-n-analytics"
+import { getHostProfile } from "@/actions/auth"
+import GatedPageModal from "@/components/modals/GatedPageModal"
 import SalesAnalyticsPageContentWrapper from "@/components/page-wrappers/SalesAnalyticsPageContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
     ...hostSiteMetadata,
@@ -61,15 +64,28 @@ const emptyTransactions = {
     total_pages: 1,
 }
 
-export const dynamic = "force-dynamic"
+
 
 
 export default async function SalesAndAnalyticsPage() {
-    const [cardsResult, graphsResult, transactionsResult] = await Promise.allSettled([
-        getSalesAnalyticsCards(),
-        getSalesAnalyticsGraphs(),
-        getSalesAnalyticsTransaction(),
+    const cookieStore = await cookies();
+    const token = cookieStore.get("host_access_token")?.value;
+    const [profileResult, cardsResult, graphsResult, transactionsResult] = await Promise.allSettled([
+        getHostProfile(token),
+        getSalesAnalyticsCards(token),
+        getSalesAnalyticsGraphs(token),
+        getSalesAnalyticsTransaction(token),
     ])
+
+    const profile = profileResult.status === "fulfilled" ? profileResult.value : null
+
+    if (!profile?.verified) {
+        return <GatedPageModal type="verification" />
+    }
+
+    if (!profile.plan_type) {
+        return <GatedPageModal type="plan" featureName="Sales & Analytics" requiredPlan="Free" />
+    }
 
     const cards = cardsResult.status === "fulfilled" && cardsResult.value.success
         ? cardsResult.value.data!

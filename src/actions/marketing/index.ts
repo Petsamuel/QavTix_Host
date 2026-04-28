@@ -10,23 +10,14 @@ import {
 } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
-import { revalidateTag } from "next/cache"
-import { cookies } from "next/headers"
+import { revalidateTag, cacheTag } from "next/cache"
 
-async function getToken(): Promise<string | undefined> {
-    const cookieStore = await cookies()
-    return cookieStore.get("host_access_token")?.value
-}
-
-async function fetchWithAuth(url: string, tag: string) {
-    const token = await getToken()
+async function fetchWithAuth(token: string | undefined, url: string, tag: string) {
     const res = await fetch(url, {
         headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        next: { tags: [tag], revalidate: 1000 },
-        cache: "force-cache",
+        }
     })
     if (!res.ok) {
         const json = await res.json()
@@ -36,36 +27,41 @@ async function fetchWithAuth(url: string, tag: string) {
     return { success: true, data: json.data }
 }
 
-export async function getPromoCodes(params: {
+export async function getPromoCodes(token: string | undefined, params: {
     page?: number
     search?: string
     status?: string
     event?: string
 } = {}): Promise<{ success: boolean; data?: TabSlice<PromoCode>; message?: string }> {
+    'use cache';
+    cacheTag(CACHE_TAGS.MARKETING_PROMO);
     const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${PROMO_CODES_ENDPOINT}`)
     if (params.page) url.searchParams.set("page", String(params.page))
     if (params.search) url.searchParams.set("search", params.search)
     if (params.status) url.searchParams.set("status", params.status)
     if (params.event) url.searchParams.set("event", params.event)
-    return fetchWithAuth(url.toString(), CACHE_TAGS.MARKETING_PROMO)
+    return fetchWithAuth(token, url.toString(), CACHE_TAGS.MARKETING_PROMO)
 }
 
-export async function getAffiliateLinks(params: {
+export async function getAffiliateLinks(token: string | undefined, params: {
     page?: number
 } = {}): Promise<{ success: boolean; data?: TabSlice<AffiliateLink> & { cards: AffiliateCards }; message?: string }> {
+    'use cache';
+    cacheTag(CACHE_TAGS.MARKETING_AFFILIATE);
     const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${AFFILIATE_LINKS_HOST_ENDPOINT}`)
     if (params.page) url.searchParams.set("page", String(params.page))
-    return fetchWithAuth(url.toString(), CACHE_TAGS.MARKETING_AFFILIATE)
+    return fetchWithAuth(token, url.toString(), CACHE_TAGS.MARKETING_AFFILIATE)
 }
 
-export async function getEmailCampaigns(params: {
+export async function getEmailCampaigns(token: string | undefined, params: {
     page?: number
 } = {}): Promise<{ success: boolean; data?: TabSlice<EmailCampaign>; message?: string }> {
+    'use cache';
+    cacheTag(CACHE_TAGS.MARKETING_CAMPAIGNS);
     const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${EMAIL_CAMPAIGNS_ENDPOINT}`)
     if (params.page) url.searchParams.set("page", String(params.page))
-    return fetchWithAuth(url.toString(), CACHE_TAGS.MARKETING_CAMPAIGNS)
+    return fetchWithAuth(token, url.toString(), CACHE_TAGS.MARKETING_CAMPAIGNS)
 }
-
 
 export async function createPromoCode(
     payload: CreatePromoCodePayload
@@ -80,8 +76,8 @@ export async function createPromoCode(
         return { success: true, message: "Account removed successfully." }
 
     } catch (err: any) {
-        console.error("[removePayoutAccount] status:", err?.response?.status)
-        console.error("[removePayoutAccount] body:", JSON.stringify(err?.response?.data))
+        console.error("[createPromoCode] status:", err?.response?.status)
+        console.error("[createPromoCode] body:", JSON.stringify(err?.response?.data))
         return { success: false, message: handleApiError(err?.response?.data) }
     }
 }

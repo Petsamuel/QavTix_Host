@@ -4,12 +4,8 @@ import { revalidateTag } from "next/cache"
 import { CACHE_TAGS } from "@/cache-tags"
 import { EVENT_DELETE, EVENT_UPDATE, EVENTS_ENDPOINT, CUSTOMER_LIST_DOWNLOAD_ENDPOINT, EVENT_DETAILS_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { cookies } from "next/headers"
-
-async function getToken(): Promise<string | undefined> {
-    const cookieStore = await cookies()
-    return cookieStore.get("host_access_token")?.value
-}
+import { cacheTag } from "next/cache";
+import { getServerAxios } from "@/lib/axios"
 
 function authHeaders(token?: string): Record<string, string> {
     return {
@@ -28,10 +24,11 @@ interface BulkActionParams {
 }
 
 export async function getEvents(
-    params: GetEventsParams = {}
+    token: string | undefined, params: GetEventsParams = {}
 ): Promise<GetEventsResult> {
+    'use cache';
+    cacheTag(CACHE_TAGS.EVENTS);
     try {
-        const token = await getToken()
         const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENTS_ENDPOINT}`)
 
         if (params.category != null) url.searchParams.set("category", String(params.category))
@@ -44,9 +41,7 @@ export async function getEvents(
         if (params.status != null) url.searchParams.set("status", params.status)
 
         const res = await fetch(url.toString(), {
-            headers: authHeaders(token),
-            cache: "force-cache",
-            next: { tags: [CACHE_TAGS.EVENTS], revalidate: 500 },
+            headers: authHeaders(token)
         })
 
         if (!res.ok) {
@@ -71,15 +66,14 @@ interface GetEventDetailsResult {
     message?: string
 }
 
-export async function getEventDetails(eventID: string): Promise<GetEventDetailsResult> {
+export async function getEventDetails(token: string | undefined, eventID: string): Promise<GetEventDetailsResult> {
+    'use cache';
+    cacheTag(`event-${eventID}`);
     try {
-        const token = await getToken()
         const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_DETAILS_ENDPOINT.replace("[event_id]", eventID)}`
 
         const res = await fetch(url, {
-            headers: authHeaders(token),
-            cache: "force-cache",
-            next: { tags: [`event-${eventID}`], revalidate: 500 },
+            headers: authHeaders(token)
         })
 
         const json = await res.json()
@@ -102,16 +96,15 @@ interface GetEditEventDetailsResult {
     message?: string
 }
 
-export async function getEditEventDetails(eventID: string): Promise<GetEditEventDetailsResult> {
+export async function getEditEventDetails(token: string | undefined, eventID: string): Promise<GetEditEventDetailsResult> {
+    'use cache';
+    cacheTag(`event-edit-${eventID}`);
     try {
-        const token = await getToken()
         const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_DETAILS_ENDPOINT.replace("[event_id]", eventID)}`
 
         const res = await fetch(url, {
             headers: authHeaders(token),
-            cache: "force-cache",
             // ✅ Separate tag from getEventDetails — prevents parallel write collision
-            next: { tags: [`event-edit-${eventID}`], revalidate: 500 },
         })
 
         const json = await res.json()
@@ -132,7 +125,8 @@ export async function deleteEvent(
     { eventId }: { eventId: string }
 ): Promise<ActionResult> {
     try {
-        const token = await getToken()
+        const axiosInstance = await getServerAxios()
+        const token = (axiosInstance.defaults.headers.common['Authorization'] as string)?.replace('Bearer ', '')
         const endpoint = EVENT_DELETE.replace("[event_id]", eventId)
 
         const res = await fetch(
@@ -161,7 +155,8 @@ export async function updateEventStatus(
     { eventId, status }: { eventId: string; status: "active" | "draft" }
 ): Promise<ActionResult> {
     try {
-        const token = await getToken()
+        const axiosInstance = await getServerAxios()
+        const token = (axiosInstance.defaults.headers.common['Authorization'] as string)?.replace('Bearer ', '')
         const endpoint = EVENT_UPDATE.replace("[event_id]", eventId)
 
         const res = await fetch(
@@ -195,7 +190,8 @@ export async function cancelEvent(
     { eventId }: { eventId: string }
 ): Promise<ActionResult> {
     try {
-        const token = await getToken()
+        const axiosInstance = await getServerAxios()
+        const token = (axiosInstance.defaults.headers.common['Authorization'] as string)?.replace('Bearer ', '')
         const endpoint = EVENT_UPDATE.replace("[event_id]", eventId)
 
         const res = await fetch(
@@ -228,7 +224,8 @@ export async function bulkDeleteEvents(
     { eventIds }: BulkActionParams
 ): Promise<ActionResult> {
     try {
-        const token = await getToken()
+        const axiosInstance = await getServerAxios()
+        const token = (axiosInstance.defaults.headers.common['Authorization'] as string)?.replace('Bearer ', '')
 
         const results = await Promise.allSettled(
             eventIds.map((id) => {
@@ -264,7 +261,8 @@ export async function bulkCancelEvents(
     { eventIds }: BulkActionParams
 ): Promise<ActionResult> {
     try {
-        const token = await getToken()
+        const axiosInstance = await getServerAxios()
+        const token = (axiosInstance.defaults.headers.common['Authorization'] as string)?.replace('Bearer ', '')
 
         const results = await Promise.allSettled(
             eventIds.map((id) => {
@@ -301,7 +299,8 @@ export async function bulkUnpublishEvents(
     { eventIds }: BulkActionParams
 ): Promise<ActionResult> {
     try {
-        const token = await getToken()
+        const axiosInstance = await getServerAxios()
+        const token = (axiosInstance.defaults.headers.common['Authorization'] as string)?.replace('Bearer ', '')
 
         const results = await Promise.allSettled(
             eventIds.map((id) => {
@@ -335,10 +334,10 @@ export async function bulkUnpublishEvents(
 
 
 export async function getAttendeesExport(
-    { eventId }: { eventId: string }
+    token: string | undefined, { eventId }: { eventId: string }
 ): Promise<{ success: boolean; message?: string; blob?: Blob }> {
+    'use cache';
     try {
-        const token = await getToken()
         const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMER_LIST_DOWNLOAD_ENDPOINT}`.replace("[event_id]", eventId)
 
         const res = await fetch(url, {
@@ -364,7 +363,7 @@ export async function bulkDownloadAttendees(
 ): Promise<ActionResult & { blobs?: Array<{ eventId: string; blob: Blob }> }> {
     try {
         const results = await Promise.allSettled(
-            eventIds.map((id) => getAttendeesExport({ eventId: id }))
+            eventIds.map((id) => getAttendeesExport(undefined, { eventId: id }))
         )
 
         const blobs: Array<{ eventId: string; blob: Blob }> = []

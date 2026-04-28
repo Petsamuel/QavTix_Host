@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils"
 import { space_grotesk } from "@/lib/fonts"
 
 import {
-    getSalesAnalyticsCards,
-    getSalesAnalyticsGraphs,
-} from "@/actions/sales-n-analytics"
+    getSalesAnalyticsCardsClient as getSalesAnalyticsCards,
+    getSalesAnalyticsGraphsClient as getSalesAnalyticsGraphs,
+} from "@/actions/sales-n-analytics/client"
 
 import { EventFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventFilter"
 import ExportButton1 from "@/lib/features/export/ExportDataBtn1"
@@ -35,9 +35,6 @@ import DateRangePresetFilter from "../custom-utils/TableDataDisplayAreas/filters
 import { SALES_ANALYTICS_TRANSACTIONS_ENDPOINT } from "@/endpoints"
 import ChartPresetFilter from "../custom-utils/TableDataDisplayAreas/filters/ChartPresetFilter"
 import { exportSalesAnalyticsFull } from "@/helper-fns/exportData"
-import { useHostGate } from "@/custom-hooks/UseRoleGate"
-import UpgradePlanModal from "../modals/UpgradePlanModal"
-import { useRouter } from "next/navigation"
 
 
 interface Props {
@@ -48,20 +45,6 @@ interface Props {
 
 
 export default function SalesAnalyticsPageContentWrapper(props: Props) {
-    const router = useRouter()
-    const { allowed, modalOpen } = useHostGate()
-
-    if (!allowed) {
-        return (
-            <UpgradePlanModal
-                open={modalOpen}
-                onClose={() => router.back()}
-                featureName="Sales & Analytics"
-                requiredPlan="Host Account"
-            />
-        )
-    }
-
     return <SalesAnalyticsPageClient {...props} />
 }
 
@@ -214,10 +197,13 @@ function SalesAnalyticsPageClient({
                         onChange={handleEventChange}
                         icon="hugeicons:calendar-02"
                     />
-                    <ChartPresetFilter
-                        value={chartPreset}
-                        onChange={handleChartPresetChange}
-                    />
+                    <div>
+                        <p className="text-[10px] text-brand-secondary-9 -mt-3.5">Chart Preset</p>
+                        <ChartPresetFilter
+                            value={chartPreset}
+                            onChange={handleChartPresetChange}
+                        />
+                    </div>
                 </div>
                 <ExportButton1
                     showFormatSelector

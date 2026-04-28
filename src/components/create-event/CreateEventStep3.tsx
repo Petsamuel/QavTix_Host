@@ -22,7 +22,27 @@ import { usePlanRestrictions } from '@/custom-hooks/useRestriction'
 import { PlanGateBanner } from './PlanGateBanner'
 import { CustomDateTimeInput } from '../custom-utils/inputs/CustomDateTimeInput'
 import { useEffect } from 'react'
+import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
 
+const LabelWithTooltip = ({ label, tooltipText }: { label: string, tooltipText: string }) => (
+    <div className="flex items-center gap-1.5">
+        {label}
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <button
+                    type="button"
+                    aria-label={label}
+                    className="text-brand-secondary-6 hover:text-brand-secondary-8 transition-colors"
+                >
+                    <Icon icon="carbon:information" className="size-3.5 text-brand-accent-6" />
+                </button>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>{tooltipText}</p>
+            </TooltipContent>
+        </Tooltip>
+    </div>
+);
 
 export default function CreateEventStep3() {
 
@@ -157,7 +177,7 @@ export default function CreateEventStep3() {
                                             data-testid={`input-ticket-price-${index}`}
                                         />
                                         <CustomInput2
-                                            label="Quantity"
+                                            label={<LabelWithTooltip label="Quantity" tooltipText="The total number of available tickets for this category." />}
                                             type="number"
                                             placeholder="Available No. of Tickets"
                                             error={errors.ticketTypes?.[index]?.quantity?.message}
@@ -165,7 +185,7 @@ export default function CreateEventStep3() {
                                             data-testid={`input-ticket-quantity-${index}`}
                                         />
                                         <CustomInput2
-                                            label="Per Person Max"
+                                            label={<LabelWithTooltip label="Per Person Max" tooltipText="The maximum number of tickets a single person can buy." />}
                                             type="number"
                                             placeholder="Eg: 100"
                                             error={errors.ticketTypes?.[index]?.perPersonMax?.message}

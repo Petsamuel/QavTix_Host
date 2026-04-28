@@ -1,5 +1,3 @@
-"use server"
-
 export interface BankOption {
     label: string
     value: string  // bank code
@@ -27,8 +25,9 @@ const COUNTRY_SLUGS: Record<string, string> = {
 const bankCache = new Map<string, BankOption[]>()
 
 export async function getPaystackBanks(
-    country: string = "nigeria"
+    token: string | undefined, country: string = "nigeria"
 ): Promise<{ success: boolean; data?: BankOption[]; message?: string }> {
+    'use cache';
     try {
         const slug = COUNTRY_SLUGS[country.toLowerCase().replace(/\s/g, "")] ?? country
 
@@ -40,8 +39,7 @@ export async function getPaystackBanks(
         const res = await fetch(
             `https://api.paystack.co/bank?country=${encodeURIComponent(slug)}&perPage=100&use_cursor=false`,
             {
-                headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
-                next:    { revalidate: 60 * 60 * 24 },
+                headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` }
             }
         )
 

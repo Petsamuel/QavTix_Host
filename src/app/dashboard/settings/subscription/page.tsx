@@ -3,6 +3,7 @@ import SubscriptionPanel from "@/components/settings-page/SubsciptionPanel"
 import { PricingCheckoutProvider } from "@/contexts/checkout/PricingCheckoutContext"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
     ...hostSiteMetadata,
@@ -13,7 +14,9 @@ export const metadata: Metadata = {
 
 
 export default async function SubscriptionPage() {
-    const result = await getSubscription()
+    const cookieStore = await cookies();
+    const token = cookieStore.get("host_access_token")?.value;
+    const result = await getSubscription(token)
 
     return (
         <PricingCheckoutProvider>

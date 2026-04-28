@@ -3,7 +3,7 @@
 import { forwardRef } from 'react'
 
 interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-    label: string
+    label: React.ReactNode
     error?: string
     required?: boolean
     helperText?: string

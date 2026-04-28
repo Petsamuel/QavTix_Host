@@ -2,7 +2,7 @@
 import { CompleteEventFormData } from "@/schemas/create-event.schema"
 import { ApiCategory } from "@/actions/filters"
 import { countries, getStates } from "@/components-data/location"
-import { parsePhoneNumberFromString } from 'libphonenumber-js'
+import { UploadedMediaItem } from "./uploadEventMedia"
 
 
 export function mapEventToFormData(
@@ -273,6 +273,10 @@ export function buildEventPayload(
         currency: ticketsPayload[0]?.currency ?? "NGN",
         social_links: socialLinks,
         permissions,
-        media,
+        media: (media as UploadedMediaItem[]).map(m => ({
+            image_url: m.resource_type === 'image' ? m.secure_url : "",
+            video_url: m.resource_type === 'video' ? m.secure_url : "",
+            is_featured: m.is_featured,
+        })),
     }
 }

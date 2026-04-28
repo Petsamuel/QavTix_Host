@@ -15,6 +15,7 @@ export function useLogOut() {
         dispatch(clearUser())
         await logOut()
         setIsLoggingOut(false)
+        window.location.href = `${process.env.NEXT_PUBLIC_APP_DOMAIN}/auth/signin`
     }
 
     return { handleLogOut, isLoggingOut }
