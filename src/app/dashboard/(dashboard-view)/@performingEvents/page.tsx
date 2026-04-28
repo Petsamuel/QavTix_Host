@@ -6,15 +6,15 @@ import TopPerformingEventsSlotPW from "@/components/page-wrappers/TopPerformingE
 export default async function PerformingEventsSlot() {
     const cookieStore = await cookies()
     const token = cookieStore.get("host_access_token")?.value
-    const result = await getDashboardFeed(token, token)
+    const result = await getDashboardFeed(token)
 
     if (!result.success || !result.data) {
-		return (
-			<ActivitySectionError 
-				title="Failed to load top events"
-				desc="We couldn't fetch your top performing events. Please refresh the page."
-			/>
-		)
+        return (
+            <ActivitySectionError
+                title="Failed to load top events"
+                desc="We couldn't fetch your top performing events. Please refresh the page."
+            />
+        )
     }
 
     return (

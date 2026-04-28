@@ -12,13 +12,14 @@ import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { openSuccessModal } from "@/lib/redux/slices/successModalSlice"
 import { Icon } from "@iconify/react"
 import { cn } from "@/lib/utils"
-import { BankOption, getPaystackBanksClient as getPaystackBanks, verifyAccountNumber } from "@/actions/payout/client"
+import { getPaystackBanksClient as getPaystackBanks, verifyAccountNumber } from "@/actions/payout/client"
 import SearchableSelect from "../inputs/CustomSearchableSelect"
 import ActionButton1 from "../buttons/ActionBtn1"
 import { addPayoutAccount } from "@/actions/financials"
+import { BankOption } from "@/actions/payout"
 
 interface Props {
-    openAddAccountModal:    boolean
+    openAddAccountModal: boolean
     setOpenAddAccountModal: Dispatch<SetStateAction<boolean>>
 }
 
@@ -27,15 +28,15 @@ export default function AddBankAccountForm({
     setOpenAddAccountModal,
 }: Props) {
 
-    const dispatch  = useAppDispatch()
-    const { user }  = useAppSelector(store => store.authUser)
+    const dispatch = useAppDispatch()
+    const { user } = useAppSelector(store => store.authUser)
 
     // Determine if user is Nigerian based on their currency
     const isNigerian = user?.currency?.toUpperCase() === "NGN"
 
-    const [banks,         setBanks]        = useState<BankOption[]>([])
-    const [banksLoading,  setBanksLoading]  = useState(false)
-    const [verifyState,   setVerifyState]   = useState<"idle" | "loading" | "success" | "error">("idle")
+    const [banks, setBanks] = useState<BankOption[]>([])
+    const [banksLoading, setBanksLoading] = useState(false)
+    const [verifyState, setVerifyState] = useState<"idle" | "loading" | "success" | "error">("idle")
     const [verifyMessage, setVerifyMessage] = useState("")
 
     const {
@@ -49,15 +50,15 @@ export default function AddBankAccountForm({
     } = useForm<AddAccountSchemaType>({
         resolver: zodResolver(addAccountSchema),
         defaultValues: {
-            bank_code:      "",
-            bank_name:      "",
+            bank_code: "",
+            bank_name: "",
             account_number: "",
-            account_name:   "",
-            is_default:     false,
+            account_name: "",
+            is_default: false,
         },
     })
 
-    const bankCode      = watch("bank_code")
+    const bankCode = watch("bank_code")
     const accountNumber = watch("account_number")
     const accountNumReady = accountNumber?.length === 10
 
@@ -93,11 +94,11 @@ export default function AddBankAccountForm({
 
     const onSubmit = async (data: AddAccountSchemaType) => {
         const result = await addPayoutAccount({
-            bank_name:      data.bank_name,
-            account_name:   data.account_name,
+            bank_name: data.bank_name,
+            account_name: data.account_name,
             account_number: data.account_number,
-            is_default:     data.is_default,
-            bank_code:      data.bank_code,
+            is_default: data.is_default,
+            bank_code: data.bank_code,
         })
 
         if (result.success) {
@@ -105,14 +106,14 @@ export default function AddBankAccountForm({
             setVerifyState("idle")
             setOpenAddAccountModal(false)
             dispatch(openSuccessModal({
-                title:       "Submission Successful!",
+                title: "Submission Successful!",
                 description: "Your bank account is being verified. We’ll let you know when it’s done.",
-                variant:     "success"
+                variant: "success"
             }))
         } else {
             dispatch(showAlert({
-                variant:     "destructive",
-                title:       "Failed to add account",
+                variant: "destructive",
+                title: "Failed to add account",
                 description: result.message ?? "Please try again.",
             }))
         }
@@ -188,7 +189,7 @@ export default function AddBankAccountForm({
                             <div className={cn(
                                 "flex items-center gap-2 mt-2 text-xs",
                                 verifyState === "success" && "text-green-600",
-                                verifyState === "error"   && "text-red-500",
+                                verifyState === "error" && "text-red-500",
                                 verifyState === "loading" && "text-brand-secondary-6",
                             )}>
                                 {verifyState === "loading" && (
