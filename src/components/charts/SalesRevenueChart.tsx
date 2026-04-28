@@ -12,15 +12,15 @@ import LockedChartOverlay from "./LockedChartOverlay"
 
 
 interface ChartDataPoint {
-    label:        string
-    value:        number
+    label: string
+    value: number
     displayLabel: string
 }
 
 interface SalesRevenueGrowthChartProps {
-    data:      RevenueChartPoint[]
+    data: RevenueChartPoint[]
     isPending: boolean
-    locked?:   boolean
+    locked?: boolean
 }
 
 const CustomTooltip = ({ active, payload, currency }: any) => {
@@ -37,16 +37,16 @@ const CustomTooltip = ({ active, payload, currency }: any) => {
 }
 
 export default function SalesRevenueGrowthChart({ data, isPending, locked }: SalesRevenueGrowthChartProps) {
-    const { user }   = useAppSelector(store => store.authUser)
-    const currency   = user?.currency || ""
+    const { user } = useAppSelector(store => store.authUser)
+    const currency = user?.currency || ""
 
-    const chartData: ChartDataPoint[] = data.map(d => ({
-        label:        d.label,
-        value:        parseFloat(d.amount),
+    const chartData: ChartDataPoint[] = data ? data.map(d => ({
+        label: d.label,
+        value: parseFloat(d.amount),
         displayLabel: d.label,
-    }))
+    })) : []
 
-    const maxValue        = Math.max(...chartData.map(d => d.value), 0)
+    const maxValue = Math.max(...chartData.map(d => d.value), 0)
     const { ticks, yMax } = getNiceTicks(maxValue)
 
     return (
