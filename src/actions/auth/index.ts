@@ -4,7 +4,6 @@ import { LOGIN_ENDPOINT, GET_PROFILE_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
 import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
 
 import { CACHE_TAGS } from "@/cache-tags"
 import { cacheTag } from "next/cache"
@@ -31,6 +30,8 @@ export async function getHostProfile(token: string | undefined): Promise<AuthUse
     }
 }
 
+
+import { redirect } from "next/navigation"
 
 export const logOut = async () => {
     const cookiesStore = await cookies()
