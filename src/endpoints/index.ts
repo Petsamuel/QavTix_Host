@@ -48,9 +48,9 @@ export const HOST_PLAN_CHECKOUT_VERIFY_ENDPOINT = "payments/plans/complete/"
 export const ADD_PAYMENT_CARD = "payments/cards/initiate/"
 export const ADD_PAYMENT_CARD_CONFIRM = "payments/cards/confirm/"
 
-export const GET_SUBSCRIPTION_ENDPOINT    = "host/subscription/status/"
-export const TOGGLE_AUTO_RENEW_ENDPOINT   = "host/auto-renew/toggle/"
-export const RENEW_SUBSCRIPTION_ENDPOINT  = "host/subscription/renew/"
+export const GET_SUBSCRIPTION_ENDPOINT = "host/subscription/status/"
+export const TOGGLE_AUTO_RENEW_ENDPOINT = "host/auto-renew/toggle/"
+export const RENEW_SUBSCRIPTION_ENDPOINT = "host/subscription/renew/"
 export const CANCEL_SUBSCRIPTION_ENDPOINT = "payments/plans/cancel/"
 
 
@@ -63,11 +63,12 @@ export const SEND_EMAIL_CAMPAIGNS_ENDPOINT = "host/campaigns/send/"
 export const SINGLE_EMAIL_ENDPOINT = "host/campaigns/send-single/"
 
 export const PAYMENT_METHODS_ENDPOINT = "payments/cards/"
+export const SET_DEFAULT_PAYMENT_CARD_ENDPOINT = "payments/cards/[card_id]/default/"
 export const CHANGE_PASSWORD_ENDPOINT = "host/security/change-password/"
-export const GET_PRIVACY_SETTINGS_ENDPOINT = "host/privacy/settings"
-export const SET_PRIVACY_SETTINGS_ENDPOINT = "host/privacy/activity/sharing"
+export const GET_PRIVACY_SETTINGS_ENDPOINT = "host/privacy/settings/"
+export const SET_PRIVACY_SETTINGS_ENDPOINT = "host/privacy/activity/sharing/"
 export const DOWNLOAD_DATA_ENDPOINT = "host/privacy/data/download/"
-export const DELETE_ACCOUNT_ENDPOINT = "host/privacy/account/delete"
+export const DELETE_ACCOUNT_ENDPOINT = "host/privacy/account/delete/"
 export const CANCEL_PLAN_ENDPOINT = "payments/host-plans/cancel/"
 
 export const LOGIN_ENDPOINT = "auth/login/"

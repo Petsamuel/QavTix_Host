@@ -232,7 +232,7 @@ const promoCodeSchema = yup.object({
 
 const ticketTypeSchema = yup.object({
     id: yup.string().required(),
-    ticketType: yup.string().required('Ticket type name is required'),
+    ticketType: yup.string().required('Ticket type is required'),
     description: yup.string().optional(),
     price: yup.number().typeError('Please enter a valid price').min(0, 'Price cannot be negative').required('Price is required'),
     currency: yup.string().required('Please select a currency'),

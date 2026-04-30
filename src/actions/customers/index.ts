@@ -1,7 +1,8 @@
 import { CACHE_TAGS } from "@/cache-tags"
 import { CUSTOMER_DETAILS_ENDPOINT, CUSTOMER_LIST_DOWNLOAD_ENDPOINT, CUSTOMERS_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { cacheTag } from "next/cache";
+import { cacheTag } from "next/cache"
+
 
 interface GetCustomersResult {
     success: boolean

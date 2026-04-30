@@ -80,17 +80,21 @@ export default function AddBankAccountForm({
         setVerifyMessage("")
         setValue("account_name", "")
 
-        verifyAccountNumber(accountNumber, bankCode, "nigeria").then(result => {
-            if (result.success && result.account_name) {
-                setValue("account_name", result.account_name, { shouldValidate: true })
-                setVerifyState("success")
-                setVerifyMessage(result.account_name)
-            } else {
-                setVerifyState("error")
-                setVerifyMessage(result.message ?? "Could not verify account number")
-            }
-        })
-    }, [accountNumber, bankCode, isNigerian])
+        const timeout = setTimeout(() => {
+            verifyAccountNumber(accountNumber, bankCode, "nigeria").then(result => {
+                if (result.success && result.account_name) {
+                    setValue("account_name", result.account_name, { shouldValidate: true })
+                    setVerifyState("success")
+                    setVerifyMessage(result.account_name)
+                } else {
+                    setVerifyState("error")
+                    setVerifyMessage(result.message ?? "Could not verify account number")
+                }
+            })
+        }, 300)
+
+        return () => clearTimeout(timeout)
+    }, [accountNumber, bankCode, isNigerian, accountNumReady])
 
     const onSubmit = async (data: AddAccountSchemaType) => {
         const result = await addPayoutAccount({

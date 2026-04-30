@@ -1,6 +1,6 @@
 import { CATEGORIES_ENDPOINT } from "@/endpoints"
 import { CACHE_TAGS } from "@/cache-tags"
-import { cacheTag } from "next/cache";
+import { cacheTag } from "next/cache"
 
 export interface ApiCategory {
     id: number

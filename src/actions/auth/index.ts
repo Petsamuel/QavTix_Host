@@ -5,9 +5,9 @@ import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import { cacheTag } from "next/cache";
-import { CACHE_TAGS } from "@/cache-tags"
 
+import { CACHE_TAGS } from "@/cache-tags"
+import { cacheTag } from "next/cache"
 export async function getHostProfile(token: string | undefined): Promise<AuthUser | null> {
     'use cache';
     cacheTag(CACHE_TAGS.PROFILE);

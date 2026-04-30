@@ -1,10 +1,11 @@
 "use server"
 
 import { CACHE_TAGS } from "@/cache-tags"
+import { cacheTag } from "next/cache"
 import { CHECKIN_OVERVIEW_ENDPOINT, CHECKIN_ATTENDEES_ENDPOINT, CHECKIN_SCAN_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
-import { cacheTag } from "next/cache";
+
 
 export async function getCheckInMetrics(
     token: string | undefined, params: CheckInParams = {}
