@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils"
 import { getPaystackBanksClient as getPaystackBanks, verifyAccountNumber } from "@/actions/payout/client"
 import SearchableSelect from "../inputs/CustomSearchableSelect"
 import ActionButton1 from "../buttons/ActionBtn1"
+import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 import { addPayoutAccount } from "@/actions/financials"
 import { BankOption } from "@/actions/payout"
 
@@ -30,6 +31,8 @@ export default function AddBankAccountForm({
 
     const dispatch = useAppDispatch()
     const { user } = useAppSelector(store => store.authUser)
+
+    const { trigger } = useRevalidate("financials")
 
     // Determine if user is Nigerian based on their currency
     const isNigerian = user?.currency?.toUpperCase() === "NGN"
@@ -109,6 +112,7 @@ export default function AddBankAccountForm({
             reset()
             setVerifyState("idle")
             setOpenAddAccountModal(false)
+            trigger()
             dispatch(openSuccessModal({
                 title: "Submission Successful!",
                 description: "Your bank account is being verified. We’ll let you know when it’s done.",

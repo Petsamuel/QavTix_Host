@@ -61,7 +61,7 @@ export default function SearchableSelect({
                 </label>
             )}
 
-            <Popover open={open} onOpenChange={setOpen} modal={false}>
+            <Popover open={open} onOpenChange={setOpen} modal={true}>
                 <PopoverTrigger asChild>
                     <Button
                         variant="outline"

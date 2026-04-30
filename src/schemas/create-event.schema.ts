@@ -236,7 +236,7 @@ const ticketTypeSchema = yup.object({
     description: yup.string().optional(),
     price: yup.number().typeError('Please enter a valid price').min(0, 'Price cannot be negative').required('Price is required'),
     currency: yup.string().required('Please select a currency'),
-    quantity: yup.number().typeError('Please enter a valid quantity').min(1, 'Quantity must be at least 1').required('Quantity is required'),
+    quantity: yup.number().typeError('Please enter a quantity').min(1, 'Quantity must be at least 1').max(750, 'Quantity exceeds 750 limit, Upgrade your plan').required('Please enter a quantity'),
     perPersonMax: yup.number().typeError('Please enter a valid limit').min(1).max(750, 'Limit cannot exceed 750 attendees').optional(),
     promoCode: promoCodeSchema,
 });
