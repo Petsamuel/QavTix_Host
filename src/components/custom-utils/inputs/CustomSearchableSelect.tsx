@@ -24,24 +24,24 @@ interface Option {
 }
 
 interface SearchableSelectProps {
-    options:       Option[]
-    value?:        string
+    options: Option[]
+    value?: string
     onValueChange: (value: string) => void
-    placeholder?:  string
+    placeholder?: string
     searchPlaceholder?: string
-    label?:        string
-    error?:        string
-    required?:     boolean
-    disabled?:     boolean
-    className?:    string
+    label?: string
+    error?: string
+    required?: boolean
+    disabled?: boolean
+    className?: string
 }
 
 export default function SearchableSelect({
     options,
     value,
     onValueChange,
-    placeholder        = "Select...",
-    searchPlaceholder  = "Search...",
+    placeholder = "Select...",
+    searchPlaceholder = "Search...",
     label,
     error,
     required,
@@ -61,7 +61,7 @@ export default function SearchableSelect({
                 </label>
             )}
 
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover open={open} onOpenChange={setOpen} modal={true}>
                 <PopoverTrigger asChild>
                     <Button
                         variant="outline"

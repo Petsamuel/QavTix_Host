@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Icon } from "@iconify/react"
 import { space_grotesk } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import PaymentCard from "../cards/PaymentCard"
 import ChangeDefaultCardModal from "../modals/ChangeDefaultPaymentMethod"
 import AddPaymentCard from "@/lib/features/add-payment-card"
+import { getPaymentMethods } from "@/actions/payment"
 
 
 interface Props {
@@ -19,6 +20,17 @@ export default function PaymentMethodsPanel({ initialMethods }: Props) {
     const [methods,     setMethods]     = useState<PaymentMethod[]>(initialMethods)
     const [showModal,   setShowModal]   = useState(false)
 
+    useEffect(() => {
+        setMethods(initialMethods)
+    }, [initialMethods])
+
+    const handleRefetch = async () => {
+        const res = await getPaymentMethods()
+        if (res.success && res.data) {
+            setMethods(res.data)
+        }
+    }
+
     const defaultMethod = methods.find(m => m.is_default)
     const otherMethods  = methods.filter(m => !m.is_default)
 
@@ -28,6 +40,9 @@ export default function PaymentMethodsPanel({ initialMethods }: Props) {
                 <h2 className={cn(space_grotesk.className, "text-lg font-bold text-brand-secondary-9")}>
                     Payment Method
                 </h2>
+                <div className="md:self-center md:ms-6">
+                    <AddPaymentCard onSuccess={handleRefetch} />
+                </div>
             </div>
 
             {methods.length === 0 ? (
@@ -74,9 +89,6 @@ export default function PaymentMethodsPanel({ initialMethods }: Props) {
                         </div>
                     )}
 
-                    <div className="md:self-center md:ms-6">
-                        <AddPaymentCard />
-                    </div>
                 </div>
             )}
 

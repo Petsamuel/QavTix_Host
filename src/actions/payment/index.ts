@@ -1,11 +1,12 @@
 "use server"
 
-import { ADD_PAYMENT_CARD, ADD_PAYMENT_CARD_CONFIRM, FEATURED_PLAN_INITIATE_ENDPOINT, FEATURED_PLAN_VERIFY_ENDPOINT, FREE_TRIAL_ENDPOINT, PAYMENT_METHODS_ENDPOINT, PLANS_ENDPOINT } from "@/endpoints"
+import { ADD_PAYMENT_CARD, ADD_PAYMENT_CARD_CONFIRM, FEATURED_PLAN_INITIATE_ENDPOINT, FEATURED_PLAN_VERIFY_ENDPOINT, FREE_TRIAL_ENDPOINT, PAYMENT_METHODS_ENDPOINT, PLANS_ENDPOINT, SET_DEFAULT_PAYMENT_CARD_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
 import { updateTag } from "next/cache"
 import { CACHE_TAGS } from "@/cache-tags"
-import { cacheTag } from "next/cache";
+import { cacheTag } from "next/cache"
+import { cookies } from "next/headers"
 
 interface PaymentMethodsResult {
     success: boolean
@@ -18,16 +19,22 @@ interface MutateResult {
     message?: string
 }
 
-export async function getPaymentMethods(token: string | undefined): Promise<PaymentMethodsResult> {
+const getToken = async () => {
+    const cookieStore = await cookies()
+    return cookieStore.get("access_token")?.value
+}
+
+
+export async function getPaymentMethods(token?: string | undefined): Promise<PaymentMethodsResult> {
     'use cache';
-    cacheTag(CACHE_TAGS.PAYMENT_METHODS);
+    cacheTag(CACHE_TAGS.PAYMENT_METHODS)
     try {
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${PAYMENT_METHODS_ENDPOINT}`,
             {
                 headers: {
                     "Content-Type": "application/json",
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    ...((token || await getToken()) ? { Authorization: `Bearer ${(token || await getToken())}` } : {}),
                 }
             }
         )
@@ -50,7 +57,8 @@ export async function getPaymentMethods(token: string | undefined): Promise<Paym
 export async function setDefaultPaymentMethod(methodID: number): Promise<MutateResult> {
     try {
         const axiosInstance = await getServerAxios()
-        await axiosInstance.patch(`${PAYMENT_METHODS_ENDPOINT}/${methodID}/default/`)
+        const endpoint = SET_DEFAULT_PAYMENT_CARD_ENDPOINT.replace("[card_id]", String(methodID))
+        await axiosInstance.patch(endpoint)
         updateTag(CACHE_TAGS.PAYMENT_METHODS)
         return { success: true }
     } catch (error: any) {
@@ -77,7 +85,7 @@ interface VerifyPaymentPayload {
 export async function addPaymentMethod(country: string): Promise<InitializePaymentMethodResult> {
     try {
         const axiosInstance = await getServerAxios()
-        const { data: json } = await axiosInstance.post(ADD_PAYMENT_CARD, { country, currency: "naira" })
+        const { data: json } = await axiosInstance.post(ADD_PAYMENT_CARD, { country, currency: "NGN" })
         const checkout_url = json.data?.checkout_url ?? json.checkout_url
         if (!checkout_url) {
             return { success: false, message: "No checkout URL returned from server." }
@@ -98,6 +106,7 @@ export async function verifyPaymentMethod(
     try {
         const axiosInstance = await getServerAxios()
         await axiosInstance.post(ADD_PAYMENT_CARD_CONFIRM, payload)
+        updateTag(CACHE_TAGS.PAYMENT_METHODS)
         return { success: true, message: "Confirmation Successful" }
 
     } catch (error: any) {

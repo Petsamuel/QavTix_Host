@@ -46,15 +46,21 @@ export default function AuthUserDetails() {
                         <DropdownMenuItem className="text-xs capitalize border-b pb-2">
                             <span>{user.full_name}</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer text-brand-secondary-9 text-xs font-medium bg-red-50/50">
-                            <button onClick={handleLogOut} disabled={isLoggingOut} className="flex items-center gap-2">
+                        <DropdownMenuItem 
+                            className="cursor-pointer text-brand-secondary-9 text-xs font-medium bg-red-50/50"
+                            onSelect={(e) => {
+                                e.preventDefault();
+                                if (!isLoggingOut) handleLogOut();
+                            }}
+                        >
+                            <div className="flex w-full items-center gap-2 opacity-100" aria-disabled={isLoggingOut}>
                                 {isLoggingOut ? (
                                     <Icon icon="eos-icons:three-dots-loading" width="20" height="20" className="text-brand-primary-darkRed" />
                                 ) : (
                                     <Icon icon="solar:logout-2-outline" width="40" height="40" aria-hidden="true" className="text-brand-primary-darkRed block" />
                                 )}
                                 <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
-                            </button>
+                            </div>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

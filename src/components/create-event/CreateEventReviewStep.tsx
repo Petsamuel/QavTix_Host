@@ -254,8 +254,18 @@ export default function CreateEventReviewStep() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <p className="text-[11px] text-brand-secondary-6 capitalize">Ticket Type</p>
-                                    <p className="text-xs text-brand-secondary-9">Regular & VIP Pass</p>
+                                    <p className="text-[11px] text-brand-secondary-6 capitalize mb-1">Ticket Type</p>
+                                    <div className="flex flex-wrap gap-1">
+                                        {eventData.ticketsPricing?.ticketTypes && eventData.ticketsPricing.ticketTypes.length > 0 ? (
+                                            eventData.ticketsPricing.ticketTypes.map((t, idx) => (
+                                                <span key={idx} className="text-[10px] capitalize bg-brand-secondary-2 text-brand-secondary-8 px-1.5 py-0.5 rounded-sm">
+                                                    {t.ticketType}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="text-xs text-brand-secondary-9">Free</span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div>
                                     <p className="text-[11px] text-brand-secondary-6 capitalize">Affiliate</p>

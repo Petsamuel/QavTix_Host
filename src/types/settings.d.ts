@@ -123,5 +123,5 @@ interface PricingFeature {
 
 interface PricingData {
     plans: PricingPlan[]
-    features: Feature[]
+    features: any[]
 }

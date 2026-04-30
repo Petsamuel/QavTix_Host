@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useCallback } from "react"
 import { Icon } from "@iconify/react"
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { AnimatedDialog } from "@/components/custom-utils/dialogs/AnimatedDialog"
@@ -10,7 +10,9 @@ import { cn } from "@/lib/utils"
 import { extractAccessCode } from "@/helper-fns/extractAccessCode"
 import { addPaymentMethod, verifyPaymentMethod } from "@/actions/payment"
 import { tick } from "@/helper-fns/tick"
-
+import { resolveCountryCode } from "@/helper-fns/resolveCountryCode"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 type FlowStatus = "idle" | "loading" | "verifying" | "success" | "error"
 
@@ -21,24 +23,27 @@ const STEPS = [
     "Verifying your card…",
 ]
 
-export default function AddPaymentCardModal() {
+interface Props {
+    onSuccess?: () => void
+}
+
+export default function AddPaymentCardModal({ onSuccess }: Props = {}) {
 
     const dispatch = useAppDispatch()
-    const user     = useAppSelector(state => state.authUser.user)
+    const user = useAppSelector(state => state.authUser.user)
+    const router = useRouter()
 
-    const [open,      setOpen]      = useState(false)
-    const [status,    setStatus]    = useState<FlowStatus>("idle")
+    const [open, setOpen] = useState(false)
+    const [status, setStatus] = useState<FlowStatus>("idle")
     const [stepIndex, setStepIndex] = useState(0)
-    const [errorMsg,  setErrorMsg]  = useState("")
+    const [errorMsg, setErrorMsg] = useState("")
 
-    // Reset internal state whenever the modal opens
-    useEffect(() => {
-        if (open) {
-            setStatus("idle")
-            setStepIndex(0)
-            setErrorMsg("")
-        }
-    }, [open])
+    const openFresh = () => {
+        setStatus("idle")
+        setStepIndex(0)
+        setErrorMsg("")
+        setOpen(true)
+    }
 
     const handleProceed = useCallback(async () => {
         setStatus("loading")
@@ -47,8 +52,7 @@ export default function AddPaymentCardModal() {
         try {
             await tick(); setStepIndex(1)
 
-            // initialise — get checkout_url from your add-card endpoint
-            const init = await addPaymentMethod(user?.country ?? "NG")
+            const init = await addPaymentMethod(resolveCountryCode(user?.country || "") ?? "NG")
 
             if (!init.success || !init.checkout_url) {
                 throw new Error(init.message ?? "Could not generate card setup link.")
@@ -57,30 +61,33 @@ export default function AddPaymentCardModal() {
             setStepIndex(2)
             await tick()
 
-            // launch Paystack inline (same pattern as checkout provider)
             const PaystackPop = (await import("@paystack/inline-js")).default
-            const handler     = new PaystackPop()
-            const accessCode  = extractAccessCode(init.checkout_url)
+            const handler = new PaystackPop()
+            const accessCode = extractAccessCode(init.checkout_url)
+
+            // Close dialog BEFORE Paystack mounts — removes Radix body pointer-events lock
+            setOpen(false)
 
             handler.resumeTransaction(accessCode, {
 
                 onSuccess: async (transaction: { reference: string }) => {
-                    // call your confirm endpoint with the reference
+                    // Set state before reopening — no reset effect to race against
                     setStepIndex(3)
                     setStatus("verifying")
+                    setOpen(true)
 
                     const verify = await verifyPaymentMethod({
-                        reference:   transaction.reference,
-                        country:     user?.country ?? "NG",
-                        save_card: false
+                        reference: transaction.reference,
+                        country: user?.country ?? "NG",
+                        save_card: false,
                     })
 
                     if (!verify.success) {
                         setStatus("error")
                         setErrorMsg(verify.message ?? "Card verification failed. Please try again.")
                         dispatch(showAlert({
-                            variant:     "destructive",
-                            title:       "Verification Failed",
+                            variant: "destructive",
+                            title: "Verification Failed",
                             description: verify.message ?? "Card could not be verified.",
                         }))
                         return
@@ -88,19 +95,22 @@ export default function AddPaymentCardModal() {
 
                     setStatus("success")
                     dispatch(showAlert({
-                        variant:     "default",
-                        title:       "Card Added Successfully",
+                        variant: "success",
+                        title: "Card Added Successfully",
                         description: "Your card has been saved to your account.",
                         duration: 5000,
                     }))
+
+                    router.refresh()
+                    onSuccess?.()
                 },
 
                 onCancel: () => {
-                    // User closed Paystack popup — return to idle so they can retry
                     setStatus("idle")
+                    setOpen(true)
                     dispatch(showAlert({
-                        variant:     "destructive",
-                        title:       "Card Setup Cancelled",
+                        variant: "destructive",
+                        title: "Card Setup Cancelled",
                         description: "You closed the card setup window. No card was saved.",
                     }))
                 },
@@ -108,10 +118,11 @@ export default function AddPaymentCardModal() {
 
         } catch (err: any) {
             setStatus("error")
+            setOpen(true)
             setErrorMsg(err?.message ?? "An unexpected error occurred. Please try again.")
             dispatch(showAlert({
-                variant:     "destructive",
-                title:       "Card Setup Failed",
+                variant: "destructive",
+                title: "Card Setup Failed",
                 description: err?.message ?? "Please try again.",
             }))
         }
@@ -120,7 +131,7 @@ export default function AddPaymentCardModal() {
     return (
         <>
             <button
-                onClick={() => setOpen(true)}
+                onClick={openFresh}
                 className={cn(
                     "bg-brand-primary-1 size-12 text-brand-primary-6 md:p-2 font-bold text-sm mx-1",
                     "flex rounded-lg gap-1 justify-center items-center",
@@ -147,6 +158,7 @@ export default function AddPaymentCardModal() {
                     </button>
                 )}
 
+                {/* ── idle ──────────────────────────────────────────────── */}
                 {status === "idle" && (
                     <div className="flex flex-col items-center text-center gap-5 px-1 pt-1 pb-2">
 
@@ -207,6 +219,7 @@ export default function AddPaymentCardModal() {
                     </div>
                 )}
 
+                {/* ── loading / verifying ───────────────────────────────── */}
                 {(status === "loading" || status === "verifying") && (
                     <div className="flex flex-col items-center text-center gap-6 px-1 py-4">
 
@@ -243,9 +256,9 @@ export default function AddPaymentCardModal() {
                                     key={i}
                                     className={cn(
                                         "block rounded-full transition-all duration-300",
-                                        i < stepIndex  ? "w-2 h-2 bg-brand-primary-5"
-                                        : i === stepIndex ? "w-4 h-2 bg-brand-primary-6"
-                                        : "w-2 h-2 bg-brand-secondary-3"
+                                        i < stepIndex ? "w-2 h-2 bg-brand-primary-5"
+                                            : i === stepIndex ? "w-4 h-2 bg-brand-primary-6"
+                                                : "w-2 h-2 bg-brand-secondary-3"
                                     )}
                                 />
                             ))}
@@ -257,18 +270,12 @@ export default function AddPaymentCardModal() {
                     </div>
                 )}
 
+                {/* ── success ───────────────────────────────────────────── */}
                 {status === "success" && (
                     <div className="flex flex-col items-center text-center gap-5 px-1 py-4">
 
-                        <div className="flex items-center justify-center w-20 h-20 rounded-full bg-green-50 border-4 border-green-100">
-                            <svg
-                                viewBox="0 0 24 24" fill="none"
-                                className="w-9 h-9 text-green-600"
-                                strokeWidth={2.5} stroke="currentColor"
-                                strokeLinecap="round" strokeLinejoin="round"
-                            >
-                                <path d="M5 13l4 4L19 7" />
-                            </svg>
+                        <div className="flex items-center justify-center w-20 h-20 rounded-full">
+                            <Image src="/images/vectors/scan-verified.svg" alt="success" width={80} height={80} />
                         </div>
 
                         <DialogHeader className="text-center flex flex-col items-center gap-1">
@@ -292,6 +299,7 @@ export default function AddPaymentCardModal() {
                     </div>
                 )}
 
+                {/* ── error ─────────────────────────────────────────────── */}
                 {status === "error" && (
                     <div className="flex flex-col items-center text-center gap-5 px-1 py-2">
 

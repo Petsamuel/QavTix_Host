@@ -1,10 +1,10 @@
 "use server"
 
-import { revalidateTag } from "next/cache"
+import { revalidateTag, cacheTag } from "next/cache"
 import { CACHE_TAGS } from "@/cache-tags"
 import { EVENT_DELETE, EVENT_UPDATE, EVENTS_ENDPOINT, CUSTOMER_LIST_DOWNLOAD_ENDPOINT, EVENT_DETAILS_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { cacheTag } from "next/cache";
+
 import { getServerAxios } from "@/lib/axios"
 
 function authHeaders(token?: string): Record<string, string> {

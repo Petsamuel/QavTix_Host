@@ -21,7 +21,6 @@ import { cn } from '@/lib/utils'
 import { usePlanRestrictions } from '@/custom-hooks/useRestriction'
 import { PlanGateBanner } from './PlanGateBanner'
 import { CustomDateTimeInput } from '../custom-utils/inputs/CustomDateTimeInput'
-import { useEffect } from 'react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
 
 const LabelWithTooltip = ({ label, tooltipText }: { label: string, tooltipText: string }) => (
@@ -82,9 +81,6 @@ export default function CreateEventStep3() {
     }
 
 
-    useEffect(() => {
-        console.log(errors)
-    }, [refundPolicy])
 
     return (
         <FormProvider {...methods}>
@@ -175,6 +171,7 @@ export default function CreateEventStep3() {
                                             onCurrencyChange={(curr) => setValue(`ticketTypes.${index}.currency`, curr)}
                                             error={errors.ticketTypes?.[index]?.price?.message}
                                             data-testid={`input-ticket-price-${index}`}
+                                            disableCurrencySelect
                                         />
                                         <CustomInput2
                                             label={<LabelWithTooltip label="Quantity" tooltipText="The total number of available tickets for this category." />}

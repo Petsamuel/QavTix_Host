@@ -28,12 +28,13 @@ function DesktopSideNav() {
                 <Logo width={120} />
                 <ul className="mt-5 flex flex-col gap-4">
                     {Object.values(NAVIGATION_LINKS).map((v) => {
-                        const isActive      = isActiveRoute(v.href)
+                        const isActive = isActiveRoute(v.href)
                         const isSettingsLink = v.href === NAVIGATION_LINKS.SETTINGS.href
 
                         return (
                             <li key={v.href} className="flex flex-col">
                                 <Link
+                                    prefetch={false}
                                     className={cn(
                                         isActive || (isSettingsLink && isSettingsActive)
                                             ? "bg-brand-accent-4 text-white font-medium"
@@ -63,16 +64,20 @@ function DesktopSideNav() {
                                         "grid transition-all duration-300 ease-in-out overflow-hidden",
                                         isSettingsActive ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"
                                     )}>
-                                        <ul className="relative ml-3 flex flex-col min-h-0">
+                                        <div className="relative ml-3 flex flex-col min-h-0">
                                             <div className="absolute left-0 top-0 h-[88%] my-auto bottom-0 w-px bg-brand-neutral-5" />
-
+                                            <ul className="flex flex-col w-full">
                                             {SETTINGS_SUB_LINKS.map((sub) => {
                                                 const isSubActive = pathName === sub.href
+                                                console.log("SETTINGS href:", NAVIGATION_LINKS.SETTINGS.href)
+                                                console.log("isSettingsActive:", isSettingsActive)
+                                                console.log("pathName:", pathName)
                                                 return (
                                                     <li key={sub.href} className="relative flex items-center">
                                                         <div className="absolute -left-[3.5px] z-10 size-2 rounded-full border border-brand-secondary-3/50 bg-brand-secondary-2" />
                                                         <Link
                                                             href={sub.href}
+                                                            prefetch={false}
                                                             className={cn(
                                                                 "flex-1 py-3 ml-3 pl-3 text-[13px] transition-colors",
                                                                 isSubActive
@@ -85,7 +90,8 @@ function DesktopSideNav() {
                                                     </li>
                                                 )
                                             })}
-                                        </ul>
+                                            </ul>
+                                        </div>
                                     </div>
                                 )}
                             </li>

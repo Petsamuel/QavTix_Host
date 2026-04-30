@@ -1,8 +1,6 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { cn } from "@/lib/utils"
-import { space_grotesk } from "@/lib/fonts"
 import { useForm } from "react-hook-form"
 import ActionButton1 from "@/components/custom-utils/buttons/ActionBtn1"
 import { useAppDispatch } from "@/lib/redux/hooks"
@@ -16,31 +14,25 @@ interface Props {
     initialSettings: PrivacySettings
 }
 
-const PLAN_STATUS_STYLES: Record<string, string> = {
-    active:    "bg-green-50  text-green-700  border-green-200",
-    trialing:  "bg-blue-50   text-blue-700   border-blue-200",
-    cancelled: "bg-neutral-100 text-neutral-500 border-neutral-200",
-    expired:   "bg-red-50    text-red-600    border-red-200",
-}
 
 const PLAN_STATUS_LABEL: Record<string, string> = {
-    active:    "Active",
-    trialing:  "Trial",
+    active: "Active",
+    trialing: "Trial",
     cancelled: "Cancelled",
-    expired:   "Expired",
+    expired: "Expired",
 }
 
 export default function PrivacyPanel({ initialSettings }: Props) {
 
     const dispatch = useAppDispatch()
-    const [anyLoading,    setAnyLoading] = useState(false)
+    const [anyLoading, setAnyLoading] = useState(false)
     const [isDownloading, setIsDownloading] = useState(false)
 
     const router = useRouter()
 
     const { control, getValues } = useForm({
         defaultValues: {
-            showMyEvents:     initialSettings.show_my_events,
+            showMyEvents: initialSettings.show_my_events,
             showPastEvents: initialSettings.show_past_events,
         }
     })
@@ -49,7 +41,7 @@ export default function PrivacyPanel({ initialSettings }: Props) {
         setAnyLoading(true)
         const values = getValues()
         const result = await updatePrivacySettings({
-            show_my_events:    values.showMyEvents,
+            show_my_events: values.showMyEvents,
             show_past_events: values.showPastEvents,
         })
         setAnyLoading(false)
@@ -57,8 +49,8 @@ export default function PrivacyPanel({ initialSettings }: Props) {
 
         if (!result.success) {
             dispatch(showAlert({
-                variant:     "destructive",
-                title:       "Could not save privacy settings",
+                variant: "destructive",
+                title: "Could not save privacy settings",
                 description: result.message ?? "Please try again.",
             }))
         }
@@ -71,8 +63,8 @@ export default function PrivacyPanel({ initialSettings }: Props) {
         setIsDownloading(false)
 
         dispatch(showAlert({
-            variant:     result.success ? "default" : "destructive",
-            title:       result.success ? "Data request sent" : "Download failed",
+            variant: result.success ? "success" : "destructive",
+            title: result.success ? "Data request sent" : "Download failed",
             description: result.success
                 ? "A copy of your data will be delivered to your email shortly."
                 : result.message ?? "Please try again.",

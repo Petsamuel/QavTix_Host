@@ -1,6 +1,6 @@
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { CACHE_TAGS } from "@/cache-tags"
-import { cacheTag } from "next/cache";
+import { cacheTag } from "next/cache"
 import {
     SALES_ANALYTICS_CARDS_ENDPOINT,
     SALES_ANALYTICS_GRAPHS_ENDPOINT,

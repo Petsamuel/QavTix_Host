@@ -1,35 +1,39 @@
 "use client"
 
+import { useIsMounted } from "@/custom-hooks/UseIsMounted"
 import { space_grotesk } from "@/lib/fonts"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 const BRAND_LOGO: Record<string, string> = {
-    visa:       "/images/vectors/visa.svg",
+    visa: "/images/vectors/visa.svg",
     mastercard: "/images/vectors/mastercard.svg",
-    verve:      "/images/vectors/verve.svg",
-    amex:       "/images/vectors/amex.svg",
-    discover:   "/images/vectors/discover.svg",
+    verve: "/images/vectors/verve.svg",
+    amex: "/images/vectors/amex.svg",
+    discover: "/images/vectors/discover.svg",
 }
 
 const getBrandLogo = (brand: string): string | null =>
     BRAND_LOGO[brand.toLowerCase().trim()] ?? null
 
 interface Props {
-    method:     PaymentMethod
-    variant?:   "default" | "other"
+    method: PaymentMethod
+    variant?: "default" | "other"
     className?: string
 }
 
 export default function PaymentCard({ method, variant = "default", className }: Props) {
 
     const isDefault = variant === "default"
-    const logo      = getBrandLogo(method.brand)
-    const expiry    = `${String(method.exp_month).padStart(2, "0")}/${method.exp_year}`
-    const { user }  = useAppSelector(store => store.authUser)
+    const logo = getBrandLogo(method.brand)
+    const expiry = `${String(method.exp_month).padStart(2, "0")}/${method.exp_year}`
+    const { user } = useAppSelector(store => store.authUser)
+    const isMounted = useIsMounted()
+
 
     return (
+        isMounted &&
         <div className={cn("max-w-77.5 sm:w-77.5 shrink-0", className)}>
             <div className="relative w-full rounded-2xl overflow-hidden select-none aspect-16/10">
 
@@ -44,10 +48,10 @@ export default function PaymentCard({ method, variant = "default", className }: 
                     isDefault ? "border-white/40" : "border-white/45",
                 )}
                     style={{
-                        width:  "190px",
+                        width: "190px",
                         height: "190px",
-                        top:    "-90px",
-                        right:  "-60px",
+                        top: "-90px",
+                        right: "-60px",
                     }}
                 />
                 <div className={cn(
@@ -55,10 +59,10 @@ export default function PaymentCard({ method, variant = "default", className }: 
                     isDefault ? "border-white/30" : "border-white/25",
                 )}
                     style={{
-                        width:  "150px",
+                        width: "150px",
                         height: "150px",
-                        top:    "-80px",
-                        right:  "-50px",
+                        top: "-80px",
+                        right: "-50px",
                     }}
                 />
 
