@@ -68,9 +68,6 @@ function DesktopSideNav() {
                                             <ul className="flex flex-col w-full">
                                                 {SETTINGS_SUB_LINKS.map((sub) => {
                                                     const isSubActive = pathName === sub.href
-                                                    console.log("SETTINGS href:", NAVIGATION_LINKS.SETTINGS.href)
-                                                    console.log("isSettingsActive:", isSettingsActive)
-                                                    console.log("pathName:", pathName)
                                                     return (
                                                         <li key={sub.href} className="relative flex items-center">
                                                             <div className="absolute -left-[3.5px] z-10 size-2 rounded-full border border-brand-secondary-3/50 bg-brand-secondary-2" />

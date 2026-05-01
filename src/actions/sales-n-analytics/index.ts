@@ -14,7 +14,7 @@ async function fetchFinancials<T>(
     params?: Record<string, string | number>,
 ): Promise<{ success: true; data: T } | { success: false; message: string }> {
     try {
-        const url = new URL(`${process.env.API_BASE_URL}/${endpoint}`)
+        const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`)
         if (params) {
             Object.entries(params).forEach(([k, v]) => {
                 if (v != null) url.searchParams.set(k, String(v))

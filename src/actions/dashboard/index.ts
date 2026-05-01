@@ -7,15 +7,17 @@ import {
 } from "@/endpoints"
 import { cacheLife } from "next/cache"
 
-const BASE_URL = process.env.API_BASE_URL
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 async function apiFetch(token: string, endpoint: string, params: Record<string, string> = {}) {
     const query = new URLSearchParams(params).toString()
+    console.log(query)
     const res = await fetch(`${BASE_URL}/${endpoint}${query ? `?${query}` : ""}`, {
         headers: { Authorization: `Bearer ${token}` },
     })
     if (!res.ok) throw new Error(`Request failed: ${endpoint}`)
     const data = await res.json()
+    console.log("data", data)
     return data.data ?? data
 }
 

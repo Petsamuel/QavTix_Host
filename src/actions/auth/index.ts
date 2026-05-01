@@ -7,7 +7,7 @@ export async function getHostProfile(token: string | undefined): Promise<AuthUse
     cacheLife("hours")
     try {
         const res = await fetch(
-            `${process.env.API_BASE_URL}/${GET_PROFILE_ENDPOINT}`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${GET_PROFILE_ENDPOINT}`,
             {
                 headers: {
                     "Content-Type": "application/json",
