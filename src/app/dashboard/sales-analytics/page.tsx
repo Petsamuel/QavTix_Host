@@ -79,11 +79,11 @@ export default async function SalesAndAnalyticsPage() {
 
     const profile = profileResult.status === "fulfilled" ? profileResult.value : null
 
-    if (!profile?.verified) {
+    if (profile && profile.user_id && !profile?.verified) {
         return <GatedPageModal type="verification" />
     }
 
-    if (!profile.plan_type) {
+    if (profile && !profile.plan_type) {
         return <GatedPageModal type="plan" featureName="Sales & Analytics" requiredPlan="Free" />
     }
 

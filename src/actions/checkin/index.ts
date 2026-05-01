@@ -10,11 +10,11 @@ async function apiFetch(token: string, endpoint: string, params: Record<string, 
             query.append(key, String(value))
         }
     })
-    
-    const res = await fetch(`${process.env.API_BASE_URL}/${endpoint}${query.toString() ? `?${query.toString()}` : ""}`, {
-        headers: { 
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}${query.toString() ? `?${query.toString()}` : ""}`, {
+        headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}` 
+            Authorization: `Bearer ${token}`
         },
     })
     if (!res.ok) throw new Error(`Request failed: ${endpoint}`)

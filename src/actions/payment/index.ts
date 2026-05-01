@@ -14,7 +14,7 @@ export async function getPaymentMethods(token: string | undefined): Promise<Paym
     cacheLife("minutes")
     try {
         const res = await fetch(
-            `${process.env.API_BASE_URL}/${PAYMENT_METHODS_ENDPOINT}`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${PAYMENT_METHODS_ENDPOINT}`,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -40,7 +40,7 @@ export async function getPaymentMethods(token: string | undefined): Promise<Paym
 export async function getPlans(token: string | undefined) {
     cacheLife("days")
     try {
-        const res = await fetch(`${process.env.API_BASE_URL}/${PLANS_ENDPOINT}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${PLANS_ENDPOINT}`, {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
         })
         if (res.ok) {

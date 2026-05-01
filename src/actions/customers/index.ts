@@ -24,7 +24,7 @@ export async function getCustomers(token: string, params: CustomersParams = {}):
 
     try {
         const query = new URLSearchParams(params as Record<string, string>).toString()
-        const res = await fetch(`${process.env.API_BASE_URL}/${CUSTOMERS_ENDPOINT}${query ? `?${query}` : ""}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMERS_ENDPOINT}${query ? `?${query}` : ""}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -47,7 +47,7 @@ export async function getCustomerProfile(token: string, params: CustomerProfileP
         const endpoint = CUSTOMER_DETAILS_ENDPOINT.replace("[user_id]", user_id?.toString() ?? "")
         const query = new URLSearchParams(rest as Record<string, string>).toString()
 
-        const res = await fetch(`${process.env.API_BASE_URL}/${endpoint}${query ? `?${query}` : ""}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}${query ? `?${query}` : ""}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },

@@ -17,7 +17,7 @@ export async function getPrivacySettings(token: string | undefined): Promise<Pri
     cacheLife("hours")
     try {
         const res = await fetch(
-            `${process.env.API_BASE_URL}/${GET_PRIVACY_SETTINGS_ENDPOINT}`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${GET_PRIVACY_SETTINGS_ENDPOINT}`,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -43,7 +43,7 @@ export async function getSubscription(token: string | undefined): Promise<GetSub
     cacheLife("minutes")
     try {
         const res = await fetch(
-            `${process.env.API_BASE_URL}/${GET_SUBSCRIPTION_ENDPOINT}`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${GET_SUBSCRIPTION_ENDPOINT}`,
             {
                 headers: {
                     "Content-Type": "application/json",
