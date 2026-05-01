@@ -7,7 +7,7 @@ import { extractAccessCode } from "@/helper-fns/extractAccessCode"
 import { PLATFORM_CURRENCY } from "@/components-data/currencies"
 import { useCurrencyConversion } from "@/custom-hooks/useCurrencyConversion"
 import { FEATURED_PLANS } from "@/components-data/pricing-plans"
-import { initializeFeaturedPayment, verifyFeaturedPayment } from "@/actions/payment"
+import { initializeFeaturedPayment, verifyFeaturedPayment } from "@/actions/payment/client"
 import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 
 type FeaturedStatus = "idle" | "processing" | "success" | "error"

@@ -3,7 +3,7 @@
 import { EventCreationProvider } from "@/contexts/create-event/CreateEventProvider"
 import { StepperProvider } from "@/contexts/create-event/StepperProvider"
 import EventCreationLayout from "../create-event/CreateEventLayout"
-import { ApiCategory } from "@/actions/filters"
+import { ApiCategory } from "@/actions/filters/index"
 import { CompleteEventFormData } from "@/schemas/create-event.schema"
 
 interface Props {

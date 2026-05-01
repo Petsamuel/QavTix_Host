@@ -34,7 +34,6 @@ function DesktopSideNav() {
                         return (
                             <li key={v.href} className="flex flex-col">
                                 <Link
-                                    prefetch={false}
                                     className={cn(
                                         isActive || (isSettingsLink && isSettingsActive)
                                             ? "bg-brand-accent-4 text-white font-medium"
@@ -67,29 +66,29 @@ function DesktopSideNav() {
                                         <div className="relative ml-3 flex flex-col min-h-0">
                                             <div className="absolute left-0 top-0 h-[88%] my-auto bottom-0 w-px bg-brand-neutral-5" />
                                             <ul className="flex flex-col w-full">
-                                            {SETTINGS_SUB_LINKS.map((sub) => {
-                                                const isSubActive = pathName === sub.href
-                                                console.log("SETTINGS href:", NAVIGATION_LINKS.SETTINGS.href)
-                                                console.log("isSettingsActive:", isSettingsActive)
-                                                console.log("pathName:", pathName)
-                                                return (
-                                                    <li key={sub.href} className="relative flex items-center">
-                                                        <div className="absolute -left-[3.5px] z-10 size-2 rounded-full border border-brand-secondary-3/50 bg-brand-secondary-2" />
-                                                        <Link
-                                                            href={sub.href}
-                                                            prefetch={false}
-                                                            className={cn(
-                                                                "flex-1 py-3 ml-3 pl-3 text-[13px] transition-colors",
-                                                                isSubActive
-                                                                    ? "text-brand-accent-4 bg-brand-accent-3/30 font-semibold rounded-md"
-                                                                    : "text-brand-secondary-7 hover:text-brand-accent-4"
-                                                            )}
-                                                        >
-                                                            {sub.label}
-                                                        </Link>
-                                                    </li>
-                                                )
-                                            })}
+                                                {SETTINGS_SUB_LINKS.map((sub) => {
+                                                    const isSubActive = pathName === sub.href
+                                                    console.log("SETTINGS href:", NAVIGATION_LINKS.SETTINGS.href)
+                                                    console.log("isSettingsActive:", isSettingsActive)
+                                                    console.log("pathName:", pathName)
+                                                    return (
+                                                        <li key={sub.href} className="relative flex items-center">
+                                                            <div className="absolute -left-[3.5px] z-10 size-2 rounded-full border border-brand-secondary-3/50 bg-brand-secondary-2" />
+                                                            <Link
+                                                                href={sub.href}
+                                                                prefetch={false}
+                                                                className={cn(
+                                                                    "flex-1 py-3 ml-3 pl-3 text-[13px] transition-colors",
+                                                                    isSubActive
+                                                                        ? "text-brand-accent-4 bg-brand-accent-3/30 font-semibold rounded-md"
+                                                                        : "text-brand-secondary-7 hover:text-brand-accent-4"
+                                                                )}
+                                                            >
+                                                                {sub.label}
+                                                            </Link>
+                                                        </li>
+                                                    )
+                                                })}
                                             </ul>
                                         </div>
                                     </div>

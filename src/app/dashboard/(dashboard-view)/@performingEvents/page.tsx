@@ -1,4 +1,4 @@
-import { getDashboardFeed } from "@/actions/dashboard"
+import { getDashboardFeed } from "@/actions/dashboard/index"
 import { cookies } from "next/headers"
 import ActivitySectionError from "@/components/error-components/DashboardSlotError"
 import TopPerformingEventsSlotPW from "@/components/page-wrappers/TopPerformingEventsSlotPW"
@@ -6,7 +6,7 @@ import TopPerformingEventsSlotPW from "@/components/page-wrappers/TopPerformingE
 export default async function PerformingEventsSlot() {
     const cookieStore = await cookies()
     const token = cookieStore.get("host_access_token")?.value
-    const result = await getDashboardFeed(token)
+    const result = await getDashboardFeed(token!)
 
     if (!result.success || !result.data) {
         return (

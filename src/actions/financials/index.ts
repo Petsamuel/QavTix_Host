@@ -1,134 +1,43 @@
-"use server"
+"use cache"
 
-import { revalidateTag, cacheTag } from "next/cache"
-import { CACHE_TAGS } from "@/cache-tags"
-import { FINANCIALS_ENDPOINT, PAYOUT_ADD_ENDPOINT, PAYOUT_LIST_ENDPOINT, REMOVE_PAYOUT_ENDPOINT, WITHDRAWAL_ENDPOINT } from "@/endpoints"
-import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { getServerAxios } from "@/lib/axios"
-import { randomUUID } from "crypto"
+import { cacheLife } from "next/cache"
+import { FINANCIALS_ENDPOINT, PAYOUT_LIST_ENDPOINT } from "@/endpoints"
 
-
-export async function getFinancials(
-    token: string | undefined, params: FinancialsParams = {}
-): Promise<GetFinancialsResult> {
-    'use cache';
-    cacheTag(CACHE_TAGS.FINANCIALS);
-    try {
-        const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${FINANCIALS_ENDPOINT}`)
-        if (params.date_range) url.searchParams.set("date_range", params.date_range)
-        if (params.start_date) url.searchParams.set("start_date", params.start_date)
-        if (params.end_date) url.searchParams.set("end_date", params.end_date)
-        if (params.page) url.searchParams.set("page", String(params.page))
-
-        const res = await fetch(url.toString(), {
-            headers: {
-                "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            }
-        })
-
-        if (!res.ok) {
-            const json = await res.json()
-            return { success: false, message: handleApiError(json) }
+async function apiFetch(token: string, endpoint: string, params: Record<string, any> = {}) {
+    const query = new URLSearchParams()
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+            query.append(key, String(value))
         }
+    })
+    
+    const res = await fetch(`${process.env.API_BASE_URL}/${endpoint}${query.toString() ? `?${query.toString()}` : ""}`, {
+        headers: { 
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}` 
+        },
+    })
+    if (!res.ok) throw new Error(`Request failed: ${endpoint}`)
+    const data = await res.json()
+    return data.data ?? data
+}
 
-        const json = await res.json()
-        return { success: true, data: json.data }
-
-    } catch (err) {
-        console.error("[getFinancials] error:", err)
+export async function getFinancials(token: string, params: FinancialsParams = {}): Promise<GetFinancialsResult> {
+    cacheLife("minutes")
+    try {
+        const data = await apiFetch(token, FINANCIALS_ENDPOINT, params)
+        return { success: true, data }
+    } catch {
         return { success: false, message: "Failed to load financials." }
     }
 }
 
-export async function getPayoutAccounts(token: string | undefined): Promise<{ success: boolean; data?: PayoutAccountItem[]; message?: string }> {
-    'use cache';
-    cacheTag(CACHE_TAGS.PAYOUT_ACCOUNTS);
+export async function getPayoutAccounts(token: string): Promise<{ success: boolean; data?: PayoutAccountItem[]; message?: string }> {
+    cacheLife("minutes")
     try {
-        const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${PAYOUT_LIST_ENDPOINT}`)
-
-        const res = await fetch(url.toString(), {
-            headers: {
-                "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            }
-        })
-
-        if (!res.ok) {
-            const json = await res.json()
-            return { success: false, message: handleApiError(json) }
-        }
-
-        const json = await res.json()
-        return { success: true, data: Array.isArray(json.data) ? json.data : [] }
-
-    } catch (err) {
-        console.error("[getPayoutAccounts] error:", err)
+        const data = await apiFetch(token, PAYOUT_LIST_ENDPOINT)
+        return { success: true, data: Array.isArray(data) ? data : [] }
+    } catch {
         return { success: false, message: "Failed to load payout accounts." }
-    }
-}
-
-export async function submitWithdrawal(
-    payload: WithdrawPayload
-): Promise<WithdrawResult & { freshData?: FinancialData }> {
-    try {
-        const axios = await getServerAxios()
-        const idempotencyKey = randomUUID()
-
-        await axios.post(`/${WITHDRAWAL_ENDPOINT}`, payload, {
-            headers: { "Idempotency-Key": idempotencyKey },
-        })
-
-        revalidateTag(CACHE_TAGS.FINANCIALS, "max")
-
-        const fresh = await getFinancials(undefined)
-
-        return {
-            success: true,
-            message: "Withdrawal request submitted successfully.",
-            freshData: fresh.data,
-        }
-    } catch (err: any) {
-        console.error("[submitWithdrawal] status:", err?.response?.status)
-        console.error("[submitWithdrawal] body:", JSON.stringify(err?.response?.data))
-        return { success: false, message: handleApiError(err?.response?.data) }
-    }
-}
-
-export async function addPayoutAccount(payload: {
-    bank_name: string
-    account_name: string
-    account_number: string
-    bank_code?: string
-    is_default?: boolean
-}): Promise<{ success: boolean; data?: PayoutAccountItem; message?: string }> {
-    try {
-        const axios = await getServerAxios()
-        const { data } = await axios.post(`/${PAYOUT_ADD_ENDPOINT}`, payload)
-
-        revalidateTag(CACHE_TAGS.PAYOUT_ACCOUNTS, "max")
-
-        return { success: true, data: data.data }
-    } catch (err: any) {
-        console.error("[addPayoutAccount] status:", err?.response?.status)
-        console.error("[addPayoutAccount] body:", JSON.stringify(err?.response?.data))
-        return { success: false, message: handleApiError(err?.response?.data) }
-    }
-}
-
-export async function removePayoutAccount(
-    accountId: string
-): Promise<{ success: boolean; message?: string }> {
-    try {
-        const axios = await getServerAxios()
-        await axios.delete(REMOVE_PAYOUT_ENDPOINT.replace("[payout_id]", accountId))
-
-        revalidateTag(CACHE_TAGS.PAYOUT_ACCOUNTS, "max")
-
-        return { success: true, message: "Account removed successfully." }
-    } catch (err: any) {
-        console.error("[removePayoutAccount] status:", err?.response?.status)
-        console.error("[removePayoutAccount] body:", JSON.stringify(err?.response?.data))
-        return { success: false, message: handleApiError(err?.response?.data) }
     }
 }

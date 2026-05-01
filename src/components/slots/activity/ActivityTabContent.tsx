@@ -7,6 +7,9 @@ import { cn } from '@/lib/utils'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Badge } from '@/components/ui/badge'
+import { useAppSelector } from '@/lib/redux/hooks'
+import { useIsMounted } from '@/custom-hooks/UseIsMounted'
 
 interface RecentActivityTabProps {
     activities: DashboardActivity[]
@@ -24,6 +27,8 @@ const PREVIEW_COUNT = 4
 export default function RecentActivityTab({ activities }: RecentActivityTabProps) {
     const [filterValue, setFilterValue] = useState<string>("")
     const pathName = usePathname()
+    const { user } = useAppSelector(store => store.authUser)
+    const isMounted = useIsMounted()
 
     const filtered = filterValue
         ? activities.filter(a => a.activity_type === filterValue)
@@ -54,6 +59,11 @@ export default function RecentActivityTab({ activities }: RecentActivityTabProps
                         ))}
                     </SelectContent>
                 </Select>
+
+
+                <Badge className='bg-brand-accent-1 text-brand-accent-7'>
+                    {isMounted ? user?.followers : "--"} Followers
+                </Badge>
             </div>
 
             <div className="space-y-2 px-4">

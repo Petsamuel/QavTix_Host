@@ -26,7 +26,7 @@ import {
     bulkUnpublishEvents,
     deleteEvent,
     updateEventStatus,
-} from "@/actions/event"
+} from "@/actions/event/client"
 
 import { mapEventsCards } from "@/helper-fns/mapToStatCards"
 import MetricsContainerLoader from "../loaders/MetricsContainerLoader"

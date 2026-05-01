@@ -1,5 +1,7 @@
+import { NAVIGATION_LINKS } from '@/enums/navigation'
 import { Icon } from '@iconify/react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface TopPerformingEventCardProps {
     event: TrendingTicket
@@ -7,7 +9,7 @@ interface TopPerformingEventCardProps {
 }
 
 export default function TopPerformingEventCard({ event, rank }: TopPerformingEventCardProps) {
-    const revenue         = Number(event.revenue)
+    const revenue = Number(event.revenue)
 
     return (
         <div className="shadow-[0px_5.8px_23.17px_0px_#3326AE14] py-2 space-y-1 border-b border-brand-neutral-2 last:border-0 px-3 rounded-lg">
@@ -72,6 +74,14 @@ export default function TopPerformingEventCard({ event, rank }: TopPerformingEve
                     </span>
                 </div>
             </div>
+
+            <Link
+                href={NAVIGATION_LINKS.MY_EVENTS.href}
+                className="inline-flex items-center gap-1 text-xs text-brand-primary-6 hover:text-brand-primary-7 font-semibold mt-1"
+            >
+                <span>View Full Report</span>
+                <Icon icon="hugeicons:arrow-right-01" className="w-3 h-3" />
+            </Link>
         </div>
     )
 }

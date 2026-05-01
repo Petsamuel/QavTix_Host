@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { logOut } from "@/actions/auth"
+import { logOut } from "@/actions/auth/client"
 
 export function useLogOut() {
     const [isLoggingOut, setIsLoggingOut] = useState(false)

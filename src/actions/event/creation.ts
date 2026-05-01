@@ -109,3 +109,96 @@ export async function saveEventAsDraft({
         return { success: false, message: "Failed to save draft." }
     }
 }
+
+// Update Functions
+
+import { EVENT_UPDATE } from "@/endpoints"
+
+export async function updateAndPublishEvent({
+    eventId,
+    eventData,
+    media,
+}: {
+    eventId: string | number
+    eventData: Partial<CompleteEventFormData>
+    media?: any[]
+}): Promise<{ success: boolean; message?: string }> {
+    try {
+        const token = await getToken()
+        const body = buildEventPayload(eventData, "active", media)
+        const endpoint = EVENT_UPDATE.replace("[event_id]", String(eventId))
+
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`,
+            {
+                method: "PATCH",
+                headers: authHeaders(token),
+                body: JSON.stringify(body),
+            }
+        )
+
+        const json = await res.json().catch(() => ({}))
+
+        if (!res.ok) {
+            return { success: false, message: handleApiError(json) || "Failed to update event." }
+        }
+
+        revalidateTag(CACHE_TAGS.EVENTS, 'max')
+
+        return {
+            success: true,
+            message: "Event updated and published successfully.",
+        }
+    } catch (err) {
+        console.error("[updateAndPublishEvent] error:", err)
+        return { success: false, message: "Failed to update event." }
+    }
+}
+
+export async function updateEventAsDraft({
+    eventId,
+    eventData,
+    scheduledAt,
+    media,
+}: {
+    eventId: string | number
+    eventData: Partial<CompleteEventFormData>
+    scheduledAt?: string
+    media?: any[]
+}): Promise<{ success: boolean; message?: string; eventId?: string }> {
+    try {
+        const token = await getToken()
+        const body = {
+            ...buildEventPayload(eventData, "draft", media),
+            ...(scheduledAt ? { is_scheduled: true, scheduled_time: scheduledAt } : {}),
+        }
+        const endpoint = EVENT_UPDATE.replace("[event_id]", String(eventId))
+
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`,
+            {
+                method: "PATCH",
+                headers: authHeaders(token),
+                body: JSON.stringify(body),
+            }
+        )
+
+        const json = await res.json().catch(() => ({}))
+
+        if (!res.ok) {
+            return { success: false, message: handleApiError(json) || "Failed to update draft." }
+        }
+
+        revalidateTag(CACHE_TAGS.EVENTS, 'max')
+
+        return {
+            success: true,
+            message: scheduledAt ? "Event updated and scheduled successfully." : "Draft updated successfully.",
+            eventId: String(eventId)
+        }
+    } catch (err) {
+        console.error("[updateEventAsDraft] error:", err)
+        return { success: false, message: "Failed to update draft." }
+    }
+}
+

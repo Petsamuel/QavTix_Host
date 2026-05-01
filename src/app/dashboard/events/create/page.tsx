@@ -1,4 +1,4 @@
-import { getCategories } from "@/actions/filters";
+import { getCategories } from "@/actions/filters/index";
 import CreateEventPageContentWrapper from "@/components/page-wrappers/CreateEventPageContentWrapper";
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
@@ -15,7 +15,7 @@ export default async function CreateEventPage() {
     const cookieStore = await cookies();
     const token = cookieStore.get("host_access_token")?.value;
 
-    const categoryResult = await getCategories(token)
+    const categoryResult = await getCategories()
 
     if (!categoryResult.success) {
         throw new Error("Failed to load page")

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import EmailTemplateEditor from "@/components/custom-utils/email-template-editor/EmailTemplateEditor"
 import { AnimatedDialog } from "@/components/custom-utils/dialogs/AnimatedDialog"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { getUpcomingEventsClient as getUpcomingEvents } from "@/actions/dashboard/client"
+import { getUpcomingEvents } from "@/actions/dashboard/client"
 import EventInfo from "@/components/custom-utils/event/EventInfo"
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog"
 
@@ -34,7 +34,6 @@ export default function ComposeMailBtn({ className }: AddPromoCodeProps) {
 
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    // Fetch Events Logic
     const fetchEvents = async (query: string) => {
         setLoading(true)
         try {

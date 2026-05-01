@@ -8,21 +8,21 @@ import TableLoader from "@/components/loaders/TableLoader"
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
     checked_in: { label: "Checked In", color: "text-green-600" },
-    pending:    { label: "Pending",    color: "text-amber-500" },
-    invalid:    { label: "Invalid",    color: "text-red-500"   },
+    pending: { label: "Pending", color: "text-amber-500" },
+    invalid: { label: "Invalid", color: "text-red-500" },
 }
 
 interface Props {
-    items:         CheckInAttendee[]
-    isLoading:     boolean
+    items: CheckInAttendee[]
+    isLoading: boolean
     isLoadingMore: boolean
-    isEmpty:       boolean
-    isError:       boolean
-    search:        string
-    count:         number
-    currentPage:   number
-    totalPages:    number
-    fetchPage:     (page: number) => void
+    isEmpty: boolean
+    isError: boolean
+    search: string
+    count: number
+    currentPage: number
+    totalPages: number
+    fetchPage: (page: number) => void
 }
 
 export default function AttendeeCheckInTable({

@@ -7,6 +7,9 @@ import { useState } from "react"
 import EmailTemplateEditor from "../custom-utils/email-template-editor/EmailTemplateEditor"
 import SmsEditor from "../custom-utils/email-template-editor/SmsEditor"
 
+import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks"
+import { showAlert } from "@/lib/redux/slices/alertSlice"
+
 interface CustomerProfileDetailsCardProps {
     customer:     CustomerProfile
     className?:   string
@@ -17,6 +20,10 @@ export function CustomerProfileDetailsCard({
     className,
 }: CustomerProfileDetailsCardProps) {
 
+    const dispatch = useAppDispatch()
+    const { user } = useAppSelector(s => s.authUser)
+    const isFreePlan = user?.plan_type === "free" || !user?.plan_type
+
     const address = [customer.city, customer.state, customer.country]
         .filter(Boolean)
         .join(", ")
@@ -24,8 +31,27 @@ export function CustomerProfileDetailsCard({
     const [showEmailEditor, setShowEmailEditor] = useState(false)
     const [showSmsEditor,   setShowSmsEditor]   = useState(false)
 
-    const handleEmail = () => setShowEmailEditor(true)
+    const handleEmail = () => {
+        if (isFreePlan) {
+            dispatch(showAlert({
+                title:   "Upgrade Required",
+                description: "Sending emails to customers is not available on your current plan. Upgrade your plan to unlock this feature.",
+                variant: "destructive"
+            }))
+            return
+        }
+        setShowEmailEditor(true)
+    }
+
     const handleSMS   = () => {
+        if (isFreePlan) {
+            dispatch(showAlert({
+                title:   "Upgrade Required",
+                description: "Sending SMS to customers is not available on your current plan. Upgrade your plan to unlock this feature.",
+                variant: "destructive"
+            }))
+            return
+        }
         if (!customer.phone_number) return
         setShowSmsEditor(true)
     }

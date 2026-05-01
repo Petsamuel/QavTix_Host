@@ -1,3 +1,4 @@
+import { NAVIGATION_LINKS } from "@/enums/navigation"
 import { formatPrice } from "./formatPrice"
 import { format, parseISO } from "date-fns"
 
@@ -10,7 +11,7 @@ export function mapToStatCards(cards: DashboardCardData): IDashboardStat[] {
             icon: "hugeicons:money-bag-01",
             iconBg: "bg-red-400",
             cardBg: "bg-red-50",
-            linkHref: "/dashboard/payouts",
+            linkHref: NAVIGATION_LINKS.FINANCIALS.href,
             buttonLabel: "View Details",
             change: {
                 value: `+${cards.revenue_change.toLocaleString()}%`,
@@ -23,7 +24,7 @@ export function mapToStatCards(cards: DashboardCardData): IDashboardStat[] {
             icon: "hugeicons:ticket-02",
             iconBg: "bg-orange-400",
             cardBg: "bg-orange-50",
-            linkHref: "/dashboard/tickets",
+            linkHref: NAVIGATION_LINKS.SALE_AND_ANALYTICS.href,
             buttonLabel: "View Sales",
             change: {
                 value: `+${cards.tickets_sold_change}`,
@@ -36,7 +37,7 @@ export function mapToStatCards(cards: DashboardCardData): IDashboardStat[] {
             icon: "hugeicons:calendar-02",
             iconBg: "bg-blue-500",
             cardBg: "bg-blue-50",
-            linkHref: "/dashboard/events",
+            linkHref: NAVIGATION_LINKS.MY_EVENTS.href,
             buttonLabel: "Manage Events",
             change: {
                 value: cards.active_events_change,
@@ -49,7 +50,7 @@ export function mapToStatCards(cards: DashboardCardData): IDashboardStat[] {
             icon: "hugeicons:hourglass",
             iconBg: "bg-emerald-500",
             cardBg: "bg-emerald-50",
-            linkHref: "/dashboard/payouts",
+            linkHref: NAVIGATION_LINKS.FINANCIALS.href,
             buttonLabel: "Payout History",
             change: {
                 value: cards.pending_payouts_change,

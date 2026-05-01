@@ -11,7 +11,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
 import { FAQ_PAGE } from "@/enums/navigation";
-import { cancelSubscription } from "@/actions/settings";
+import { cancelSubscription } from "@/actions/settings/client";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { showAlert } from "@/lib/redux/slices/alertSlice";
 import { cn } from "@/lib/utils";

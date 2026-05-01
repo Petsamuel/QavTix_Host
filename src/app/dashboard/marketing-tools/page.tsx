@@ -1,5 +1,5 @@
 import { getPromoCodes, getAffiliateLinks, getEmailCampaigns } from "@/actions/marketing"
-import { getHostProfile } from "@/actions/auth"
+import { getHostProfile } from "@/actions/auth/index"
 import GatedPageModal from "@/components/modals/GatedPageModal"
 import MarketingToolsPageContentWrapper from "@/components/page-wrappers/MarketingToolsPageContentWrapper"
 import { TabSlice } from "@/custom-hooks/UseDataDisplay"
@@ -38,9 +38,9 @@ export default async function MarketingToolsPage() {
     const token = cookieStore.get("host_access_token")?.value;
     const [profileResult, promoResult, affiliateResult, campaignResult] = await Promise.allSettled([
         getHostProfile(token),
-        getPromoCodes(token),
-        getAffiliateLinks(token),
-        getEmailCampaigns(token),
+        getPromoCodes(token!),
+        getAffiliateLinks(token!),
+        getEmailCampaigns(token!),
     ])
 
     const profile = profileResult.status === "fulfilled" ? profileResult.value : null

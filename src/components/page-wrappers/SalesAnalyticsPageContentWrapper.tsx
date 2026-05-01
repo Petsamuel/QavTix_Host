@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils"
 import { space_grotesk } from "@/lib/fonts"
 
 import {
-    getSalesAnalyticsCardsClient as getSalesAnalyticsCards,
-    getSalesAnalyticsGraphsClient as getSalesAnalyticsGraphs,
+    getSalesAnalyticsCards,
+    getSalesAnalyticsGraphs,
 } from "@/actions/sales-n-analytics/client"
 
 import { EventFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventFilter"

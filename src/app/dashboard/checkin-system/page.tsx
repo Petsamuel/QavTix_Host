@@ -1,5 +1,5 @@
 import { getCheckInMetrics, getCheckInAttendees } from "@/actions/checkin"
-import { getHostProfile } from "@/actions/auth"
+import { getHostProfile } from "@/actions/auth/index"
 import GatedPageModal from "@/components/modals/GatedPageModal"
 import CheckInSystemPageContentWrapper from "@/components/page-wrappers/CheckInSystemPageContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
@@ -20,8 +20,8 @@ export default async function CheckInSystemPage() {
     const token = cookieStore.get("host_access_token")?.value;
     const [profileResult, metricsResult, attendeesResult] = await Promise.allSettled([
         getHostProfile(token),
-        getCheckInMetrics(token),
-        getCheckInAttendees(token),
+        getCheckInMetrics(token!),
+        getCheckInAttendees(token!),
     ])
 
     const profile = profileResult.status === "fulfilled" ? profileResult.value : null

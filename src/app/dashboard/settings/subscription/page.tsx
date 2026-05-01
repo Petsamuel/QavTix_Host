@@ -1,4 +1,4 @@
-import { getSubscription } from "@/actions/settings"
+import { getSubscription } from "@/actions/settings/index"
 import SubscriptionPanel from "@/components/settings-page/SubsciptionPanel"
 import { PricingCheckoutProvider } from "@/contexts/checkout/PricingCheckoutContext"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"

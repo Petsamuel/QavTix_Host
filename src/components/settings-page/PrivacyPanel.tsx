@@ -8,7 +8,7 @@ import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { useRouter } from "next/navigation"
 import { ToggleItem } from "../custom-utils/inputs/CustomToggleItem"
 import { openPasswordModal } from "@/lib/redux/slices/passwordModalConfirmationSlice"
-import { downloadPrivacyData, updatePrivacySettings } from "@/actions/settings"
+import { downloadPrivacyData, updatePrivacySettings } from "@/actions/settings/client"
 
 interface Props {
     initialSettings: PrivacySettings

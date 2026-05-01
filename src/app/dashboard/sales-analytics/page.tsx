@@ -1,5 +1,5 @@
 import { getSalesAnalyticsCards, getSalesAnalyticsGraphs, getSalesAnalyticsTransaction } from "@/actions/sales-n-analytics"
-import { getHostProfile } from "@/actions/auth"
+import { getHostProfile } from "@/actions/auth/index"
 import GatedPageModal from "@/components/modals/GatedPageModal"
 import SalesAnalyticsPageContentWrapper from "@/components/page-wrappers/SalesAnalyticsPageContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
@@ -72,9 +72,9 @@ export default async function SalesAndAnalyticsPage() {
     const token = cookieStore.get("host_access_token")?.value;
     const [profileResult, cardsResult, graphsResult, transactionsResult] = await Promise.allSettled([
         getHostProfile(token),
-        getSalesAnalyticsCards(token),
-        getSalesAnalyticsGraphs(token),
-        getSalesAnalyticsTransaction(token),
+        getSalesAnalyticsCards(token!),
+        getSalesAnalyticsGraphs(token!),
+        getSalesAnalyticsTransaction(token!),
     ])
 
     const profile = profileResult.status === "fulfilled" ? profileResult.value : null
