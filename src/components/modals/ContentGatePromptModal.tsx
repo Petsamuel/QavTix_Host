@@ -29,8 +29,7 @@ export const UPGRADE_PLAN_CONFIG = (featureName: string, requiredPlan: string): 
     description: (
         <>
             <span className="font-medium text-brand-secondary-9">{featureName}</span> is not
-            available on your current plan. Upgrade to{" "}
-            <span className="font-medium text-brand-primary-6">{requiredPlan}</span> to unlock it.
+            available on your current plan. Upgrade your plan to unlock this feature.
         </>
     ),
     primaryLabel: "View Plans",

@@ -7,16 +7,16 @@ import { useEventCreation } from "@/contexts/create-event/CreateEventProvider"
 import { useAppDispatch } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { useRevalidate } from "@/custom-hooks/UseRevalidate"
-import { saveEventAsDraft } from "@/actions/event/creation"
 import { useRouter } from "next/navigation"
 import { NAVIGATION_LINKS } from "@/enums/navigation"
 import { uploadEventMedia } from "@/helper-fns/uploadEventMedia"
 import { sanitizeEventDataForServer } from "@/lib/cloudinary"
+import { saveEventAsDraft, updateEventAsDraft } from "@/actions/event/creation"
 
 
 export default function SaveAsDraftBtn() {
 
-    const { eventData } = useEventCreation()
+    const { eventData, isEditMode, eventID } = useEventCreation()
     const dispatch = useAppDispatch()
     const router = useRouter()
     const { trigger } = useRevalidate("events")
@@ -28,11 +28,15 @@ export default function SaveAsDraftBtn() {
         try {
             const media = await uploadEventMedia(eventData.detailsMedia)
             const sanitizedEventData = sanitizeEventDataForServer(eventData, media)
-            const result = await saveEventAsDraft({ eventData: sanitizedEventData, media })
+            
+            const result = isEditMode && eventID
+                ? await updateEventAsDraft({ eventId: eventID, eventData: sanitizedEventData, media })
+                : await saveEventAsDraft({ eventData: sanitizedEventData, media })
+
             if (result.success) {
                 dispatch(showAlert({
-                    title: "Draft Saved",
-                    description: "Your event progress has been saved.",
+                    title: isEditMode ? "Changes Saved" : "Draft Saved",
+                    description: isEditMode ? "Your event changes have been saved." : "Your event progress has been saved.",
                     variant: "success",
                 }))
                 trigger()

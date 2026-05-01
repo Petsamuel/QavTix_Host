@@ -10,7 +10,7 @@ import { getNiceTicks, formatYTick } from "@/helper-fns/chartFormatters"
 import ChartLoader from "../loaders/ChartLoader"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { formatPrice } from "@/helper-fns/formatPrice"
-import { getCustomerProfileClient as getCustomerProfile } from "@/actions/customers/client"
+import { getCustomerProfile } from "@/actions/customers/client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 

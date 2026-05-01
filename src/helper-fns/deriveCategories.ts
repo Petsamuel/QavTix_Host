@@ -5,7 +5,7 @@
 //   - count = how many items in this tab have this category
 //   - items with no matching category are ignored in the count
 
-import { ApiCategory } from "@/actions/filters"
+import { ApiCategory } from "@/actions/filters/index"
 
 export function deriveCategories(
     apiCategories: ApiCategory[],

@@ -25,20 +25,20 @@ const alertSlice = createSlice({
     initialState,
     reducers: {
         showAlert: (
-        state,
-        action: PayloadAction<{
-            title: string
-            description?: string | React.ReactNode
-            variant?: AlertVariant
-            duration?: number
-            icon?: React.ReactNode
-        }>
+            state,
+            action: PayloadAction<{
+                title: string
+                description?: string | React.ReactNode
+                variant?: AlertVariant
+                duration?: number
+                icon?: React.ReactNode
+            }>
         ) => {
             state.isOpen = true
             state.title = action.payload.title
             state.description = action.payload.description
             state.variant = action.payload.variant || 'default'
-            state.duration = action.payload.duration || 4000
+            state.duration = action.payload.duration || 5000
             state.icon = action.payload.icon || null
         },
         hideAlert: (state) => {

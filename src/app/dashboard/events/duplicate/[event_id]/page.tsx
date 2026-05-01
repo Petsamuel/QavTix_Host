@@ -1,5 +1,5 @@
-import { getEditEventDetails } from "@/actions/event"
-import { getCategories } from "@/actions/filters"
+import { getEditEventDetails } from "@/actions/event/client"
+import { getCategories } from "@/actions/filters/index"
 import CreateEventPageContentWrapper from "@/components/page-wrappers/CreateEventPageContentWrapper"
 import { mapEventToFormData } from "@/helper-fns/mapEventCreateData"
 import { notFound } from "next/navigation"
@@ -16,8 +16,8 @@ export default async function EditEventPage({ params }: Props) {
     const { event_id } = await params;
 
     const [categoryResult, eventResult] = await Promise.all([
-        getCategories(token),
-        getEditEventDetails(token, event_id),
+        getCategories(),
+        getEditEventDetails(event_id),
     ])
 
     if (!categoryResult.success) throw new Error("Failed to load categories")

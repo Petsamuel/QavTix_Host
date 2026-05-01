@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { openSuccessModal } from "@/lib/redux/slices/successModalSlice"
-import { sendSingleSms } from "@/actions/campaigns"
+import { sendSingleSms } from "@/actions/campaigns/client"
 
 const MAX_SMS_LENGTH = 160
 

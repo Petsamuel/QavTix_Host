@@ -12,12 +12,12 @@ import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { openSuccessModal } from "@/lib/redux/slices/successModalSlice"
 import { Icon } from "@iconify/react"
 import { cn } from "@/lib/utils"
-import { getPaystackBanksClient as getPaystackBanks, verifyAccountNumber } from "@/actions/payout/client"
 import SearchableSelect from "../inputs/CustomSearchableSelect"
 import ActionButton1 from "../buttons/ActionBtn1"
 import { useRevalidate } from "@/custom-hooks/UseRevalidate"
-import { addPayoutAccount } from "@/actions/financials"
-import { BankOption } from "@/actions/payout"
+import { addPayoutAccount } from "@/actions/financials/client"
+import { getPaystackBanks, verifyAccountNumber } from "@/actions/payout/client"
+import { BankOption } from "@/actions/payout/index"
 
 interface Props {
     openAddAccountModal: boolean

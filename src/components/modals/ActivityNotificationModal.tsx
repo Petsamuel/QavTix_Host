@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 import { space_grotesk } from '@/lib/fonts'
 import RecentActivityTab from '../slots/activity/ActivityTabContent'
 import NotificationsTab from '../slots/activity/NotificationTabContent'
-import { getDashboardFeedClient as getDashboardFeed } from '@/actions/dashboard/client'
+import { getDashboardFeed } from '@/actions/dashboard/client'
 
 type TabType = 'activity' | 'notifications'
 

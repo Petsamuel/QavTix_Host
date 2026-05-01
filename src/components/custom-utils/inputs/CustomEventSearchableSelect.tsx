@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import EventInfo from "../event/EventInfo"
-import { getUpcomingEventsClient as getUpcomingEvents } from "@/actions/dashboard/client"
+import { getUpcomingEvents } from "@/actions/dashboard/client"
 
 
 interface EventOption {

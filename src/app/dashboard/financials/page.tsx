@@ -1,5 +1,5 @@
 import { getFinancials, getPayoutAccounts } from "@/actions/financials"
-import { getHostProfile } from "@/actions/auth"
+import { getHostProfile } from "@/actions/auth/index"
 import GatedPageModal from "@/components/modals/GatedPageModal"
 import FinancialsPageContentWrapper from "@/components/page-wrappers/FinancialsPageContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
@@ -12,17 +12,13 @@ export const metadata: Metadata = {
     description: HOST_PAGE_METADATA.FINANCIALS.description,
 }
 
-
-
-
-
 export default async function FinancialsPage() {
     const cookieStore = await cookies();
     const token = cookieStore.get("host_access_token")?.value;
     const [profile, financialsResult, accountsResult] = await Promise.all([
         getHostProfile(token),
-        getFinancials(token),
-        getPayoutAccounts(token),
+        getFinancials(token!),
+        getPayoutAccounts(token!),
     ])
 
     if (!profile?.verified) {

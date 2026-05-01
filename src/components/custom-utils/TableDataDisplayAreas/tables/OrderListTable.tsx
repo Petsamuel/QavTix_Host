@@ -69,7 +69,7 @@ export default function OrderListTable({
                             {items.map(order => (
                                 <tr key={order.order_id} className="hover:bg-brand-neutral-3/70 transition-colors">
                                     <td className="py-4 px-5">
-                                        <p className="text-xs text-brand-secondary-9 truncate max-w-24">{order.event_id}</p>
+                                        <p className="text-xs text-brand-secondary-9 max-w-24">{order.event_id}</p>
                                     </td>
                                     <td className="py-4 px-4">
                                         <div className="flex items-center gap-3">

@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { openSuccessModal } from "@/lib/redux/slices/successModalSlice"
-import { sendEmailCampaign } from "@/actions/campaigns"
+import { sendEmailCampaign } from "@/actions/campaigns/client"
 import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 import ToolbarButton from "../buttons/ToolbarButton"
 
@@ -142,7 +142,7 @@ export default function EmailTemplateEditor({
                 sender_email: senderEmail,
             })
         } else {
-            const { sendSingleEmail } = await import("@/actions/campaigns")
+            const { sendSingleEmail } = await import("@/actions/campaigns/client")
             result = await sendSingleEmail({
                 recipient_email: recipient,
                 subject,

@@ -9,7 +9,7 @@ import { HOST_UPCOMING_EVENTS_ENDPOINT } from "@/endpoints"
 import { Icon } from "@iconify/react"
 import EmptyTicketsState from "../custom-utils/TableDataDisplayAreas/empty-state"
 import TableLoader from "../loaders/TableLoader"
-import { ApiCategory } from "@/actions/filters"
+import { ApiCategory } from "@/actions/filters/index"
 import { deriveCategories } from "@/helper-fns/deriveCategories"
 import { CREATE_EVENT } from "@/enums/navigation"
 

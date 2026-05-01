@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils"
 import PaymentCard from "../cards/PaymentCard"
 import ChangeDefaultCardModal from "../modals/ChangeDefaultPaymentMethod"
 import AddPaymentCard from "@/lib/features/add-payment-card"
-import { getPaymentMethods } from "@/actions/payment"
+import { getPaymentMethods } from "@/actions/payment/index"
+import { getAuthToken } from "@/helper-fns/getAuthToken"
 
 
 interface Props {
@@ -25,7 +26,8 @@ export default function PaymentMethodsPanel({ initialMethods }: Props) {
     }, [initialMethods])
 
     const handleRefetch = async () => {
-        const res = await getPaymentMethods()
+        const token = await getAuthToken()
+        const res = await getPaymentMethods(token)
         if (res.success && res.data) {
             setMethods(res.data)
         }

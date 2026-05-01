@@ -1,38 +1,39 @@
-import { cn }               from "@/lib/utils"
-import PaginationControls  from "../tools/PaginationControl"
-import { Icon }            from "@iconify/react"
-import EventInfo           from "../../event/EventInfo"
-import { Checkbox }        from "@/components/ui/checkbox"
+import { cn } from "@/lib/utils"
+import PaginationControls from "../tools/PaginationControl"
+import { Icon } from "@iconify/react"
+import EventInfo from "../../event/EventInfo"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Dispatch, SetStateAction } from "react"
-import EventsItemDropdown  from "../../dropdown/ItemActionDropdown"
-import { formatDateTime }   from "@/helper-fns/date-utils"
-import TableLoader          from "@/components/loaders/TableLoader"
-import EmptyTicketsState    from "../empty-state"
+import EventsItemDropdown from "../../dropdown/ItemActionDropdown"
+import { formatDateTime } from "@/helper-fns/date-utils"
+import TableLoader from "@/components/loaders/TableLoader"
+import EmptyTicketsState from "../empty-state"
 import { buildEndedEventActions, buildLiveEventActions } from "../../dropdown/resources/events-actions"
 import { useRouter } from "next/navigation"
+import { Badge } from "@/components/ui/badge"
 
 interface AllEventsTableProps {
-    items:             OrganizerEvent[]
-    isLoading:         boolean
-    isLoadingMore:     boolean
-    isEmpty:           boolean
-    isError:           boolean
-    search:            string
-    count:             number
-    currentPage:       number
-    totalPages:        number
-    fetchPage:         (page: number) => void
-    selectedEvents:    string[]
+    items: OrganizerEvent[]
+    isLoading: boolean
+    isLoadingMore: boolean
+    isEmpty: boolean
+    isError: boolean
+    search: string
+    count: number
+    currentPage: number
+    totalPages: number
+    fetchPage: (page: number) => void
+    selectedEvents: string[]
     setSelectedEvents: Dispatch<SetStateAction<string[]>>
 }
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-    active:     { label: "Live",      color: "text-green-600"  },
-    draft:      { label: "Draft",     color: "text-amber-500"  },
-    ended:      { label: "Ended",     color: "text-red-600"    },
-    "sold-out": { label: "Sold Out",  color: "text-purple-600" },
-    cancelled:  { label: "Cancelled", color: "text-brand-secondary-7" },
-    banned:     { label: "Banned",    color: "text-red-800"    },
+    active: { label: "Live", color: "text-green-600" },
+    draft: { label: "Draft", color: "text-amber-500" },
+    ended: { label: "Ended", color: "text-red-600" },
+    "sold-out": { label: "Sold Out", color: "text-purple-600" },
+    cancelled: { label: "Cancelled", color: "text-brand-secondary-7" },
+    banned: { label: "Banned", color: "text-red-800" },
 }
 
 export default function AllEventsTable({
@@ -106,7 +107,7 @@ export default function AllEventsTable({
                         <tbody className="divide-y divide-brand-neutral-2 bg-white">
                             {items.map((event) => {
                                 const isSelected = selectedEvents.includes(event.id)
-                                const statusCfg  = STATUS_LABEL[event.status] ?? STATUS_LABEL["active"]
+                                const statusCfg = STATUS_LABEL[event.status] ?? STATUS_LABEL["active"]
                                 return (
                                     <tr
                                         key={event.id}
@@ -137,7 +138,7 @@ export default function AllEventsTable({
                                         <td className="p-4 text-center">
                                             <div className="flex flex-col text-[11px]">
                                                 <span className="text-brand-secondary-9">{event.tickets_sold}/{event.tickets_listed}</span>
-                                                <span className="text-brand-secondary-6">
+                                                <span className="text-brand-secondary-6 whitespace-nowrap">
                                                     <span className="font-bold">Views:</span> {event.views_count} | <span className="font-bold">Saves:</span> {event.saves_count}
                                                 </span>
                                             </div>
@@ -150,18 +151,18 @@ export default function AllEventsTable({
                                         <td className="p-4" onClick={e => e.stopPropagation()}>
                                             {
                                                 event.status === "draft" ?
-                                                <p className="text-[10px]">See action on draft tab</p>
-                                                :
-                                                <EventsItemDropdown 
-                                                    eventID={event.id}
-                                                    eventName={event.title}
-                                                    actions={
-                                                        event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
-                                                        buildLiveEventActions(event.id, event.is_featured, router)
-                                                        :
-                                                        buildEndedEventActions(event.id, router)
-                                                    } 
-                                                />
+                                                    <Badge className="text-[10px] bg-brand-accent-1 text-brand-accent-7">See action on draft tab</Badge>
+                                                    :
+                                                    <EventsItemDropdown
+                                                        eventID={event.id}
+                                                        eventName={event.title}
+                                                        actions={
+                                                            event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                                buildLiveEventActions(event.id, event.is_featured, router)
+                                                                :
+                                                                buildEndedEventActions(event.id, router)
+                                                        }
+                                                    />
                                             }
                                         </td>
                                     </tr>
@@ -176,7 +177,7 @@ export default function AllEventsTable({
             <div className="md:hidden grid grid-cols-1 gap-3">
                 {items.map((event) => {
                     const isSelected = selectedEvents.includes(event.id)
-                    const statusCfg  = STATUS_LABEL[event.status] ?? STATUS_LABEL["active"]
+                    const statusCfg = STATUS_LABEL[event.status] ?? STATUS_LABEL["active"]
                     return (
                         <div key={event.id} className={cn("border border-brand-neutral-3 rounded-lg p-2", isSelected && "bg-brand-primary-1 border-brand-primary-3")}>
                             <div className="space-y-3">
@@ -192,18 +193,18 @@ export default function AllEventsTable({
                                     <div className="flex items-center gap-1"><span className="font-bold">Views:</span><span>{event.views_count}</span></div>
                                     {
                                         event.status === "draft" ?
-                                        null
-                                        :
-                                        <EventsItemDropdown 
-                                            eventID={event.id}
-                                            eventName={event.title}
-                                            actions={
-                                                event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
-                                                buildLiveEventActions(event.id, event.is_featured, router)
-                                                :
-                                                buildEndedEventActions(event.id, router)
-                                            } 
-                                        />
+                                            <Badge className="text-[10px] bg-brand-accent-1 text-brand-accent-7">See action on draft tab</Badge>
+                                            :
+                                            <EventsItemDropdown
+                                                eventID={event.id}
+                                                eventName={event.title}
+                                                actions={
+                                                    event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                        buildLiveEventActions(event.id, event.is_featured, router)
+                                                        :
+                                                        buildEndedEventActions(event.id, router)
+                                                }
+                                            />
                                     }
                                 </div>
                                 <div className="flex items-start justify-between gap-3">

@@ -14,7 +14,7 @@ import { FeatureCheckoutProvider, useFeatureCheckout } from "@/contexts/checkout
 import FeaturedSuccessModal from "@/components/modals/FeaturedSuccessModal"
 import { useAppDispatch } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
-import { cancelEvent, deleteEvent, updateEventStatus } from "@/actions/event"
+import { cancelEvent, deleteEvent, updateEventStatus } from "@/actions/event/client"
 import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 
 export type ItemAction = {

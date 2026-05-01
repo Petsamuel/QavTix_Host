@@ -9,7 +9,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import EventFilterTypeBtn from "./buttons-and-inputs/EventFilterTypeBtn"
-import { getUpcomingEventsClient as getUpcomingEvents } from "@/actions/dashboard/client"
+import { getUpcomingEvents } from "@/actions/dashboard/client"
 
 interface EventOption {
     id: string

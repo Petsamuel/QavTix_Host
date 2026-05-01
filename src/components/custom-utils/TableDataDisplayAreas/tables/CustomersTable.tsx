@@ -121,7 +121,7 @@ export default function CustomersTable({
                                         <td className="py-4 px-5">
                                             {
                                                 isMounted &&
-                                                <UserInfo user={{...customer, id: customer.user_id as number || randomUUID()}} variant="desktop" />
+                                                <UserInfo user={{...customer, profile_picture: customer.profile_picture || undefined, id: customer.user_id as number || randomUUID()}} variant="desktop" />
                                             }
                                         </td>
                                         <td className="py-4 px-5">
@@ -197,7 +197,7 @@ export default function CustomersTable({
                             <div className="flex items-start flex-wrap justify-between gap-3 mb-4">
                                 {
                                     isMounted &&
-                                    <UserInfo user={{...customer, id: customer.user_id as number || randomUUID()}} variant="mobile" className="shrink-0" />
+                                    <UserInfo user={{...customer, profile_picture: customer.profile_picture || undefined, id: customer.user_id as number || randomUUID()}} variant="mobile" className="shrink-0" />
                                 }
                                 <div className="flex flex-col gap-1 text-[11px] text-brand-secondary-9">
                                     <span className="font-bold">Last Purchase:</span>

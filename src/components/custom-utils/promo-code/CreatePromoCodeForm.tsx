@@ -11,7 +11,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { createPromoCode } from "@/actions/marketing";
+import { createPromoCode } from "@/actions/marketing/client";
 import { formatDate } from "@/helper-fns/date-utils";
 import { showAlert } from "@/lib/redux/slices/alertSlice";
 import { useAppDispatch } from "@/lib/redux/hooks";

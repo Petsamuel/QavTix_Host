@@ -2,7 +2,7 @@
 
 import { Icon } from "@iconify/react"
 import { useState } from "react"
-import { startFreeTrial } from "@/actions/payment"
+import { startFreeTrial } from "@/actions/payment/client"
 import { useAppDispatch } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
 

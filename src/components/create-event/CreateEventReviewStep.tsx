@@ -17,7 +17,7 @@ import { openConfirmation, resetConfirmationStatus, finishConfirmAction } from '
 import EventPublishStatusModal from './EventPublishStatusModal'
 import ShareEventModal from '../modals/ShareEventModal'
 import { useEventCreation } from '@/contexts/create-event/CreateEventProvider'
-import { publishEvent, saveEventAsDraft } from '@/actions/event/creation'
+import { publishEvent, saveEventAsDraft, updateAndPublishEvent, updateEventAsDraft } from '@/actions/event/creation'
 import { useRouter } from 'next/navigation'
 import { uploadEventMedia } from '@/helper-fns/uploadEventMedia'
 import { sanitizeEventDataForServer } from '@/lib/cloudinary'
@@ -28,7 +28,7 @@ import { sanitizeEventDataForServer } from '@/lib/cloudinary'
 export default function CreateEventReviewStep() {
 
     const dispatch = useAppDispatch()
-    const { eventData, resetForm, categories } = useEventCreation()
+    const { eventData, resetForm, categories, isEditMode, eventID } = useEventCreation()
     const { goToPreviousStep } = useStepper()
 
     const { isConfirmed, lastConfirmedAction } = useAppSelector((state) => state.confirmation)
@@ -72,8 +72,10 @@ export default function CreateEventReviewStep() {
 
     const handleConfirmImmediatePublish = () => {
         dispatch(openConfirmation({
-            title: "Publish Event",
-            description: "Are you sure you want to publish this event? It will be visible to attendees immediately.",
+            title: isEditMode ? "Update & Publish Event" : "Publish Event",
+            description: isEditMode 
+                ? "Are you sure you want to update and publish this event?" 
+                : "Are you sure you want to publish this event? It will be visible to attendees immediately.",
             actionType: "PUBLISH_EVENT",
         }))
     }
@@ -87,9 +89,13 @@ export default function CreateEventReviewStep() {
             try {
                 const media = await uploadEventMedia(eventData.detailsMedia)
                 const sanitizedEventData = sanitizeEventDataForServer(eventData, media)
-                const result = await publishEvent({ eventData: sanitizedEventData, media })
+                
+                const result = isEditMode && eventID
+                    ? await updateAndPublishEvent({ eventId: eventID, eventData: sanitizedEventData, media })
+                    : await publishEvent({ eventData: sanitizedEventData, media })
+
                 if (result.success) {
-                    setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: result.eventId })
+                    setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: (result as any).eventId ?? eventID })
                     dispatch(finishConfirmAction())
                     dispatch(resetConfirmationStatus())
                     // resetForm()
@@ -128,15 +134,19 @@ export default function CreateEventReviewStep() {
         try {
             const media = await uploadEventMedia(eventData.detailsMedia)
             const sanitizedEventData = sanitizeEventDataForServer(eventData, media)
-            const result = await saveEventAsDraft({ eventData: sanitizedEventData, scheduledAt: new Date(`${v.date}T${v.time}`).toISOString(), media })
+            
+            const result = isEditMode && eventID
+                ? await updateEventAsDraft({ eventId: eventID, eventData: sanitizedEventData, scheduledAt: new Date(`${v.date}T${v.time}`).toISOString(), media })
+                : await saveEventAsDraft({ eventData: sanitizedEventData, scheduledAt: new Date(`${v.date}T${v.time}`).toISOString(), media })
+
             if (result.success) {
                 dispatch(triggerPopupAlert({
                     id: `schedule-${Date.now()}`,
                     type: "schedule_success",
-                    title: "Event Scheduled Successfully",
+                    title: isEditMode ? "Event Updated & Scheduled" : "Event Scheduled Successfully",
                     subtitle: "Your post will go live at the selected time.",
-                    description: "View or manage it in Drafts/Scheduled Events.",
-                    buttonText: "View Drafts/Scheduled",
+                    description: "View or manage it in My Events.",
+                    buttonText: "View My Events",
                     navigateTo: NAVIGATION_LINKS.MY_EVENTS.href,
                 }))
 

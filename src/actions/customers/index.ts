@@ -1,140 +1,63 @@
-import { CACHE_TAGS } from "@/cache-tags"
-import { CUSTOMER_DETAILS_ENDPOINT, CUSTOMER_LIST_DOWNLOAD_ENDPOINT, CUSTOMERS_ENDPOINT } from "@/endpoints"
-import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { cacheTag } from "next/cache"
+"use cache"
 
+import { CUSTOMER_DETAILS_ENDPOINT, CUSTOMERS_ENDPOINT } from "@/endpoints"
+import { cacheLife } from "next/cache"
 
-interface GetCustomersResult {
+export interface GetCustomersResult {
     success: boolean
     data?: CustomersData
     message?: string
 }
 
-export async function getCustomers(
-    token: string | undefined, params: CustomersParams = {}
-): Promise<GetCustomersResult> {
-    'use cache';
-    cacheTag(CACHE_TAGS.CUSTOMERS);
+export interface GetCustomerProfileResult {
+    success: boolean
+    data?: CustomerProfileData
+    message?: string
+}
+
+
+
+
+
+export async function getCustomers(token: string, params: CustomersParams = {}): Promise<GetCustomersResult> {
+    cacheLife("hours")
+
     try {
-        const url = new URL(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMERS_ENDPOINT}`
-        )
-
-        if (params.date_range != null) url.searchParams.set("date_range", params.date_range)
-        if (params.start_date != null) url.searchParams.set("start_date", params.start_date)
-        if (params.end_date != null) url.searchParams.set("end_date", params.end_date)
-        if (params.event != null) url.searchParams.set("event", params.event)
-        if (params.ordering != null) url.searchParams.set("ordering", params.ordering)
-        if (params.page != null) url.searchParams.set("page", String(params.page))
-        if (params.search != null) url.searchParams.set("search", params.search)
-        if (params.ticket_type != null) url.searchParams.set("ticket_type", String(params.ticket_type))
-
-        const res = await fetch(url.toString(), {
+        const query = new URLSearchParams(params as Record<string, string>).toString()
+        const res = await fetch(`${process.env.API_BASE_URL}/${CUSTOMERS_ENDPOINT}${query ? `?${query}` : ""}`, {
             headers: {
-                "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            }
+                Authorization: `Bearer ${token}`,
+            },
         })
 
-        if (!res.ok) {
-            const json = await res.json()
-            console.error("[getCustomers] status:", res.status, json)
-            return { success: false, message: handleApiError(json) }
-        }
+        if (!res.ok) throw new Error("Failed to load customers.")
 
-        const json = await res.json()
-        return { success: true, data: json.data }
-
-    } catch (err) {
-        console.error("[getCustomers] error:", err)
+        const data = await res.json()
+        return { success: true, data: data.data ?? data }
+    } catch {
         return { success: false, message: "Failed to load customers." }
     }
 }
 
-export async function getCustomerProfile(
-    token: string | undefined, params: CustomerProfileParams
-): Promise<GetCustomerProfileResult> {
-    'use cache';
-    cacheTag(CACHE_TAGS.CUSTOMER);
+export async function getCustomerProfile(token: string, params: CustomerProfileParams): Promise<GetCustomerProfileResult> {
+    cacheLife("hours")
+
     try {
         const { user_id, ...rest } = params
+        const endpoint = CUSTOMER_DETAILS_ENDPOINT.replace("[user_id]", user_id?.toString() ?? "")
+        const query = new URLSearchParams(rest as Record<string, string>).toString()
 
-        const url = new URL(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMER_DETAILS_ENDPOINT.replace("[user_id]", user_id?.toString() || "")}`
-        )
-
-        const entries: [string, string | number | undefined][] = [
-            ["date_range", rest.date_range],
-            ["event", rest.event],
-            ["chart_range", rest.chart_range],
-            ["history_date_range", rest.history_date_range],
-            ["history_event", rest.history_event],
-            ["ticket_type", rest.ticket_type],
-            ["search", rest.search],
-            ["ordering", rest.ordering],
-            ["page", rest.page],
-        ]
-
-        for (const [key, val] of entries) {
-            if (val != null) url.searchParams.set(key, String(val))
-        }
-
-        const res = await fetch(url.toString(), {
+        const res = await fetch(`${process.env.API_BASE_URL}/${endpoint}${query ? `?${query}` : ""}`, {
             headers: {
-                "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            }
-        })
-
-        if (!res.ok) {
-            const json = await res.json()
-            return { success: false, message: handleApiError(json) }
-        }
-
-        const json = await res.json()
-        return { success: true, data: json.data }
-
-    } catch (err) {
-        console.error("[getCustomerProfile] error:", err)
-        return { success: false, message: "Failed to load customer profile." }
-    }
-}
-
-export async function getAttendeesExport(token: string | undefined): Promise<{
-    success: boolean;
-    message?: string;
-    blob?: Blob;
-}> {
-    'use cache';
-    try {
-        const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CUSTOMER_LIST_DOWNLOAD_ENDPOINT}`
-
-        const res = await fetch(url, {
-            headers: {
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                Authorization: `Bearer ${token}`,
             },
         })
 
-        if (!res.ok) {
-            const json = await res.json().catch(() => ({}))
-            return {
-                success: false,
-                message: handleApiError(json) || "Failed to export attendees"
-            }
-        }
+        if (!res.ok) throw new Error("Failed to load customer profile.")
 
-        const blob = await res.blob()
-
-        return {
-            success: true,
-            blob
-        }
-
-    } catch (err) {
-        console.error("[getAttendeesExport] error:", err)
-        return {
-            success: false,
-            message: "Failed to download attendee list."
-        }
+        const data = await res.json()
+        return { success: true, data: data.data ?? data }
+    } catch {
+        return { success: false, message: "Failed to load customer profile." }
     }
 }

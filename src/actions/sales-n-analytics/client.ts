@@ -1,21 +1,38 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { getSalesAnalyticsCards, getSalesAnalyticsGraphs, getSalesAnalyticsTransaction } from "./index";
+import { getServerAxios } from "@/lib/axios"
+import {
+    SALES_ANALYTICS_CARDS_ENDPOINT,
+    SALES_ANALYTICS_GRAPHS_ENDPOINT,
+    SALES_ANALYTICS_TRANSACTIONS_ENDPOINT,
+} from "@/endpoints"
 
-async function getToken(): Promise<string | undefined> {
-    const cookieStore = await cookies();
-    return cookieStore.get("host_access_token")?.value;
+export async function getSalesAnalyticsCards(params: SalesAnalyticsCardsParams = {}): Promise<SalesAnalyticsCardsResult> {
+    try {
+        const axios = await getServerAxios()
+        const { data } = await axios.get(`/${SALES_ANALYTICS_CARDS_ENDPOINT}`, { params })
+        return { success: true, data: data.data ?? data }
+    } catch (err) {
+        return { success: false, message: "Request failed." }
+    }
 }
 
-export async function getSalesAnalyticsCardsClient(params: SalesAnalyticsCardsParams = {}) {
-    return getSalesAnalyticsCards(await getToken(), params);
+export async function getSalesAnalyticsGraphs(params: SalesAnalyticsGraphsParams = {}): Promise<SalesAnalyticsGraphsResult> {
+    try {
+        const axios = await getServerAxios()
+        const { data } = await axios.get(`/${SALES_ANALYTICS_GRAPHS_ENDPOINT}`, { params })
+        return { success: true, data: data.data ?? data }
+    } catch (err) {
+        return { success: false, message: "Request failed." }
+    }
 }
 
-export async function getSalesAnalyticsGraphsClient(params: SalesAnalyticsGraphsParams = {}) {
-    return getSalesAnalyticsGraphs(await getToken(), params);
-}
-
-export async function getSalesAnalyticsTransactionClient(params: SalesAnalyticsGraphsParams = {}) {
-    return getSalesAnalyticsTransaction(await getToken(), params);
+export async function getSalesAnalyticsTransaction(params: SalesAnalyticsGraphsParams = {}): Promise<SalesAnalyticsTransactionsResult> {
+    try {
+        const axios = await getServerAxios()
+        const { data } = await axios.get(`/${SALES_ANALYTICS_TRANSACTIONS_ENDPOINT}`, { params })
+        return { success: true, data: data.data ?? data }
+    } catch (err) {
+        return { success: false, message: "Request failed." }
+    }
 }

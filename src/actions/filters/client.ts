@@ -1,13 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { getCategories } from "./index";
+// This file is reserved for server-side mutations (POST, PATCH, DELETE)
+// related to filter operations. GET requests are handled by index.ts.
 
-async function getToken(): Promise<string | undefined> {
-    const cookieStore = await cookies();
-    return cookieStore.get("host_access_token")?.value;
-}
-
-export async function getCategoriesClient() {
-    return getCategories(await getToken());
+export async function dummyFilterAction() {
+    return null;
 }

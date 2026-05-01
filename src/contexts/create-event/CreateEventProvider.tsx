@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiCategory } from '@/actions/filters';
+import { ApiCategory } from '@/actions/filters/index';
 import { CompleteEventFormData } from '@/schemas/create-event.schema';
 import { StepNumber } from '@/types/create-event';
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
@@ -10,6 +10,7 @@ interface EventCreationContextType {
     currentStep:       StepNumber
     completedSteps:    StepNumber[]
     isEditMode:        boolean 
+    isDuplicate:       boolean
     eventID?:          string  
     updateStep:        <K extends keyof CompleteEventFormData>(step: K, data: CompleteEventFormData[K]) => void
     setCurrentStep:    (step: StepNumber) => void
@@ -60,7 +61,7 @@ export function EventCreationProvider({
         isDuplicate ? 5 : 1
     )
 
-    const isEditMode = !!eventID
+    const isEditMode = !!eventID && !isDuplicate
 
     const updateStep = useCallback(<K extends keyof CompleteEventFormData>(
         step: K,
@@ -103,6 +104,7 @@ export function EventCreationProvider({
                 currentStep,
                 completedSteps,
                 isEditMode,
+                isDuplicate: !!isDuplicate,
                 eventID,
                 updateStep,
                 setCurrentStep,

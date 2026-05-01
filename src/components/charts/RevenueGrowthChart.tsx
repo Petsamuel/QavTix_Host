@@ -7,7 +7,7 @@ import {
 } from "recharts"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { getDashboardOverviewClient as getDashboardOverview } from "@/actions/dashboard/client"
+import { getDashboardOverview } from "@/actions/dashboard/client"
 import { formatYTick, getNiceTicks } from "@/helper-fns/chartFormatters"
 import ChartLoader from "../loaders/ChartLoader"
 import { useAppSelector } from "@/lib/redux/hooks"

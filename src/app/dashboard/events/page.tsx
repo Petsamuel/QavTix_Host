@@ -1,5 +1,5 @@
 import { getEvents } from "@/actions/event"
-import { getCategories } from "@/actions/filters"
+import { getCategories } from "@/actions/filters/index"
 import EventsPageContentWrapper from "@/components/page-wrappers/EventsPageContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"
 import { Metadata } from "next"
@@ -18,12 +18,12 @@ export default async function EventsPage() {
     const cookieStore = await cookies();
     const token = cookieStore.get("host_access_token")?.value;
     const [allRes, liveRes, draftRes, endedRes, cancelledRes, categoryResult] = await Promise.all([
-        getEvents(token),
-        getEvents(token, { status: "active" }),
-        getEvents(token, { status: "draft" }),
-        getEvents(token, { status: "ended" }),
-        getEvents(token, { status: "cancelled" }),
-        getCategories(token)
+        getEvents(token!),
+        getEvents(token!, { status: "active" }),
+        getEvents(token!, { status: "draft" }),
+        getEvents(token!, { status: "ended" }),
+        getEvents(token!, { status: "cancelled" }),
+        getCategories()
     ])
 
     const createInitialSlice = (result: any, defaultCards?: any) => ({

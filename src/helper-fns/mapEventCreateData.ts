@@ -1,6 +1,6 @@
 
 import { CompleteEventFormData } from "@/schemas/create-event.schema"
-import { ApiCategory } from "@/actions/filters"
+import { ApiCategory } from "@/actions/filters/index"
 import { countries, getStates } from "@/components-data/location"
 import { UploadedMediaItem } from "./uploadEventMedia"
 

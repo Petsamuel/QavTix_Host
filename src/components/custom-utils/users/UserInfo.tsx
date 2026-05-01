@@ -2,19 +2,20 @@ import { cn } from "@/lib/utils";
 import CustomAvatar from "../avatars/CustomAvatar";
 
 interface UserInfoProps {
-  user: {
-    id: string | number;
-    name: string;
-    email: string;
-  };
-  variant?: "desktop" | "mobile";
-  className?: string;
+    user: {
+        id: string | number;
+        name: string;
+        email: string;
+        profile_picture?: string;
+    };
+    variant?: "desktop" | "mobile";
+    className?: string;
 }
 
 export default function UserInfo({
-  user,
-  variant = "desktop",
-  className,
+    user,
+    variant = "desktop",
+    className,
 }: UserInfoProps) {
 
 
@@ -27,10 +28,11 @@ export default function UserInfo({
                 isDesktop ? "min-w-max" : "",
                 className
             )}
-            >
+        >
             <CustomAvatar
                 name={user.name}
                 id={user.id as string}
+                profileImg={user.profile_picture}
                 size={isDesktop ? "size-9 shrink-0" : "size-8"}
             />
 
@@ -46,8 +48,8 @@ export default function UserInfo({
                     className={cn(
                         "text-[11px] text-brand-secondary-9 font-bold",
                         isDesktop
-                        ? ""
-                        : " truncate"
+                            ? ""
+                            : " truncate"
                     )}
                 >
                     {user.email}

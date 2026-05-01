@@ -10,25 +10,25 @@ import TableLoader from "@/components/loaders/TableLoader"
 import { Icon } from "@iconify/react"
 
 interface SalesPaymentsTableProps {
-    transactions:  Transaction[]
-    isLoading:     boolean
+    transactions: Transaction[]
+    isLoading: boolean
     isLoadingMore: boolean
-    hasNext:       boolean
-    count:         number
-    onLoadMore:    () => void
-    isEmpty:       boolean
-    isError:       boolean
-    search:        string
-    currentPage:   number
-    totalPages:    number
-    fetchPage:     (page: number) => void
+    hasNext: boolean
+    count: number
+    onLoadMore: () => void
+    isEmpty: boolean
+    isError: boolean
+    search: string
+    currentPage: number
+    totalPages: number
+    fetchPage: (page: number) => void
 }
 
 export default function SalesPaymentsTable({
     transactions,
     count,
     currentPage,
-    fetchPage, 
+    fetchPage,
     hasNext,
     isEmpty,
     isError,
@@ -77,10 +77,10 @@ export default function SalesPaymentsTable({
                         </thead>
                         <tbody className="divide-y divide-neutral-5 bg-white">
                             {transactions.map((payment) => {
-                                
+
                                 return (
-                                    <tr 
-                                        key={payment.payment_id} 
+                                    <tr
+                                        key={payment.payment_id}
                                         className={cn(
                                             "hover:bg-brand-accent-2/5 transition-colors cursor-pointer",
                                         )}
@@ -89,7 +89,7 @@ export default function SalesPaymentsTable({
                                             <p className="text-xs text-brand-secondary-8 font-medium">{payment.payment_id}</p>
                                         </td>
                                         <td className="py-4 px-5">
-                                            <UserInfo user={{ email: payment.purchased_by.email, name: payment.purchased_by.full_name, id: payment.payment_id }} variant="desktop" />
+                                            <UserInfo user={{ email: payment.purchased_by?.email || "", profile_picture: payment.purchased_by?.profile_picture || "", name: payment.purchased_by?.full_name || "", id: payment.payment_id }} variant="desktop" />
                                         </td>
                                         <td className="py-4 px-5 min-w-40">
                                             <EventInfo title={payment.event.name} {...payment.event} />
@@ -113,7 +113,7 @@ export default function SalesPaymentsTable({
                                             <Badge className={cn(
                                                 "p-1.5 rounded-md text-[11px] border-[0.8px] capitalize border-neutral-4",
                                                 payment.status === "successful" || payment.status === "completed" ? "text-postive-default bg-green-50" :
-                                                payment.status === "failed" || payment.status === "cancelled" ? "text-brand-secondary-4 bg-brand-secondary-1" : ""
+                                                    payment.status === "failed" || payment.status === "cancelled" ? "text-brand-secondary-4 bg-brand-secondary-1" : ""
                                             )}>
                                                 {payment.status}
                                             </Badge>
@@ -129,10 +129,10 @@ export default function SalesPaymentsTable({
             {/* Mobile Cards - unchanged as per your request */}
             <div className="md:hidden grid grid-cols-1 gap-3">
                 {transactions.map((payment) => {
-                    
+
                     return (
-                        <div 
-                            key={payment.payment_id} 
+                        <div
+                            key={payment.payment_id}
                             className={cn(
                                 "border border-brand-neutral-3 rounded-lg p-2",
                             )}
@@ -156,11 +156,11 @@ export default function SalesPaymentsTable({
                                 </div>
 
                                 <div className="flex items-center justify-between">
-                                    <UserInfo user={{ email: payment.purchased_by.email, name: payment.purchased_by.full_name, id: payment.payment_id }} variant="desktop" />
+                                    <UserInfo user={{ email: payment.purchased_by.email, profile_picture: payment.purchased_by?.profile_picture || "", name: payment.purchased_by.full_name, id: payment.payment_id }} variant="desktop" />
                                     <Badge className={cn(
                                         "p-1 text-[11px] rounded-sm border-[0.8px] capitalize border-neutral-4 shrink-0",
                                         payment.status === "successful" ? "text-postive-default bg-green-50" :
-                                        payment.status === "cancelled" ? "text-brand-secondary-4 bg-brand-secondary-1" : ""
+                                            payment.status === "cancelled" ? "text-brand-secondary-4 bg-brand-secondary-1" : ""
                                     )}>
                                         {payment.status}
                                     </Badge>

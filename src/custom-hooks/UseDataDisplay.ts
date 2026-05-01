@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { format } from "date-fns"
-import { fetchPaginatedData } from "@/actions/paginated-data"
+import { fetchPaginatedData } from "@/actions/paginated-data/index"
+import { getAuthToken } from "@/helper-fns/getAuthToken"
 import { useOnRevalidate } from "./UseRevalidate"
 
 export interface PageData<T> {
@@ -114,14 +115,14 @@ const useTabState = <T>(
     endpoint: string
 ): TabState<T> => {
 
-    const [items, setItems]             = useState<T[]>(config.initialData.results)
+    const [items, setItems] = useState<T[]>(config.initialData.results)
     const [cachedItems, setCachedItems] = useState<T[]>(config.initialData.results)
-    const [count, setCount]             = useState(config.initialData.count)
-    const [totalPages, setTotalPages]   = useState(config.initialData.total_pages ?? 1)
+    const [count, setCount] = useState(config.initialData.count)
+    const [totalPages, setTotalPages] = useState(config.initialData.total_pages ?? 1)
     const [currentPage, setCurrentPage] = useState(1)
-    const [hasNext, setHasNext]         = useState(!!config.initialData.next)
-    const [search, setSearch]           = useState("")
-    const [status, setStatus]           = useState<FetchStatus>("idle")
+    const [hasNext, setHasNext] = useState(!!config.initialData.next)
+    const [search, setSearch] = useState("")
+    const [status, setStatus] = useState<FetchStatus>("idle")
 
     const configRef = useRef(config)
     configRef.current = config
@@ -134,10 +135,10 @@ const useTabState = <T>(
     const searchRef = useRef(search)
     searchRef.current = search
 
-    const initialized    = useRef(false)
-    const isFetching     = useRef(false)
-    const pageRef        = useRef(1)
-    const debounceTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const initialized = useRef(false)
+    const isFetching = useRef(false)
+    const pageRef = useRef(1)
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     // ── DIAGNOSTIC LOGS ─────────────────────────────────────────────────────
     const renderCount = useRef(0)
@@ -309,10 +310,10 @@ const useTabState = <T>(
     return {
         items, cachedItems, count, totalPages, currentPage, hasNext,
         status,
-        isLoading:     status === "loading",
+        isLoading: status === "loading",
         isLoadingMore: status === "loadingMore",
-        isError:       status === "error",
-        isEmpty:       status === "empty",
+        isError: status === "error",
+        isEmpty: status === "empty",
         search, handleSearch, loadMore, fetchPage, resetSearch, refresh,
     }
 }

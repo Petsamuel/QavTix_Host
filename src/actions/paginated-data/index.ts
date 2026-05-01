@@ -1,6 +1,7 @@
-"use server"
+'use server'
 
-import { getServerAxios } from "@/lib/axios"
+import { getAuthToken } from "@/helper-fns/getAuthToken"
+import { handleApiError } from "@/helper-fns/handleApiErrors"
 
 export interface FetchParams {
     endpoint:     string
@@ -21,25 +22,44 @@ export interface FetchResult<T, C = unknown> {
     cards?:       C
 }
 
-export async function fetchPaginatedData<T>(params: FetchParams): Promise<FetchResult<T>> {
+export async function fetchPaginatedData<T>(
+    params: FetchParams
+): Promise<FetchResult<T>> {
     try {
-        const axiosInstance = await getServerAxios()
 
-        const requestParams: Record<string, any> = {
-            ...params.staticParams,
-            ...params.filterParams,
-            page: params.page,
-            ...(params.search ? { search: params.search } : {}),
+        const token = await getAuthToken()
+        
+        const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${params.endpoint.startsWith('/') ? params.endpoint.slice(1) : params.endpoint}`)
+
+        // Add static params
+        Object.entries(params.staticParams).forEach(([key, val]) => url.searchParams.set(key, val))
+        
+        // Add filter params
+        Object.entries(params.filterParams).forEach(([key, val]) => {
+            if (Array.isArray(val)) {
+                val.forEach(v => url.searchParams.append(key, v))
+            } else {
+                url.searchParams.set(key, val)
+            }
+        })
+
+        url.searchParams.set("page", String(params.page))
+        if (params.search) url.searchParams.set("search", params.search)
+
+        const res = await fetch(url.toString(), {
+            headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            }
+        })
+
+        if (!res.ok) {
+            const json = await res.json().catch(() => ({}))
+            return { success: false, results: [], count: 0, next: null, message: handleApiError(json) }
         }
 
-        const endpoint = params.endpoint.startsWith('/') ? params.endpoint : `/${params.endpoint}`
-
-        console.log(endpoint, requestParams)
-
-        const { data } = await axiosInstance.get(endpoint, { params: requestParams })
-
+        const data = await res.json()
         const d = data.data ?? data
-
         const paginated = params.resultsKey ? d?.[params.resultsKey] : d
 
         return {
@@ -51,10 +71,7 @@ export async function fetchPaginatedData<T>(params: FetchParams): Promise<FetchR
             cards:       d?.cards ?? undefined
         }
     } catch (err: any) {
-        console.log("[fetchPaginatedData] status :", err?.response?.status)
-        console.log("[fetchPaginatedData] url    :", err?.config?.baseURL + err?.config?.url)
-        console.log("[fetchPaginatedData] params :", JSON.stringify(err?.config?.params))
-        console.log("[fetchPaginatedData] body   :", JSON.stringify(err?.response?.data))
+        console.error("[fetchPaginatedData] error:", err)
         return { success: false, results: [], count: 0, next: null, message: "Request failed" }
     }
 }

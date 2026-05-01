@@ -1,6 +1,6 @@
 "use client"
 
-import { changePassword } from "@/actions/settings"
+import { changePassword } from "@/actions/settings/client"
 import PasswordInput from "@/components/custom-utils/inputs/PasswordInput"
 import PasswordStrengthIndicator from "@/components/custom-utils/security/PasswordStrengthIndicator"
 import { space_grotesk } from "@/lib/fonts"
