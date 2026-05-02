@@ -1,28 +1,28 @@
-import { cn }               from "@/lib/utils"
-import PaginationControls  from "../tools/PaginationControl"
-import { Icon }            from "@iconify/react"
-import EventInfo           from "../../event/EventInfo"
-import { Checkbox }        from "@/components/ui/checkbox"
+import { cn } from "@/lib/utils"
+import PaginationControls from "../tools/PaginationControl"
+import { Icon } from "@iconify/react"
+import EventInfo from "../../event/EventInfo"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Dispatch, SetStateAction } from "react"
-import EventsItemDropdown  from "../../dropdown/ItemActionDropdown"
-import { formatDateTime }    from "@/helper-fns/date-utils"
-import TableLoader           from "@/components/loaders/TableLoader"
-import EmptyTicketsState     from "../empty-state"
+import EventsItemDropdown from "../../dropdown/ItemActionDropdown"
+import { formatDateTime } from "@/helper-fns/date-utils"
+import TableLoader from "@/components/loaders/TableLoader"
+import EmptyTicketsState from "../empty-state"
 import { buildEndedEventActions, buildLiveEventActions } from "../../dropdown/resources/events-actions"
 import { useRouter } from "next/navigation"
 
 interface EndedCancelledTableProps {
-    items:             OrganizerEvent[]
-    isLoading:         boolean
-    isLoadingMore:     boolean
-    isEmpty:           boolean
-    isError:           boolean
-    search:            string
-    count:             number
-    currentPage:       number
-    totalPages:        number
-    fetchPage:         (page: number) => void
-    selectedEvents:    string[]
+    items: OrganizerEvent[]
+    isLoading: boolean
+    isLoadingMore: boolean
+    isEmpty: boolean
+    isError: boolean
+    search: string
+    count: number
+    currentPage: number
+    totalPages: number
+    fetchPage: (page: number) => void
+    selectedEvents: string[]
     setSelectedEvents: Dispatch<SetStateAction<string[]>>
     variant: "ended" | "cancelled"
 }
@@ -34,8 +34,8 @@ function EndedCancelledTable({
 }: EndedCancelledTableProps) {
 
     const router = useRouter()
-    const isEnded   = variant === "ended"
-    const badgeCls  = isEnded ? "text-red-600" : "text-brand-secondary-7"
+    const isEnded = variant === "ended"
+    const badgeCls = isEnded ? "text-red-600" : "text-brand-secondary-7"
     const badgeText = isEnded ? "Ended" : "Cancelled"
 
     const isAllSelected =
@@ -134,8 +134,8 @@ function EndedCancelledTable({
                                         <td className="py-4 px-5 text-center">
                                             <div className="flex flex-col text-[11px]">
                                                 <span className="text-brand-secondary-9">{event.tickets_sold}/{event.tickets_listed}</span>
-                                                <span className="text-brand-secondary-6">
-                                                    <span className="font-bold">Views:</span> {event.views_count} | <span className="font-bold">Saves:</span> {event.saves_count}
+                                                <span className="text-brand-secondary-6 whitespace-nowrap inline-block">
+                                                    <span className="font-bold whitespace-nowrap">Views:</span> {event.views_count} | <span className="font-bold">Saves:</span> {event.saves_count}
                                                 </span>
                                             </div>
                                         </td>
@@ -147,18 +147,18 @@ function EndedCancelledTable({
                                         <td className="py-4 px-4" onClick={e => e.stopPropagation()}>
                                             {
                                                 event.status === "draft" ?
-                                                <p className="text-[10px]">See action on draft tab</p>
-                                                :
-                                                <EventsItemDropdown 
-                                                    eventID={event.id}
-                                                    eventName={event.title}
-                                                    actions={
-                                                        event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
-                                                        buildLiveEventActions(event.id, event.is_featured, router)
-                                                        :
-                                                        buildEndedEventActions(event.id, router)
-                                                    } 
-                                                />
+                                                    <p className="text-[10px]">See action on draft tab</p>
+                                                    :
+                                                    <EventsItemDropdown
+                                                        eventID={event.id}
+                                                        eventName={event.title}
+                                                        actions={
+                                                            event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                                buildLiveEventActions(event.id, event.is_featured, router)
+                                                                :
+                                                                buildEndedEventActions(event.id, router)
+                                                        }
+                                                    />
                                             }
                                         </td>
                                     </tr>
@@ -194,18 +194,18 @@ function EndedCancelledTable({
                                     <div className="flex items-center gap-1"><span className="font-bold">Views:</span><span>{event.views_count}</span></div>
                                     {
                                         event.status === "draft" ?
-                                        <p className="text-[10px]">See action on draft tab</p>
-                                        :
-                                        <EventsItemDropdown 
-                                            eventID={event.id}
-                                            eventName={event.title}
-                                            actions={
-                                                event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
-                                                buildLiveEventActions(event.id, event.is_featured, router)
-                                                :
-                                                buildEndedEventActions(event.id, router)
-                                            } 
-                                        />
+                                            <p className="text-[10px]">See action on draft tab</p>
+                                            :
+                                            <EventsItemDropdown
+                                                eventID={event.id}
+                                                eventName={event.title}
+                                                actions={
+                                                    event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                        buildLiveEventActions(event.id, event.is_featured, router)
+                                                        :
+                                                        buildEndedEventActions(event.id, router)
+                                                }
+                                            />
                                     }
                                 </div>
                                 <div className="flex items-start justify-between gap-3">

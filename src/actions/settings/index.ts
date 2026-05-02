@@ -1,3 +1,4 @@
+import { CACHE_TAGS } from "@/cache-tags";
 import {
     GET_PRIVACY_SETTINGS_ENDPOINT,
     GET_SUBSCRIPTION_ENDPOINT,
@@ -18,7 +19,8 @@ export async function getPrivacySettings(token: string | undefined): Promise<Pri
                 headers: {
                     "Content-Type": "application/json",
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                }
+                },
+                next: { tags: [CACHE_TAGS.PRIVACY_SETTINGS], revalidate: 300 }
             }
         )
 
@@ -43,7 +45,8 @@ export async function getSubscription(token: string | undefined): Promise<GetSub
                 headers: {
                     "Content-Type": "application/json",
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                }
+                },
+                next: { tags: [CACHE_TAGS.SUBSCRIPTION], revalidate: 300 }
             }
         )
 

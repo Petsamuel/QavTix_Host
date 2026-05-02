@@ -35,10 +35,10 @@ export function buildLiveEventActions(
             icon: "hugeicons:pencil-edit-01",
             onClick: () => router.push(EDIT_DRAFT_EVENT.href.replace("[event_id]", eventID)),
         },
-        { 
+        {
             id: "duplicate" as const,
-            label: "Duplicate Event", 
-            icon: "system-uicons:duplicate" ,
+            label: "Duplicate Event",
+            icon: "system-uicons:duplicate",
             onClick: () => router.push(DUPLICATE_EVENT.href.replace("[event_id]", eventID)),
         },
         {
@@ -70,16 +70,16 @@ export function buildLiveEventActions(
     ]
 
     return !isFeatured ?
-     [...actions,
+        [...actions,
         {
-           id: "feature" as "feature",
-           label: "Add to Featured",
-           icon: "flowbite:rectangle-list-outline",
+            id: "feature" as "feature",
+            label: "Add to Featured",
+            icon: "flowbite:rectangle-list-outline",
         },
         ...riskActions
-    ]
-    :
-    [...actions, ...riskActions]
+        ]
+        :
+        [...actions, ...riskActions]
 }
 
 export function buildEndedEventActions(

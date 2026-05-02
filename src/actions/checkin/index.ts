@@ -1,6 +1,7 @@
+import { CACHE_TAGS } from "@/cache-tags"
 import { CHECKIN_OVERVIEW_ENDPOINT, CHECKIN_ATTENDEES_ENDPOINT } from "@/endpoints"
 
-async function apiFetch(token: string, endpoint: string, params: Record<string, any> = {}) {
+async function apiFetch(token: string, endpoint: string, params: Record<string, any> = {}, tags?: string[]) {
     const query = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -13,6 +14,7 @@ async function apiFetch(token: string, endpoint: string, params: Record<string, 
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
         },
+        next: { tags: [...(tags ?? [])], revalidate: 300 }
     })
     if (!res.ok) throw new Error(`Request failed: ${endpoint}`)
     const data = await res.json()
@@ -21,7 +23,7 @@ async function apiFetch(token: string, endpoint: string, params: Record<string, 
 
 export async function getCheckInMetrics(token: string, params: CheckInParams = {}): Promise<GetCheckInResult> {
     try {
-        const data = await apiFetch(token, CHECKIN_OVERVIEW_ENDPOINT, params)
+        const data = await apiFetch(token, CHECKIN_OVERVIEW_ENDPOINT, params, [CACHE_TAGS.CHECKIN])
         return { success: true, data }
     } catch {
         return { success: false, message: "Failed to load metrics." }
@@ -30,7 +32,7 @@ export async function getCheckInMetrics(token: string, params: CheckInParams = {
 
 export async function getCheckInAttendees(token: string, params: CheckInParams = {}): Promise<GetAttendeesResult> {
     try {
-        const data = await apiFetch(token, CHECKIN_ATTENDEES_ENDPOINT, params)
+        const data = await apiFetch(token, CHECKIN_ATTENDEES_ENDPOINT, params, [CACHE_TAGS.CHECKIN])
         return { success: true, data }
     } catch {
         return { success: false, message: "Failed to load attendees." }

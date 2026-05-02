@@ -314,7 +314,7 @@ export default function CreateEventStep3() {
                                         ? <Icon icon="lucide:plus" className="w-4 h-4" />
                                         : <Icon icon="lucide:lock" className="w-4 h-4" />
                                     }
-                                    {canAddAnotherTicketType ? "Add another Ticket Type" : "Ticket type limit reached"}
+                                    {canAddAnotherTicketType ? "Add Another Ticket Type" : "Ticket type limit reached"}
                                 </span>
                             </button>
 

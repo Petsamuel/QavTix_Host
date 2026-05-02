@@ -1,3 +1,4 @@
+import { CACHE_TAGS } from "@/cache-tags"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import {
     SALES_ANALYTICS_CARDS_ENDPOINT,
@@ -9,6 +10,7 @@ async function fetchFinancials<T>(
     token: string,
     endpoint: string,
     params?: Record<string, string | number>,
+    tags?: string[],
 ): Promise<{ success: true; data: T } | { success: false; message: string }> {
     try {
         const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`)
@@ -23,6 +25,7 @@ async function fetchFinancials<T>(
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
+            next: { tags: [...(tags ?? [])], revalidate: 300 }
         })
 
         if (!res.ok) {
@@ -38,7 +41,6 @@ async function fetchFinancials<T>(
     }
 }
 
-
 export async function getSalesAnalyticsCards(
     token: string, params: SalesAnalyticsCardsParams = {}
 ): Promise<SalesAnalyticsCardsResult> {
@@ -46,6 +48,7 @@ export async function getSalesAnalyticsCards(
         token,
         SALES_ANALYTICS_CARDS_ENDPOINT,
         params as Record<string, string | number>,
+        [CACHE_TAGS.FINANCIALS]
     )
 }
 
@@ -56,6 +59,7 @@ export async function getSalesAnalyticsGraphs(
         token,
         SALES_ANALYTICS_GRAPHS_ENDPOINT,
         params as Record<string, string | number>,
+        [CACHE_TAGS.FINANCIALS]
     )
 }
 
@@ -66,5 +70,6 @@ export async function getSalesAnalyticsTransaction(
         token,
         SALES_ANALYTICS_TRANSACTIONS_ENDPOINT,
         params as Record<string, string | number>,
+        [CACHE_TAGS.FINANCIALS]
     )
 }

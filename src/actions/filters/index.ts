@@ -1,8 +1,5 @@
-'use cache'
-
 import { CATEGORIES_ENDPOINT } from "@/endpoints"
 import { CACHE_TAGS } from "@/cache-tags"
-import { cacheTag } from "next/cache"
 
 export interface ApiCategory {
     id: number
@@ -16,10 +13,10 @@ export interface GetCategoriesResult {
 }
 
 export async function getCategories(): Promise<GetCategoriesResult> {
-    cacheTag(CACHE_TAGS.EVENTS);
     try {
         const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CATEGORIES_ENDPOINT}`
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${CATEGORIES_ENDPOINT}`,
+            { next: { tags: [CACHE_TAGS.EVENTS], revalidate: 300 } }
         )
         if (!res.ok) return { success: false, data: [] }
         const json = await res.json()
