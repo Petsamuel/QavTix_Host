@@ -1,6 +1,3 @@
-"use cache"
-
-import { cacheLife } from "next/cache"
 import {
     PROMO_CODES_ENDPOINT,
     AFFILIATE_LINKS_HOST_ENDPOINT,
@@ -32,7 +29,6 @@ export async function getPromoCodes(token: string, params: {
     status?: string
     event?: string
 } = {}): Promise<{ success: boolean; data?: any; message?: string }> {
-    cacheLife("minutes")
     try {
         const data = await apiFetch(token, PROMO_CODES_ENDPOINT, params)
         return { success: true, data }
@@ -44,7 +40,6 @@ export async function getPromoCodes(token: string, params: {
 export async function getAffiliateLinks(token: string, params: {
     page?: number
 } = {}): Promise<{ success: boolean; data?: any; message?: string }> {
-    cacheLife("minutes")
     try {
         const data = await apiFetch(token, AFFILIATE_LINKS_HOST_ENDPOINT, params)
         return { success: true, data }
@@ -56,7 +51,6 @@ export async function getAffiliateLinks(token: string, params: {
 export async function getEmailCampaigns(token: string, params: {
     page?: number
 } = {}): Promise<{ success: boolean; data?: any; message?: string }> {
-    cacheLife("minutes")
     try {
         const data = await apiFetch(token, EMAIL_CAMPAIGNS_ENDPOINT, params)
         return { success: true, data }

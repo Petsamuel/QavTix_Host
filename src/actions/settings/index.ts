@@ -1,11 +1,8 @@
-"use cache"
-
 import {
     GET_PRIVACY_SETTINGS_ENDPOINT,
     GET_SUBSCRIPTION_ENDPOINT,
 } from "@/endpoints";
 import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { cacheLife } from "next/cache"
 
 interface PrivacyResult {
     success: boolean
@@ -14,7 +11,6 @@ interface PrivacyResult {
 }
 
 export async function getPrivacySettings(token: string | undefined): Promise<PrivacyResult> {
-    cacheLife("hours")
     try {
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${GET_PRIVACY_SETTINGS_ENDPOINT}`,
@@ -40,7 +36,6 @@ export async function getPrivacySettings(token: string | undefined): Promise<Pri
 }
 
 export async function getSubscription(token: string | undefined): Promise<GetSubscriptionResult> {
-    cacheLife("minutes")
     try {
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${GET_SUBSCRIPTION_ENDPOINT}`,

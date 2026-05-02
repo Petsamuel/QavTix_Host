@@ -1,7 +1,4 @@
-"use cache"
-
 import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { cacheLife } from "next/cache"
 import {
     SALES_ANALYTICS_CARDS_ENDPOINT,
     SALES_ANALYTICS_GRAPHS_ENDPOINT,
@@ -45,7 +42,6 @@ async function fetchFinancials<T>(
 export async function getSalesAnalyticsCards(
     token: string, params: SalesAnalyticsCardsParams = {}
 ): Promise<SalesAnalyticsCardsResult> {
-    cacheLife("minutes")
     return fetchFinancials<SalesAnalyticsCardsData>(
         token,
         SALES_ANALYTICS_CARDS_ENDPOINT,
@@ -56,7 +52,6 @@ export async function getSalesAnalyticsCards(
 export async function getSalesAnalyticsGraphs(
     token: string, params: SalesAnalyticsGraphsParams = {}
 ): Promise<SalesAnalyticsGraphsResult> {
-    cacheLife("minutes")
     return fetchFinancials<SalesAnalyticsGraphsData>(
         token,
         SALES_ANALYTICS_GRAPHS_ENDPOINT,
@@ -67,7 +62,6 @@ export async function getSalesAnalyticsGraphs(
 export async function getSalesAnalyticsTransaction(
     token: string, params: SalesAnalyticsGraphsParams = {}
 ): Promise<SalesAnalyticsTransactionsResult> {
-    cacheLife("minutes")
     return fetchFinancials<any>(
         token,
         SALES_ANALYTICS_TRANSACTIONS_ENDPOINT,

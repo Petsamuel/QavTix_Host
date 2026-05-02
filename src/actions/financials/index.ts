@@ -1,6 +1,3 @@
-"use cache"
-
-import { cacheLife } from "next/cache"
 import { FINANCIALS_ENDPOINT, PAYOUT_LIST_ENDPOINT } from "@/endpoints"
 
 async function apiFetch(token: string, endpoint: string, params: Record<string, any> = {}) {
@@ -23,7 +20,6 @@ async function apiFetch(token: string, endpoint: string, params: Record<string, 
 }
 
 export async function getFinancials(token: string, params: FinancialsParams = {}): Promise<GetFinancialsResult> {
-    cacheLife("minutes")
     try {
         const data = await apiFetch(token, FINANCIALS_ENDPOINT, params)
         return { success: true, data }
@@ -33,7 +29,6 @@ export async function getFinancials(token: string, params: FinancialsParams = {}
 }
 
 export async function getPayoutAccounts(token: string): Promise<{ success: boolean; data?: PayoutAccountItem[]; message?: string }> {
-    cacheLife("minutes")
     try {
         const data = await apiFetch(token, PAYOUT_LIST_ENDPOINT)
         return { success: true, data: Array.isArray(data) ? data : [] }

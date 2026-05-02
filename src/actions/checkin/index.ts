@@ -1,6 +1,3 @@
-"use cache"
-
-import { cacheLife } from "next/cache"
 import { CHECKIN_OVERVIEW_ENDPOINT, CHECKIN_ATTENDEES_ENDPOINT } from "@/endpoints"
 
 async function apiFetch(token: string, endpoint: string, params: Record<string, any> = {}) {
@@ -23,7 +20,6 @@ async function apiFetch(token: string, endpoint: string, params: Record<string, 
 }
 
 export async function getCheckInMetrics(token: string, params: CheckInParams = {}): Promise<GetCheckInResult> {
-    cacheLife("minutes")
     try {
         const data = await apiFetch(token, CHECKIN_OVERVIEW_ENDPOINT, params)
         return { success: true, data }
@@ -33,7 +29,6 @@ export async function getCheckInMetrics(token: string, params: CheckInParams = {
 }
 
 export async function getCheckInAttendees(token: string, params: CheckInParams = {}): Promise<GetAttendeesResult> {
-    cacheLife("minutes")
     try {
         const data = await apiFetch(token, CHECKIN_ATTENDEES_ENDPOINT, params)
         return { success: true, data }

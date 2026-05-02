@@ -1,5 +1,3 @@
-"use cache"
-
 // This module currently contains no pure GET actions.
 // All mutations are in client.ts.
 

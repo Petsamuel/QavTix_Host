@@ -1,7 +1,4 @@
-"use cache"
-
 import { CUSTOMER_DETAILS_ENDPOINT, CUSTOMERS_ENDPOINT } from "@/endpoints"
-import { cacheLife } from "next/cache"
 
 export interface GetCustomersResult {
     success: boolean
@@ -20,7 +17,6 @@ export interface GetCustomerProfileResult {
 
 
 export async function getCustomers(token: string, params: CustomersParams = {}): Promise<GetCustomersResult> {
-    cacheLife("hours")
 
     try {
         const query = new URLSearchParams(params as Record<string, string>).toString()
@@ -40,7 +36,6 @@ export async function getCustomers(token: string, params: CustomersParams = {}):
 }
 
 export async function getCustomerProfile(token: string, params: CustomerProfileParams): Promise<GetCustomerProfileResult> {
-    cacheLife("hours")
 
     try {
         const { user_id, ...rest } = params
