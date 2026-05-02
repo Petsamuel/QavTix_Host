@@ -1,7 +1,5 @@
-"use cache"
-
+import { CACHE_TAGS } from "@/cache-tags"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { cacheLife } from "next/cache"
 import {
     SALES_ANALYTICS_CARDS_ENDPOINT,
     SALES_ANALYTICS_GRAPHS_ENDPOINT,
@@ -12,6 +10,7 @@ async function fetchFinancials<T>(
     token: string,
     endpoint: string,
     params?: Record<string, string | number>,
+    tags?: string[],
 ): Promise<{ success: true; data: T } | { success: false; message: string }> {
     try {
         const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`)
@@ -26,6 +25,7 @@ async function fetchFinancials<T>(
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
+            next: { tags: [...(tags ?? [])], revalidate: 300 }
         })
 
         if (!res.ok) {
@@ -41,36 +41,35 @@ async function fetchFinancials<T>(
     }
 }
 
-
 export async function getSalesAnalyticsCards(
     token: string, params: SalesAnalyticsCardsParams = {}
 ): Promise<SalesAnalyticsCardsResult> {
-    cacheLife("minutes")
     return fetchFinancials<SalesAnalyticsCardsData>(
         token,
         SALES_ANALYTICS_CARDS_ENDPOINT,
         params as Record<string, string | number>,
+        [CACHE_TAGS.FINANCIALS]
     )
 }
 
 export async function getSalesAnalyticsGraphs(
     token: string, params: SalesAnalyticsGraphsParams = {}
 ): Promise<SalesAnalyticsGraphsResult> {
-    cacheLife("minutes")
     return fetchFinancials<SalesAnalyticsGraphsData>(
         token,
         SALES_ANALYTICS_GRAPHS_ENDPOINT,
         params as Record<string, string | number>,
+        [CACHE_TAGS.FINANCIALS]
     )
 }
 
 export async function getSalesAnalyticsTransaction(
     token: string, params: SalesAnalyticsGraphsParams = {}
 ): Promise<SalesAnalyticsTransactionsResult> {
-    cacheLife("minutes")
     return fetchFinancials<any>(
         token,
         SALES_ANALYTICS_TRANSACTIONS_ENDPOINT,
         params as Record<string, string | number>,
+        [CACHE_TAGS.FINANCIALS]
     )
 }

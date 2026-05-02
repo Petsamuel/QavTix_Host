@@ -1,11 +1,9 @@
-"use cache"
-
+import { CACHE_TAGS } from "@/cache-tags";
 import {
     GET_PRIVACY_SETTINGS_ENDPOINT,
     GET_SUBSCRIPTION_ENDPOINT,
 } from "@/endpoints";
 import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { cacheLife } from "next/cache"
 
 interface PrivacyResult {
     success: boolean
@@ -14,7 +12,6 @@ interface PrivacyResult {
 }
 
 export async function getPrivacySettings(token: string | undefined): Promise<PrivacyResult> {
-    cacheLife("hours")
     try {
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${GET_PRIVACY_SETTINGS_ENDPOINT}`,
@@ -22,7 +19,8 @@ export async function getPrivacySettings(token: string | undefined): Promise<Pri
                 headers: {
                     "Content-Type": "application/json",
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                }
+                },
+                next: { tags: [CACHE_TAGS.PRIVACY_SETTINGS], revalidate: 300 }
             }
         )
 
@@ -40,7 +38,6 @@ export async function getPrivacySettings(token: string | undefined): Promise<Pri
 }
 
 export async function getSubscription(token: string | undefined): Promise<GetSubscriptionResult> {
-    cacheLife("minutes")
     try {
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${GET_SUBSCRIPTION_ENDPOINT}`,
@@ -48,7 +45,8 @@ export async function getSubscription(token: string | undefined): Promise<GetSub
                 headers: {
                     "Content-Type": "application/json",
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                }
+                },
+                next: { tags: [CACHE_TAGS.SUBSCRIPTION], revalidate: 300 }
             }
         )
 

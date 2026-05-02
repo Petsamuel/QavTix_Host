@@ -1,6 +1,3 @@
-"use cache"
-
-import { cacheLife } from "next/cache"
 
 export interface BankOption {
     label: string
@@ -27,7 +24,6 @@ const SUPPORTED_VERIFY_COUNTRIES = ["nigeria"] as const
 export async function getPaystackBanks(
     country: string = "nigeria"
 ): Promise<{ success: boolean; data?: BankOption[]; message?: string }> {
-    cacheLife("days")
     try {
         const slug = COUNTRY_SLUGS[country.toLowerCase().replace(/\s/g, "")] ?? country
 
@@ -65,7 +61,7 @@ export async function verifyAccountNumber(
     if (!SUPPORTED_VERIFY_COUNTRIES.includes(country.toLowerCase() as any)) {
         return { success: false, message: "auto_verify_unsupported" }
     }
-    
+
     // We don't cache account verification
     try {
         const res = await fetch(

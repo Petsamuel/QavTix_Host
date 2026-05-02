@@ -1,15 +1,26 @@
 "use server";
 
+import { accessCookieOptions, refreshCookieOptions } from "@/components-data/cookie-keys";
 import { LOGIN_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation"
 
 export const logOut = async () => {
-    const { cookies } = await import("next/headers")
     const cookiesStore = await cookies()
-    cookiesStore.delete("host_access_token")
-    cookiesStore.delete("host_refresh_token")
+
+    cookiesStore.delete({
+        name: "host_access_token",
+        path: accessCookieOptions.path,
+        ...("domain" in accessCookieOptions && { domain: accessCookieOptions.domain })
+    })
+    cookiesStore.delete({
+        name: "host_refresh_token",
+        path: refreshCookieOptions.path,
+        ...("domain" in accessCookieOptions && { domain: refreshCookieOptions.domain })
+    })
+
     redirect(process.env.NEXT_PUBLIC_APP_DOMAIN || "/")
 }
 

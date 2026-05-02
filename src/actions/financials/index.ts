@@ -1,9 +1,7 @@
-"use cache"
-
-import { cacheLife } from "next/cache"
+import { CACHE_TAGS } from "@/cache-tags"
 import { FINANCIALS_ENDPOINT, PAYOUT_LIST_ENDPOINT } from "@/endpoints"
 
-async function apiFetch(token: string, endpoint: string, params: Record<string, any> = {}) {
+async function apiFetch(token: string, endpoint: string, params: Record<string, any> = {}, tags?: string[]) {
     const query = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -16,6 +14,7 @@ async function apiFetch(token: string, endpoint: string, params: Record<string, 
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
         },
+        next: { tags: [...(tags ?? [])], revalidate: 300 }
     })
     if (!res.ok) throw new Error(`Request failed: ${endpoint}`)
     const data = await res.json()
@@ -23,9 +22,8 @@ async function apiFetch(token: string, endpoint: string, params: Record<string, 
 }
 
 export async function getFinancials(token: string, params: FinancialsParams = {}): Promise<GetFinancialsResult> {
-    cacheLife("minutes")
     try {
-        const data = await apiFetch(token, FINANCIALS_ENDPOINT, params)
+        const data = await apiFetch(token, FINANCIALS_ENDPOINT, params, [CACHE_TAGS.FINANCIALS])
         return { success: true, data }
     } catch {
         return { success: false, message: "Failed to load financials." }
@@ -33,9 +31,8 @@ export async function getFinancials(token: string, params: FinancialsParams = {}
 }
 
 export async function getPayoutAccounts(token: string): Promise<{ success: boolean; data?: PayoutAccountItem[]; message?: string }> {
-    cacheLife("minutes")
     try {
-        const data = await apiFetch(token, PAYOUT_LIST_ENDPOINT)
+        const data = await apiFetch(token, PAYOUT_LIST_ENDPOINT, {}, [CACHE_TAGS.PAYOUT_ACCOUNTS])
         return { success: true, data: Array.isArray(data) ? data : [] }
     } catch {
         return { success: false, message: "Failed to load payout accounts." }

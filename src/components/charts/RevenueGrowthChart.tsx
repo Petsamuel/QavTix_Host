@@ -7,45 +7,45 @@ import {
 } from "recharts"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { getDashboardOverview } from "@/actions/dashboard/client"
 import { formatYTick, getNiceTicks } from "@/helper-fns/chartFormatters"
 import ChartLoader from "../loaders/ChartLoader"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { formatPrice } from "@/helper-fns/formatPrice"
+import { getDashboardOverview } from "@/actions/dashboard/client"
 
 type TimeFilter = "annual" | "month" | "week"
 
 interface ChartDataPoint {
-    label:        string
-    value:        number
+    label: string
+    value: number
     displayLabel: string
 }
 
 interface RevenueGrowthChartProps {
     initialChartData: DashboardChartPoint[]
-    chartFilter:      "revenue" | "tickets"
+    chartFilter: "revenue" | "tickets"
     onChartDataChange?: (data: DashboardChartPoint[]) => void
 }
 
-const YEARS        = ["2023", "2024", "2025", "2026"]
+const YEARS = ["2023", "2024", "2025", "2026"]
 const CURRENT_YEAR = String(new Date().getFullYear())
 
 function toChartPoints(data: DashboardChartPoint[]): ChartDataPoint[] {
     return data.map(d => ({
-        label:        d.label,
+        label: d.label,
         displayLabel: d.label,
-        value:        parseFloat(d.amount),
+        value: parseFloat(d.amount),
     }))
 }
 
 function buildParams(
-    timeFilter:   TimeFilter,
+    timeFilter: TimeFilter,
     selectedYear: string,
-    chartFilter:  "revenue" | "tickets",
+    chartFilter: "revenue" | "tickets",
 ): DashboardOverviewParams {
     const params: DashboardOverviewParams = {
         chart_type: chartFilter,
-        year:       parseInt(selectedYear),
+        year: parseInt(selectedYear),
     }
     if (timeFilter === "month") params.month = new Date().getMonth() + 1
     if (timeFilter === "week") { params.week = true; delete params.year; delete params.month }
@@ -74,10 +74,10 @@ export default function RevenueGrowthChart({
     chartFilter,
     onChartDataChange,
 }: RevenueGrowthChartProps) {
-    const [timeFilter,   setTimeFilter]   = useState<TimeFilter>("annual")
+    const [timeFilter, setTimeFilter] = useState<TimeFilter>("annual")
     const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR)
-    const [chartData,    setChartData]    = useState<ChartDataPoint[]>(() => toChartPoints(initialChartData))
-    const [isPending,    startTransition] = useTransition()
+    const [chartData, setChartData] = useState<ChartDataPoint[]>(() => toChartPoints(initialChartData))
+    const [isPending, startTransition] = useTransition()
 
     const hasMountedRef = useRef(false)
     const renderCount = useRef(0)

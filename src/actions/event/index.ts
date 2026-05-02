@@ -1,6 +1,4 @@
-"use cache"
-
-import { cacheLife } from "next/cache"
+import { CACHE_TAGS } from "@/cache-tags"
 import { EVENT_DETAILS_ENDPOINT, EVENTS_ENDPOINT } from "@/endpoints"
 
 export interface GetEventsResult {
@@ -21,7 +19,7 @@ export interface GetEditEventDetailsResult {
     message?: string
 }
 
-async function apiFetch(token: string, endpoint: string, params: Record<string, any> = {}) {
+async function apiFetch(token: string, endpoint: string, params: Record<string, any> = {}, tags?: string[]) {
     const query = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -34,6 +32,7 @@ async function apiFetch(token: string, endpoint: string, params: Record<string, 
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
         },
+        next: { tags: [...(tags ?? [])], revalidate: 300 }
     })
     if (!res.ok) throw new Error(`Request failed: ${endpoint}`)
     const data = await res.json()
@@ -41,9 +40,8 @@ async function apiFetch(token: string, endpoint: string, params: Record<string, 
 }
 
 export async function getEvents(token: string, params: GetEventsParams = {}): Promise<GetEventsResult> {
-    cacheLife("minutes")
     try {
-        const data = await apiFetch(token, EVENTS_ENDPOINT, params)
+        const data = await apiFetch(token, EVENTS_ENDPOINT, params, [CACHE_TAGS.EVENTS])
         return { success: true, data }
     } catch {
         return { success: false, message: "Failed to load events." }
@@ -51,10 +49,9 @@ export async function getEvents(token: string, params: GetEventsParams = {}): Pr
 }
 
 export async function getEventDetails(token: string, eventID: string): Promise<GetEventDetailsResult> {
-    cacheLife("minutes")
     try {
         const endpoint = EVENT_DETAILS_ENDPOINT.replace("[event_id]", eventID)
-        const data = await apiFetch(token, endpoint)
+        const data = await apiFetch(token, endpoint, {}, [CACHE_TAGS.EVENT_DETAILS])
         return { success: true, data }
     } catch {
         return { success: false, message: "Failed to load event details." }
@@ -62,10 +59,9 @@ export async function getEventDetails(token: string, eventID: string): Promise<G
 }
 
 export async function getEditEventDetails(token: string, eventID: string): Promise<GetEditEventDetailsResult> {
-    cacheLife("minutes")
     try {
         const endpoint = EVENT_DETAILS_ENDPOINT.replace("[event_id]", eventID)
-        const data = await apiFetch(token, endpoint)
+        const data = await apiFetch(token, endpoint, {}, [CACHE_TAGS.EVENT_DETAILS])
         return { success: true, data }
     } catch {
         return { success: false, message: "Failed to load event details." }

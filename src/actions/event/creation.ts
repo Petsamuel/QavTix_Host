@@ -137,6 +137,8 @@ export async function updateAndPublishEvent({
             }
         )
 
+        console.log(res)
+
         const json = await res.json().catch(() => ({}))
 
         if (!res.ok) {
