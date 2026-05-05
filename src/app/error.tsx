@@ -17,7 +17,7 @@ export default function Error({
     return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center px-4">
             <div className="p-4 rounded-full bg-red-50">
-                <Icon icon="mage:exclamation-circle" className="size-8 text-red-400" />
+                <Icon icon="bx:error-alt" className="size-8 text-red-400" />
             </div>
 
             <div className="space-y-1 flex items-center justify-center flex-col">
