@@ -34,8 +34,8 @@ export default function ShareEventModal({ isOpen, onClose, shareUrl }: ShareModa
     ]
 
     return (
-        <AnimatedDialog 
-            open={isOpen} 
+        <AnimatedDialog
+            open={isOpen}
             showCloseButton={false}
             className="md:max-w-md py-5"
         >
@@ -65,10 +65,10 @@ export default function ShareEventModal({ isOpen, onClose, shareUrl }: ShareModa
                             value={shareUrl}
                             className="bg-transparent border-none outline-none text-sm text-brand-secondary-7 w-full pr-4 focus:ring-0 truncate"
                         />
-                        
+
                         <div className="flex items-center gap-3">
                             <div className="h-6 w-[1.5px] bg-[#D0D5DD]" />
-                            
+
                             <div className={cn(
                                 "size-5 rounded-sm flex items-center justify-center transition-all duration-300",
                                 copied ? "bg-brand-primary text-white" : "bg-brand-primary-3 text-white"
@@ -76,7 +76,7 @@ export default function ShareEventModal({ isOpen, onClose, shareUrl }: ShareModa
                                 <Icon icon={copied ? "lucide:check-check" : "lucide:check"} className="size-3 stroke-3" />
                             </div>
 
-                            <button 
+                            <button
                                 onClick={handleCopy}
                                 className="text-brand-secondary-5 hover:text-brand-primary active:scale-90 transition-all"
                                 title="Copy to clipboard"

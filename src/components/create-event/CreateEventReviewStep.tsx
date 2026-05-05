@@ -28,7 +28,7 @@ import { sanitizeEventDataForServer } from '@/lib/cloudinary'
 export default function CreateEventReviewStep() {
 
     const dispatch = useAppDispatch()
-    const { eventData, resetForm, categories, isEditMode, eventID } = useEventCreation()
+    const { eventData, resetForm, discardDraft, categories, isEditMode, eventID } = useEventCreation()
     const { goToPreviousStep } = useStepper()
 
     const { isConfirmed, lastConfirmedAction } = useAppSelector((state) => state.confirmation)
@@ -98,7 +98,7 @@ export default function CreateEventReviewStep() {
                     setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: (result as any).eventId ?? eventID })
                     dispatch(finishConfirmAction())
                     dispatch(resetConfirmationStatus())
-                    // resetForm()
+                    discardDraft()
                 } else {
                     setStatusModal({ isOpen: true, type: 'FAILED', errorMsg: result.message })
                     dispatch(finishConfirmAction())
@@ -150,6 +150,7 @@ export default function CreateEventReviewStep() {
                     navigateTo: NAVIGATION_LINKS.MY_EVENTS.href,
                 }))
 
+                discardDraft()
                 resetForm()
             } else {
                 dispatch(showAlert({

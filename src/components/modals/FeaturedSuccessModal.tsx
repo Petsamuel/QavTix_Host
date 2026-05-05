@@ -13,107 +13,80 @@ interface FeaturedSuccessModalProps {
     onClose: () => void;
     eventSlug?: string;
 }
-
 export default function FeaturedSuccessModal({ onClose, eventSlug }: FeaturedSuccessModalProps) {
+    const { resetSuccess, status } = useFeatureCheckout()
 
-    const { status, resetSuccess } = useFeatureCheckout()
+    const handleClose = () => { onClose(); resetSuccess() }
 
     const nextSteps = [
-        {
-            icon: "hugeicons:user-id-verification",
-            text: "Increased visibility across the platform",
-            color: "text-blue-500"
-        },
-        {
-            icon: "hugeicons:checkmark-badge-03",
-            text: "Your event is now live with a Featured badge",
-            color: "text-orange-500"
-        },
-        {
-            icon: "hugeicons:dollar-circle",
-            text: "You can track performance from your dashboard",
-            color: "text-green-500"
-        }
+        { icon: "hugeicons:user-id-verification", text: "Increased visibility across the platform", color: "text-blue-500" },
+        { icon: "hugeicons:checkmark-badge-03", text: "Featured badge is now live on your event", color: "text-orange-500" },
+        { icon: "hugeicons:dollar-circle", text: "Track performance from your dashboard", color: "text-green-500" },
     ]
 
     return (
         <AnimatedDialog
             open={status === "success"}
-            onOpenChange={() => {
-                onClose()
-                resetSuccess()
-            }}
+            onOpenChange={handleClose}
             showCloseButton={false}
-            className="rounded-[40px] md:max-w-[32em]"
-            childrenContainerStyles="px-8 pt-0! pb-10"
+            className="rounded-3xl md:max-w-[26em] pt-0!"
+            childrenContainerStyles="px-6 pb-8 pt-0"
         >
-            <div className="text-center relative overflow-hidden">
-                {/* Confetti Backgrounds */}
-                <Image
-                    src="/images/vectors/confetti.svg"
-                    alt="" aria-hidden="true"
-                    width={500} height={500}
-                    className="block md:hidden absolute w-full top-0 left-0 pointer-events-none select-none opacity-70"
-                />
+            <div className="relative text-center overflow-hidden">
                 <Image
                     src="/images/vectors/confetti-lg.svg"
-                    alt="" aria-hidden="true"
+                    alt=""
+                    aria-hidden="true"
                     width={500} height={500}
-                    className="hidden md:block absolute w-full top-0 left-0 pointer-events-none select-none opacity-70"
+                    className="absolute w-full top-0 left-0 pointer-events-none select-none opacity-60"
                 />
 
-                <div className="relative z-10 mt-10">
-                    {/* Featured Success Indicator Badge */}
-                    <div className="relative mx-auto mb-6 w-fit">
-                        <Image
-                            src="/images/vectors/publish-status.svg"
-                            alt="Success"
-                            width={122} height={131}
-                            className=""
-                        />
+                <div className="relative mt-3 z-10 flex flex-col items-center gap-5">
+                    <Image
+                        src="/images/vectors/publish-status.svg"
+                        alt="Success"
+                        width={100} height={100}
+                    />
+
+                    <div>
+                        <DialogTitle className={`text-xl font-bold text-brand-secondary-9 ${space_grotesk.className}`}>
+                            Your event is now featured!
+                        </DialogTitle>
+                        <DialogDescription className="text-brand-secondary-6 text-xs mt-1 max-w-[80%] mx-auto">
+                            Added to Featured Events for your selected duration.
+                        </DialogDescription>
                     </div>
 
-                    <DialogTitle className={`text-2xl lg:text-3xl font-bold text-brand-secondary-9 mb-2 ${space_grotesk.className}`}>
-                        Congrats! Your event is now featured.
-                    </DialogTitle>
-
-                    <DialogDescription className="text-brand-secondary-9 text-sm max-w-[85%] mx-auto">
-                        Your event has been added to the Featured Events section. It will remain featured for the selected duration.
-                    </DialogDescription>
-
-                    {/* Next Steps Section */}
-                    <div className="mt-10 space-y-4">
-                        <p className="font-medium text-brand-secondary-9 my-4">What happens next:</p>
+                    <div className="w-full space-y-2">
                         {nextSteps.map((step, idx) => (
-                            <div key={idx} className="flex shadow-[0_5.8px_23.17px_0_#3326AE14] items-center gap-4 p-4 bg-white rounded-md border border-brand-neutral-2/40 text-left">
-                                <div className={` ${step.color}`}>
-                                    <Icon icon={step.icon} className="size-5" />
-                                </div>
-                                <span className="text-sm text-brand-secondary-8">
-                                    {step.text}
-                                </span>
+                            <div key={idx} className="flex items-center gap-3 px-3 py-2.5 bg-white rounded-lg border border-brand-neutral-2/40 text-left shadow-sm">
+                                <Icon icon={step.icon} className={`size-4 shrink-0 ${step.color}`} />
+                                <span className="text-xs text-brand-secondary-8">{step.text}</span>
                             </div>
                         ))}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex w-full flex-col gap-5 mt-10">
-                        <ActionButton1
-                            buttonText="View Featured Event"
-                            icon="solar:arrow-right-linear"
-                            iconPosition="right"
-                            action={() => window.open(EVENT_DETAILS_LINK.replace("[event_id]", eventSlug?.toString() || ""), "_blank")}
-                            className="w-full flex-1 text-sm! rounded-md!"
-                        />
+                    <div className="flex w-full gap-3 p-1">
                         <button
-                            onClick={() => {
-                                onClose()
-                                resetSuccess()
-                            }}
-                            className="bg-transparent rounded-md border-2 border-brand-primary-6 h-12 text-brand-primary-6 font-semibold w-full"
+                            onClick={handleClose}
+                            className="flex-1 h-10 rounded-lg border border-brand-primary-6 text-brand-primary-6 font-semibold text-sm"
                         >
                             Go back
                         </button>
+                        <ActionButton1
+                            buttonText="View Event"
+                            icon="solar:arrow-right-linear"
+                            iconPosition="right"
+                            action={() => {
+                                const url = EVENT_DETAILS_LINK.replace("[event_id]", eventSlug?.toString() || "")
+                                const a = document.createElement("a")
+                                a.href = url
+                                a.target = "_blank"
+                                a.rel = "noopener noreferrer"
+                                a.click()
+                            }}
+                            className="flex-1 text-sm! rounded-lg! h-10!"
+                        />
                     </div>
                 </div>
             </div>

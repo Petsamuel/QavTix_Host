@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useTransition, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Icon } from '@iconify/react'
 import { AnimatedDialog } from '@/components/custom-utils/dialogs/AnimatedDialog'
 import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
@@ -37,6 +37,14 @@ export default function AllActivityNotificationsModal({
     const [hasMore, setHasMore] = useState(initialHasMore)
     const [isPending, startTransition] = useTransition()
 
+    const searchParams = useSearchParams()
+
+    useEffect(() => {
+        setActivities(initialActivities)
+        setNotifications(initialNotifications)
+        setCurrentPage(initialPage)
+    }, [initialActivities, initialNotifications, initialPage])
+
     const handleClose = () => {
         setOpen(false)
         setTimeout(() => router.back(), 300)
@@ -44,11 +52,19 @@ export default function AllActivityNotificationsModal({
 
     const handleLoadMore = () => {
         startTransition(async () => {
-            const res = await getDashboardFeed({ page: currentPage + 1 })
+            const params: any = { page: currentPage + 1 }
+            if (searchParams.get('activity_type')) params.activity_type = searchParams.get('activity_type')
+            if (searchParams.get('notification_type')) params.notification_type = searchParams.get('notification_type')
+            
+            const res = await getDashboardFeed(params)
             if (res.success && res.data) {
-                setActivities(prev => [...prev, ...res.data!.activities])
-                setNotifications(prev => [...prev, ...res.data!.notifications])
-                setCurrentPage(currentPage + 1)
+                if (res.data.activities?.length === 0 && res.data.notifications?.length === 0) {
+                    setHasMore(false)
+                } else {
+                    setActivities(prev => [...prev, ...(res.data!.activities || [])])
+                    setNotifications(prev => [...prev, ...(res.data!.notifications || [])])
+                    setCurrentPage(currentPage + 1)
+                }
             }
         })
     }
@@ -132,7 +148,7 @@ export default function AllActivityNotificationsModal({
             )}
 
             {/* Load more button — shared across both tabs since data comes from one endpoint */}
-            {hasMore && !isPending && (
+            {hasMore && !isPending && (isActivityTab ? activities.length > 0 : notifications.length > 0) && (
                 <div className="px-6 pb-4 pt-1">
                     <button
                         onClick={handleLoadMore}

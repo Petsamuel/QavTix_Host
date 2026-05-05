@@ -1,15 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { Icon } from '@iconify/react'
 import RecentActivityItem from './RecentActivityItem'
 import { cn } from '@/lib/utils'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { useAppSelector } from '@/lib/redux/hooks'
 import { useIsMounted } from '@/custom-hooks/UseIsMounted'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface RecentActivityTabProps {
     activities: DashboardActivity[]
@@ -25,40 +26,58 @@ const FILTER_OPTIONS: { label: string; value: ActivityType }[] = [
 const PREVIEW_COUNT = 4
 
 export default function RecentActivityTab({ activities }: RecentActivityTabProps) {
-    const [filterValue, setFilterValue] = useState<string>("")
+    const router = useRouter()
     const pathName = usePathname()
+    const searchParams = useSearchParams()
+
+    const filterValue = searchParams.get('activity_type') || ""
+
     const { user } = useAppSelector(store => store.authUser)
     const isMounted = useIsMounted()
+    const [isFiltering, startFiltering] = useTransition()
 
-    const filtered = filterValue
-        ? activities.filter(a => a.activity_type === filterValue)
-        : activities
+    const isCompletelyEmpty = activities.length === 0 && !filterValue
 
-    const preview = filtered.slice(0, PREVIEW_COUNT)
+    const preview = activities.slice(0, PREVIEW_COUNT)
+
+    const handleFilterChange = (v: string) => {
+        const newValue = v === filterValue ? "" : v;
+        const params = new URLSearchParams(searchParams.toString());
+        if (newValue) {
+            params.set('activity_type', newValue);
+        } else {
+            params.delete('activity_type');
+        }
+        startFiltering(() => {
+            router.push(`${pathName}?${params.toString()}`, { scroll: false });
+        })
+    }
 
     return (
         <div className="space-y-2 w-full">
-            <div className="flex items-center justify-between px-4">
-                <Select
-                    value={filterValue}
-                    onValueChange={(v) => setFilterValue(v === filterValue ? "" : v)}
-                >
-                    <SelectTrigger
-                        className={cn(
-                            "border-brand-neutral-8 font-medium disabled:cursor-not-allowed disabled:opacity-65 text-xs w-fit bg-white rounded-lg border-neutral-4 hover:border-brand-neutral-5 focus:border-brand-primary-6",
-                        )}
+            <div className={cn("flex items-center px-4", isCompletelyEmpty ? "justify-end" : "justify-between")}>
+                {!isCompletelyEmpty && (
+                    <Select
+                        value={filterValue}
+                        onValueChange={handleFilterChange}
                     >
-                        <Icon icon="hugeicons:sliders-horizontal" width="24" height="24" className="shrink-0" />
-                        <SelectValue placeholder="Filter" />
-                    </SelectTrigger>
-                    <SelectContent className='z-999'>
-                        {FILTER_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                                {opt.label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                        <SelectTrigger
+                            className={cn(
+                                "border-brand-neutral-8 font-medium disabled:cursor-not-allowed disabled:opacity-65 text-xs w-fit bg-white rounded-lg border-neutral-4 hover:border-brand-neutral-5 focus:border-brand-primary-6",
+                            )}
+                        >
+                            <Icon icon="hugeicons:sliders-horizontal" width="24" height="24" className="shrink-0" />
+                            <SelectValue placeholder="Filter" />
+                        </SelectTrigger>
+                        <SelectContent className='z-999'>
+                            {FILTER_OPTIONS.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                                    {opt.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
 
 
                 <Badge className='bg-brand-accent-1 text-brand-accent-7'>
@@ -67,7 +86,11 @@ export default function RecentActivityTab({ activities }: RecentActivityTabProps
             </div>
 
             <div className="space-y-2 px-4">
-                {preview.length > 0 ? (
+                {isFiltering ? (
+                    Array.from({ length: PREVIEW_COUNT }).map((_, i) => (
+                        <Skeleton key={i} className="h-[72px] bg-brand-neutral-4 w-full rounded-xl" />
+                    ))
+                ) : preview.length > 0 ? (
                     preview.map((activity) => (
                         <RecentActivityItem key={activity.id} activity={activity} />
                     ))
@@ -79,7 +102,7 @@ export default function RecentActivityTab({ activities }: RecentActivityTabProps
                 )}
             </div>
 
-            {filtered.length > PREVIEW_COUNT && !pathName.includes("/all-activities") && (
+            {!isCompletelyEmpty && activities.length > PREVIEW_COUNT && !pathName.includes("/all-activities") && (
                 <div className="px-4 pt-1 pb-2">
                     <Link
                         href="/dashboard/all-activities"

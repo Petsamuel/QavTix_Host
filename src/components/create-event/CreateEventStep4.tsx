@@ -22,12 +22,13 @@ import { useEventCreation } from '@/contexts/create-event/CreateEventProvider'
 import { useStepper } from '@/contexts/create-event/StepperProvider'
 import { PlanGateBanner } from './PlanGateBanner'
 import { usePlanRestrictions } from '@/custom-hooks/useRestriction'
+import { writeEventDraft, useStepDraftSync } from '@/custom-hooks/UseEventDraftPersist'
 
 
 
 export default function CreateEventStep4() {
 
-    const { updateStep, eventData } = useEventCreation()
+    const { updateStep, eventData, hasDraftAvailable, isEditMode, isDuplicate } = useEventCreation()
     const { goToNextStep } = useStepper()
     const plan = usePlanRestrictions()
 
@@ -64,6 +65,13 @@ export default function CreateEventStep4() {
         },
     })
 
+    useStepDraftSync({
+        stepKey: "settings",
+        control: methods.control,
+        enabled: !hasDraftAvailable && !isEditMode,
+        eventData
+    })
+
     const { control, watch, register, handleSubmit, formState: { errors } } = methods
     const { fields: collaborators, append, remove, update } = useFieldArray({
         control,
@@ -89,6 +97,12 @@ export default function CreateEventStep4() {
             },
         }
         updateStep("settings", sanitized)
+        if (!isEditMode && !isDuplicate) {
+            writeEventDraft({
+                ...eventData,
+                settings: data,
+            })
+        }
         goToNextStep()
     }
 
@@ -116,39 +130,34 @@ export default function CreateEventStep4() {
                         <h3 className="text-brand-secondary-8 font-bold">Check-In Settings</h3>
                         <div className="space-y-4">
 
-                            {/* QR Code — gated */}
                             <div className="space-y-1.5">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <label className={cn(
-                                            "text-sm",
-                                            !plan.canUseQrCheckin ? "text-brand-secondary-5" : "text-brand-secondary-9"
-                                        )}>
+                                {plan.canUseQrCheckin ? (
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-sm text-brand-secondary-9">
                                             QR code enabled
                                         </label>
-                                        {!plan.canUseQrCheckin && (
-                                            <Icon icon="lucide:lock" className="size-3.5 text-amber-500" />
-                                        )}
+                                        <Controller
+                                            name="checkInSettings.qrCodeEnabled"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Switch
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                    data-testid="switch-qr-code"
+                                                />
+                                            )}
+                                        />
                                     </div>
-                                    <Controller
-                                        name="checkInSettings.qrCodeEnabled"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Switch
-                                                checked={plan.canUseQrCheckin ? field.value : false}
-                                                onCheckedChange={plan.canUseQrCheckin ? field.onChange : undefined}
-                                                disabled={!plan.canUseQrCheckin}
-                                                data-testid="switch-qr-code"
-                                            />
-                                        )}
-                                    />
-                                </div>
-                                {!plan.canUseQrCheckin && (
-                                    <PlanGateBanner
-                                        message={plan.upgradePromptFor("qr_checkin") ?? "QR Check-In requires a plan upgrade."}
-                                        variant="inline"
-                                        data-testid="qr-plan-gate"
-                                    />
+                                ) : (
+                                    <div className="space-y-2">
+                                        <label className="text-[15px] text-brand-secondary-5 font-medium">
+                                            QR code enabled
+                                        </label>
+                                        <PlanGateBanner
+                                            message={plan.upgradePromptFor("qr_checkin") ?? "QR Check-in is not available on your current plan. Upgrade to access this feature."}
+                                            data-testid="qr-plan-gate"
+                                        />
+                                    </div>
                                 )}
                             </div>
 
@@ -189,7 +198,7 @@ export default function CreateEventStep4() {
                                     <CustomInput2
                                         label="Enter Minimum Age Required"
                                         type="number"
-                                        placeholder="18"
+                                        placeholder="e.g 18"
                                         className="max-w-max"
                                         error={errors.checkInSettings?.minimumAge?.message}
                                         {...register("checkInSettings.minimumAge")}
@@ -230,27 +239,15 @@ export default function CreateEventStep4() {
 
                     {/* Affiliate Program — gated */}
                     <section className="space-y-6" data-testid="section-affiliate-program">
-                        <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                                <h3 className="text-brand-secondary-8 font-bold">Affiliate Program</h3>
-                                {!plan.canUseAffiliate && (
-                                    <Icon icon="lucide:lock" className="size-4 text-amber-500" />
-                                )}
-                            </div>
-                            <p className="text-sm text-brand-secondary-9">
-                                When this is turned on, users can generate links, help sell tickets and get commission
-                            </p>
-                        </div>
-
-                        {/* Gate banner */}
-                        {!plan.canUseAffiliate ? (
-                            <PlanGateBanner
-                                message={plan.upgradePromptFor("affiliate") ?? "Affiliate Program requires a plan upgrade."}
-                                variant="block"
-                                data-testid="affiliate-plan-gate"
-                            />
-                        ) : (
+                        {plan.canUseAffiliate ? (
                             <>
+                                <div className="space-y-1">
+                                    <h3 className="text-brand-secondary-8 font-bold">Affiliate Program</h3>
+                                    <p className="text-sm text-brand-secondary-9">
+                                        When this is turned on, users can generate links, help sell tickets and get commission
+                                    </p>
+                                </div>
+
                                 <div className="flex items-center justify-between">
                                     <label className="text-sm text-brand-secondary-9">Turn On Affiliate</label>
                                     <Controller
@@ -307,6 +304,16 @@ export default function CreateEventStep4() {
                                     </div>
                                 )}
                             </>
+                        ) : (
+                            <div className="space-y-2">
+                                <label className="text-[15px] text-brand-secondary-5 font-medium">
+                                    Affiliate Program
+                                </label>
+                                <PlanGateBanner
+                                    message={plan.upgradePromptFor("affiliate") ?? "Affiliate Program is not available on your current plan. Upgrade to access this feature."}
+                                    data-testid="affiliate-plan-gate"
+                                />
+                            </div>
                         )}
                     </section>
                 </div>

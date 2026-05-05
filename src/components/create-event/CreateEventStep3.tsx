@@ -22,6 +22,7 @@ import { usePlanRestrictions } from '@/custom-hooks/useRestriction'
 import { PlanGateBanner } from './PlanGateBanner'
 import { CustomDateTimeInput } from '../custom-utils/inputs/CustomDateTimeInput'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
+import { writeEventDraft, useStepDraftSync } from '@/custom-hooks/UseEventDraftPersist'
 
 const LabelWithTooltip = ({ label, tooltipText }: { label: string, tooltipText: string }) => (
     <div className="flex items-center gap-1.5">
@@ -45,7 +46,7 @@ const LabelWithTooltip = ({ label, tooltipText }: { label: string, tooltipText: 
 
 export default function CreateEventStep3() {
 
-    const { updateStep, eventData } = useEventCreation()
+    const { updateStep, eventData, isEditMode, isDuplicate, eventStatus, hasDraftAvailable } = useEventCreation()
     const { goToNextStep } = useStepper()
     const plan = usePlanRestrictions()
 
@@ -57,10 +58,17 @@ export default function CreateEventStep3() {
             refundPolicy: eventData.ticketsPricing?.refundPolicy ?? 'no',
             customRefundPercentage: eventData.ticketsPricing?.customRefundPercentage ?? 1,
             salesPeriod: eventData.ticketsPricing?.salesPeriod ?? {
-                startDateTime: "",
-                endDateTime: "",
-            },
+                startDateTime: '',
+                endDateTime: '',
+            }
         },
+    })
+
+    useStepDraftSync({
+        stepKey: "ticketsPricing",
+        control: methods.control,
+        enabled: !hasDraftAvailable && !isEditMode,
+        eventData
     })
 
     const { register, control, watch, setValue, handleSubmit, formState: { errors } } = methods
@@ -73,10 +81,17 @@ export default function CreateEventStep3() {
         return acc + (!!(t.promoCode?.codeWord?.trim()) ? 1 : 0)
     }, 0)
 
-    const canAddAnotherTicketType = plan.canAddTicketType(fields.length)
+    const isLiveEdit = isEditMode && (eventStatus === 'active' || eventStatus === 'completed')
+    const canAddAnotherTicketType = plan.canAddTicketType(fields.length) && !isLiveEdit
 
     const handleStep3Submit: SubmitHandler<Step3FormData> = (data) => {
         updateStep("ticketsPricing", data)
+        if (!isEditMode && !isDuplicate) {
+            writeEventDraft({
+                ...eventData,
+                ticketsPricing: data,
+            })
+        }
         goToNextStep()
     }
 
@@ -125,14 +140,15 @@ export default function CreateEventStep3() {
                                     className="space-y-6 relative border-b last-of-type:border-b-0 border-brand-neutral-5 pb-12 mb-12 last-of-type:pb-0 last-of-type:mb-6"
                                     data-testid={`ticket-type-row-${index}`}
                                 >
-                                    {fields.length > 1 && (
+                                    {fields.length > 1 && !isLiveEdit && (
                                         <button
                                             title="Remove Ticket Type"
                                             type="button"
                                             onClick={() => remove(index)}
-                                            className="absolute -top-4 right-4 text-red-400 hover:text-red-600 transition-colors"
+                                            className="absolute -top-4 right-4 text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
                                             aria-label={`Remove ticket type ${index + 1}`}
                                             data-testid={`btn-remove-ticket-type-${index}`}
+                                            disabled={isLiveEdit}
                                         >
                                             <Trash2 className="size-4 md:size-5" />
                                         </button>
@@ -150,6 +166,7 @@ export default function CreateEventStep3() {
                                                     onValueChange={selectField.onChange}
                                                     error={errors.ticketTypes?.[index]?.ticketType?.message}
                                                     data-testid={`select-ticket-type-${index}`}
+                                                    disabled={isLiveEdit}
                                                 />
                                             )}
                                         />
@@ -172,6 +189,7 @@ export default function CreateEventStep3() {
                                             error={errors.ticketTypes?.[index]?.price?.message}
                                             data-testid={`input-ticket-price-${index}`}
                                             disableCurrencySelect
+                                            disabled={isLiveEdit}
                                         />
                                         <CustomInput2
                                             label={<LabelWithTooltip label="Quantity" tooltipText="The total number of available tickets for this category." />}
@@ -196,42 +214,39 @@ export default function CreateEventStep3() {
                                         className="pt-6 border-t border-dashed border-brand-secondary-2 space-y-4"
                                         data-testid={`section-promo-code-${index}`}
                                     >
-                                        <div className="flex items-center justify-between">
-                                            <h4 className="text-brand-secondary-8 font-bold md:text-base text-sm">
-                                                Promo Code
-                                            </h4>
-                                            {/* Per-plan usage counter */}
-                                            {plan.canUsePromoCodes && plan.promoCodeLimit > 0 && (
-                                                <span
-                                                    className={cn(
-                                                        "text-xs font-medium tabular-nums",
-                                                        totalPromoCodes >= plan.promoCodeLimit
-                                                            ? "text-amber-600"
-                                                            : "text-brand-secondary-5"
-                                                    )}
-                                                    data-testid={`promo-counter-${index}`}
-                                                >
-                                                    {totalPromoCodes}/{plan.promoCodeLimit} used
-                                                </span>
-                                            )}
-                                            {/* Locked badge */}
-                                            {!plan.canUsePromoCodes && (
-                                                <span className="flex items-center gap-1 text-xs text-amber-600 font-medium">
-                                                    <Icon icon="lucide:lock" className="size-3" />
-                                                    Upgrade required
-                                                </span>
-                                            )}
-                                        </div>
-
                                         {/* Plan doesn't include promo codes at all */}
                                         {plan.promoCodeLimitMsg ? (
-                                            <PlanGateBanner
-                                                message={plan.promoCodeLimitMsg}
-                                                variant="inline"
-                                                data-testid={`promo-gate-${index}`}
-                                            />
+                                            <div className="space-y-2">
+                                                <label className="text-[15px] text-brand-secondary-5 font-medium">
+                                                    Promo Code
+                                                </label>
+                                                <PlanGateBanner
+                                                    message="Promo Codes are not available on the free plan."
+                                                    data-testid={`promo-gate-${index}`}
+                                                />
+                                            </div>
                                         ) : (
                                             <>
+                                                <div className="flex items-center justify-between">
+                                                    <h4 className="text-brand-secondary-8 font-bold md:text-base text-sm">
+                                                        Promo Code
+                                                    </h4>
+                                                    {/* Per-plan usage counter */}
+                                                    {plan.canUsePromoCodes && plan.promoCodeLimit > 0 && (
+                                                        <span
+                                                            className={cn(
+                                                                "text-xs font-medium tabular-nums",
+                                                                totalPromoCodes >= plan.promoCodeLimit
+                                                                    ? "text-amber-600"
+                                                                    : "text-brand-secondary-5"
+                                                            )}
+                                                            data-testid={`promo-counter-${index}`}
+                                                        >
+                                                            {totalPromoCodes}/{plan.promoCodeLimit} used
+                                                        </span>
+                                                    )}
+                                                </div>
+
                                                 <div className={cn(
                                                     "grid grid-cols-1 md:grid-cols-4 gap-4 transition-opacity",
                                                     !promoEditable && "opacity-50 pointer-events-none"
@@ -278,11 +293,12 @@ export default function CreateEventStep3() {
 
                                                 {/* Limit reached and this ticket doesn't already have a code */}
                                                 {!promoEditable && !existingCode && plan.canUsePromoCodes && (
-                                                    <PlanGateBanner
-                                                        message={`You've used all ${plan.promoCodeLimit} promo code${plan.promoCodeLimit === 1 ? "" : "s"} allowed on your plan. Upgrade to add more.`}
-                                                        variant="inline"
-                                                        data-testid={`promo-limit-reached-${index}`}
-                                                    />
+                                                    <div className="space-y-2 mt-4">
+                                                        <PlanGateBanner
+                                                            message={`You've used all ${plan.promoCodeLimit} promo code${plan.promoCodeLimit === 1 ? "" : "s"} allowed on your plan. Upgrade to add more.`}
+                                                            data-testid={`promo-limit-reached-${index}`}
+                                                        />
+                                                    </div>
                                                 )}
                                             </>
                                         )}
@@ -293,37 +309,36 @@ export default function CreateEventStep3() {
 
                         {/* ── Add Ticket Type ───────────────────────── */}
                         <div className="space-y-2" data-testid="add-ticket-type-wrapper">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    if (!canAddAnotherTicketType) return
-                                    append({ id: crypto.randomUUID(), ticketType: '', price: 0, currency: 'NGN', quantity: 1 })
-                                }}
-                                disabled={!canAddAnotherTicketType}
-                                className={cn(
-                                    "w-59 h-14 text-sm rounded-[6px] border-[1.4px] border-dashed transition-all",
-                                    canAddAnotherTicketType
-                                        ? "border-brand-secondary-5 bg-transparent hover:bg-brand-primary-1 hover:border-brand-primary-7 text-brand-secondary-5"
-                                        : "border-amber-200 bg-amber-50/60 text-amber-500 cursor-not-allowed"
-                                )}
-                                data-testid="btn-add-ticket-type"
-                                aria-disabled={!canAddAnotherTicketType}
-                            >
-                                <span className="flex items-center text-sm justify-center gap-2">
-                                    {canAddAnotherTicketType
-                                        ? <Icon icon="lucide:plus" className="w-4 h-4" />
-                                        : <Icon icon="lucide:lock" className="w-4 h-4" />
-                                    }
-                                    {canAddAnotherTicketType ? "Add Another Ticket Type" : "Ticket type limit reached"}
-                                </span>
-                            </button>
-
-                            {!canAddAnotherTicketType && plan.ticketTypeLimitMsg && (
-                                <PlanGateBanner
-                                    message={plan.ticketTypeLimitMsg}
-                                    variant="inline"
-                                    data-testid="ticket-type-limit-msg"
-                                />
+                            {!canAddAnotherTicketType && plan.ticketTypeLimitMsg ? (
+                                <div className="space-y-2 pt-2">
+                                    <label className="text-[15px] text-brand-secondary-5 font-medium">
+                                        Ticket Type Limit reached
+                                    </label>
+                                    <PlanGateBanner
+                                        message={plan.ticketTypeLimitMsg}
+                                        data-testid="ticket-type-limit-msg"
+                                    />
+                                </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (!canAddAnotherTicketType) return
+                                        append({ id: crypto.randomUUID(), ticketType: '', price: 0, currency: 'NGN', quantity: 1 })
+                                    }}
+                                    disabled={!canAddAnotherTicketType}
+                                    className={cn(
+                                        "w-59 h-14 text-sm rounded-[6px] border-[1.4px] border-dashed transition-all",
+                                        "border-brand-secondary-5 bg-transparent hover:bg-brand-primary-1 hover:border-brand-primary-7 text-brand-secondary-5"
+                                    )}
+                                    data-testid="btn-add-ticket-type"
+                                    aria-disabled={!canAddAnotherTicketType}
+                                >
+                                    <span className="flex items-center text-sm justify-center gap-2">
+                                        <Icon icon="lucide:plus" className="w-4 h-4" />
+                                        {isLiveEdit ? "Ticket management disabled for live events" : "Add Another Ticket Type"}
+                                    </span>
+                                </button>
                             )}
                         </div>
                     </section>

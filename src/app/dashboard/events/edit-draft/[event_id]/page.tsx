@@ -30,6 +30,7 @@ export default async function EditEventPage({ params }: Props) {
             categories={categoryResult.data}
             initialData={initialFormData} 
             eventID={event_id}
+            eventStatus={eventResult.data.event_status}
         />
     )
 }

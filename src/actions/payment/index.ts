@@ -1,8 +1,6 @@
-'use cache';
-
+import { CACHE_TAGS } from "@/cache-tags"
 import { PAYMENT_METHODS_ENDPOINT, PLANS_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
-import { cacheLife } from "next/cache"
 
 interface PaymentMethodsResult {
     success: boolean
@@ -11,7 +9,6 @@ interface PaymentMethodsResult {
 }
 
 export async function getPaymentMethods(token: string | undefined): Promise<PaymentMethodsResult> {
-    cacheLife("minutes")
     try {
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${PAYMENT_METHODS_ENDPOINT}`,
@@ -19,7 +16,8 @@ export async function getPaymentMethods(token: string | undefined): Promise<Paym
                 headers: {
                     "Content-Type": "application/json",
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                }
+                },
+                next: { tags: [CACHE_TAGS.PAYMENT_METHODS], revalidate: 300 }
             }
         )
 
@@ -38,7 +36,6 @@ export async function getPaymentMethods(token: string | undefined): Promise<Paym
 }
 
 export async function getPlans(token: string | undefined) {
-    cacheLife("days")
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${PLANS_ENDPOINT}`, {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
