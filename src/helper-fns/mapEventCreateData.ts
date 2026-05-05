@@ -12,6 +12,7 @@ export function mapEventToFormData(
 
     const categoryId = categories.find(c => c.id === event.category)?.id?.toString() ?? ""
 
+    console.log(event.event_location.state)
     const countryValue = countries.find(v => v.label === event.event_location?.country)?.value ?? event.event_location?.country ?? ""
     const stateValue = getStates(countryValue).find(v => v.label === event.event_location?.state)?.value ?? event.event_location?.state ?? ""
 

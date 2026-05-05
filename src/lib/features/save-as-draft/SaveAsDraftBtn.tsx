@@ -11,16 +11,18 @@ import { useRouter } from "next/navigation"
 import { NAVIGATION_LINKS } from "@/enums/navigation"
 import { uploadEventMedia } from "@/helper-fns/uploadEventMedia"
 import { sanitizeEventDataForServer } from "@/lib/cloudinary"
-import { saveEventAsDraft, updateEventAsDraft } from "@/actions/event/creation"
+import { saveEventAsDraft, updateEventAsDraft, updateAndPublishEvent } from "@/actions/event/creation"
 
 
 export default function SaveAsDraftBtn() {
 
-    const { eventData, isEditMode, eventID } = useEventCreation()
+    const { eventData, isEditMode, eventID, eventStatus, discardDraft } = useEventCreation()
     const dispatch = useAppDispatch()
     const router = useRouter()
     const { trigger } = useRevalidate("events")
     const [saving, setSaving] = useState(false)
+
+    const isLive = eventStatus === 'active' || eventStatus === 'completed'
 
     const handleSave = async () => {
         if (saving) return
@@ -29,9 +31,16 @@ export default function SaveAsDraftBtn() {
             const media = await uploadEventMedia(eventData.detailsMedia)
             const sanitizedEventData = sanitizeEventDataForServer(eventData, media)
             
-            const result = isEditMode && eventID
-                ? await updateEventAsDraft({ eventId: eventID, eventData: sanitizedEventData, media })
-                : await saveEventAsDraft({ eventData: sanitizedEventData, media })
+            let result;
+            if (isEditMode && eventID) {
+                if (isLive) {
+                    result = await updateAndPublishEvent({ eventId: eventID, eventData: sanitizedEventData, media })
+                } else {
+                    result = await updateEventAsDraft({ eventId: eventID, eventData: sanitizedEventData, media })
+                }
+            } else {
+                result = await saveEventAsDraft({ eventData: sanitizedEventData, media })
+            }
 
             if (result.success) {
                 dispatch(showAlert({
@@ -39,12 +48,13 @@ export default function SaveAsDraftBtn() {
                     description: isEditMode ? "Your event changes have been saved." : "Your event progress has been saved.",
                     variant: "success",
                 }))
+                discardDraft()
                 trigger()
                 router.push(NAVIGATION_LINKS.MY_EVENTS.href)
             } else {
                 dispatch(showAlert({
                     title: "Save Failed",
-                    description: result.message ?? "Could not save your draft. Please try again.",
+                    description: result.message ?? "Could not save your changes. Please try again.",
                     variant: "destructive",
                 }))
             }
@@ -69,7 +79,7 @@ export default function SaveAsDraftBtn() {
                 "hover:bg-brand-primary-2 hover:scale-105 transition-all ease-in-out duration-200",
                 "disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100"
             )}
-            aria-label={saving ? "Saving draft..." : "Save as Draft"}
+            aria-label={saving ? "Saving..." : (isEditMode && isLive) ? "Save Changes" : "Save as Draft"}
             data-testid="btn-save-as-draft"
         >
             <span className="size-9 md:size-7 rounded-sm flex justify-center items-center bg-brand-primary-4 text-white shrink-0">
@@ -79,7 +89,7 @@ export default function SaveAsDraftBtn() {
                 }
             </span>
             <span className="hidden md:inline">
-                {saving ? "Saving..." : "Save as Draft"}
+                {saving ? "Saving..." : (isEditMode && isLive) ? "Save Changes" : "Save as Draft"}
             </span>
         </button>
     )

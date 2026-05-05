@@ -18,11 +18,11 @@ import { useEventCreation } from "@/contexts/create-event/CreateEventProvider";
 import { useStepper } from "@/contexts/create-event/StepperProvider";
 import { useEffect } from "react";
 import { generateMapLink } from "@/helper-fns/generateMapLink";
-
+import { writeEventDraft, useStepDraftSync } from "@/custom-hooks/UseEventDraftPersist";
 
 export default function CreateEventStep1() {
 
-    const { updateStep, eventData, categories } = useEventCreation()
+    const { updateStep, eventData, categories, hasDraftAvailable, isEditMode, isDuplicate } = useEventCreation()
     const { goToNextStep } = useStepper()
 
     const {
@@ -54,6 +54,13 @@ export default function CreateEventStep1() {
         },
     })
 
+    useStepDraftSync({
+        stepKey: "basicInformation",
+        control,
+        enabled: !hasDraftAvailable && !isEditMode,
+        eventData
+    })
+
     const eventType = watch("eventType")
     const locationType = watch("locationType")
     const selectedTags = watch("additionalTags") || []
@@ -66,6 +73,13 @@ export default function CreateEventStep1() {
             startDateTime: data.startDateTime!,
             endDateTime: data.endDateTime!,
         })
+
+        if (!isEditMode && !isDuplicate) {
+            writeEventDraft({
+                ...eventData,
+                basicInformation: data,
+            })
+        }
         goToNextStep()
     }
 

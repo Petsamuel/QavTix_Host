@@ -1,4 +1,4 @@
-import { getPaymentMethods } from "@/actions/payment/index"
+import { getPaymentMethods } from "@/actions/payment"
 import { getPrivacySettings } from "@/actions/settings/index"
 import AccountSettingsContentWrapper from "@/components/page-wrappers/AccountSettingsContentWrapper"
 import { hostSiteMetadata, HOST_PAGE_METADATA } from "@/lib/metadata/index"

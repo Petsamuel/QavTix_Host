@@ -68,8 +68,8 @@ export default function ContentGatePromptModal({ open, onClose, config }: Props)
         <AnimatedDialogForPrompt open={open} onOpenChange={(v) => !v && onClose()}>
             <div>
                 <div className="size-14 mb-4 flex items-center justify-center rounded-2xl" style={{ background: "inherit" }}>
-                    <div className={`size-14 mb-4 flex items-center justify-center rounded-2xl ${config.iconBg}`}>
-                        <Icon icon={config.icon} className={`size-9 ${config.iconColor}`} />
+                    <div className={`size-14 mb-4 flex items-center justify-center rounded-full ${config.iconBg}`}>
+                        <Icon icon={config.icon} className={`size-8.5 ${config.iconColor}`} />
                     </div>
                 </div>
 

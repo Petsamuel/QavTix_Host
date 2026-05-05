@@ -90,6 +90,7 @@ interface DashboardFeedData {
     notifications:  DashboardNotification[]
     trending:       TrendingTicket[]
     follower_count: number
+    unread_notifications_count?: number
 }
 
 interface DashboardFeedParams {
@@ -97,6 +98,8 @@ interface DashboardFeedParams {
     page?:      number
     search?:    string
     ordering?:  string
+    activity_type?: string
+    notification_type?: string
 }
 
 interface GetDashboardFeedResult {

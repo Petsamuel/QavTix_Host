@@ -8,6 +8,7 @@ interface Customer {
     email: string
     status: CustomerListStatus
     events_attended: number
+    quantity_bought: number
     total_spent: string
     last_purchase_date: string
 }
@@ -43,81 +44,81 @@ interface CustomersParams {
 
 // CUSTOMER PROFILE
 interface CustomerProfileCards {
-    total_spent:             string
-    total_spent_change:      number
-    tickets_bought:          number
-    tickets_bought_change:   number
-    refund_count:            number
-    refund_count_change:     number
-    last_order_value:        string
+    total_spent: string
+    total_spent_change: number
+    tickets_bought: number
+    tickets_bought_change: number
+    refund_count: number
+    refund_count_change: number
+    last_order_value: string
     last_order_value_change: number
 }
 
 interface CustomerProfile {
-    user_id:             number
-    full_name:           string
-    email:               string
-    phone_number:        string
-    country:             string
-    state:               string
-    city:                string
-    gender:              string
-    dob:                 string
-    profile_picture:     string | null
-    registration_date:   string
+    user_id: number
+    full_name: string
+    email: string
+    phone_number: string
+    country: string
+    state: string
+    city: string
+    gender: string
+    dob: string
+    profile_picture: string | null
+    registration_date: string
     first_purchase_date: string
-    last_purchase_date:  string
+    last_purchase_date: string
 }
 
 interface CustomerProfileChartPoint {
-    label:  string
+    label: string
     amount: string
 }
 
 interface CustomerOrder {
-    order_id:       string
-    event_id:       string
-    event_name:     string
-    event_image:    string
+    order_id: string
+    event_id: string
+    event_name: string
+    event_image: string
     event_category: string
-    purchase_date:  string
-    quantity:       number
-    amount:         string
-    status:         string
+    purchase_date: string
+    quantity: number
+    amount: string
+    status: string
 }
 
 interface CustomerOrderHistory {
-    results:     CustomerOrder[]
-    count:       number
-    next:        string | null
-    previous:    string | null
+    results: CustomerOrder[]
+    count: number
+    next: string | null
+    previous: string | null
     total_pages?: number
 }
 
 interface CustomerProfileData {
-    cards:         CustomerProfileCards
-    profile:       CustomerProfile
+    cards: CustomerProfileCards
+    profile: CustomerProfile
     revenue_chart: CustomerProfileChartPoint[]
     order_history: CustomerOrderHistory
 }
 
 interface GetCustomerProfileResult {
     success: boolean
-    data?:   CustomerProfileData
+    data?: CustomerProfileData
     message?: string
 }
 
 interface CustomerProfileParams {
-    user_id:              number
-    date_range?:          'day' | 'week' | 'month'
-    event?:               string
-    chart_range?:         'day' | 'week' | 'month'
-    history_date_range?:  'day' | 'week' | 'month'
-    history_event?:       string
-    ticket_type?:         number
-    search?:              string
-    ordering?:            string
-    page?:                number
+    user_id: number
+    date_range?: 'day' | 'week' | 'month'
+    event?: string
+    chart_range?: 'day' | 'week' | 'month'
+    history_date_range?: 'day' | 'week' | 'month'
+    history_event?: string
+    ticket_type?: number
+    search?: string
+    ordering?: string
+    page?: number
 }
 
 type CustomerProfileDatePreset = 'day' | 'week' | 'month'

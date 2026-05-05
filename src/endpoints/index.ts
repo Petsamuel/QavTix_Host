@@ -6,6 +6,7 @@ export const HOST_UPCOMING_EVENTS_ENDPOINT = "host/events/management"
 export const EVENT_DETAILS_ENDPOINT = "host/events/[event_id]"
 export const EVENTS_ENDPOINT = "host/events/management"
 export const DASHBOARD_FEED_ENDPOINT = "host/dashboard/feed/"
+export const MARK_NOTIFICATIONS_READ_ENDPOINT = "host/dashboard/notifications/mark-read/"
 
 export const CATEGORIES_ENDPOINT = "public/categories"
 

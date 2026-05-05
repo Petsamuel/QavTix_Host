@@ -14,11 +14,11 @@ import MultiStepFormButtonDuo from "../custom-utils/buttons/MultiStepFormButtonD
 import { useEventCreation } from "@/contexts/create-event/CreateEventProvider";
 import { useStepper } from "@/contexts/create-event/StepperProvider";
 import { useAppSelector } from "@/lib/redux/hooks";
-
+import { writeEventDraft, useStepDraftSync } from "@/custom-hooks/UseEventDraftPersist";
 
 export default function CreateEventStep2() {
 
-    const { updateStep, eventData } = useEventCreation()
+    const { updateStep, eventData, hasDraftAvailable, isEditMode, isDuplicate } = useEventCreation()
     const { goToNextStep } = useStepper()
     const { user } = useAppSelector(store => store.authUser)
 
@@ -46,11 +46,24 @@ export default function CreateEventStep2() {
         },
     })
 
+    useStepDraftSync({
+        stepKey: "detailsMedia",
+        control,
+        enabled: !hasDraftAvailable && !isEditMode,
+        eventData
+    })
+
     const { fields, append, remove } = useFieldArray({ control, name: "socialMediaLinks" })
 
 
     const handleStep2Submit: SubmitHandler<Step2FormData> = (data) => {
         updateStep("detailsMedia", data)
+        if (!isEditMode && !isDuplicate) {
+            writeEventDraft({
+                ...eventData,
+                detailsMedia: data,
+            })
+        }
         goToNextStep()
     }
 

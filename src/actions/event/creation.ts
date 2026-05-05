@@ -90,8 +90,6 @@ export async function saveEventAsDraft({
 
         const json = await res.json()
 
-        console.log(res)
-        console.log(json)
 
         if (!res.ok) {
             return { success: false, message: handleApiError(json) || "Failed to save draft." }

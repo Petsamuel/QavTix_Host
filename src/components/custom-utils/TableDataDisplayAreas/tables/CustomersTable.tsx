@@ -5,7 +5,7 @@ import PaginationControls from "../tools/PaginationControl"
 import { formatDateTime } from "@/helper-fns/date-utils"
 import UserInfo from "../../users/UserInfo"
 import EmptyTicketsState from "../empty-state"
-import { v4 as randomUUID} from "uuid"
+import { v4 as randomUUID } from "uuid"
 import TableLoader from "@/components/loaders/TableLoader"
 import { useEffect, useState } from "react"
 import { useIsMounted } from "@/custom-hooks/UseIsMounted"
@@ -14,19 +14,19 @@ import { buildCustomerActions } from "../../dropdown/resources/customer-actions"
 import { useRouter } from "next/navigation"
 
 interface CustomersTableProps {
-    items:          Customer[]
-    isLoading:      boolean
-    isLoadingMore:  boolean
-    hasNext:        boolean
-    count:          number
-    onLoadMore:     () => void
-    isEmpty:        boolean
-    isError:        boolean
-    search:         string
+    items: Customer[]
+    isLoading: boolean
+    isLoadingMore: boolean
+    hasNext: boolean
+    count: number
+    onLoadMore: () => void
+    isEmpty: boolean
+    isError: boolean
+    search: string
     // Pagination
-    currentPage:    number
-    totalPages:     number
-    fetchPage:      (page: number) => void
+    currentPage: number
+    totalPages: number
+    fetchPage: (page: number) => void
 }
 
 export default function CustomersTable({
@@ -95,7 +95,7 @@ export default function CustomersTable({
                                 <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">Status</th>
                                 <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">Profile Info</th>
                                 <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">Address</th>
-                                <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">Attended</th>
+                                <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">Quantity Bought</th>
                                 <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">Total Spend</th>
                                 <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize whitespace-nowrap">Last Purchase</th>
                                 <th className="w-12 py-4 px-4" />
@@ -121,7 +121,7 @@ export default function CustomersTable({
                                         <td className="py-4 px-5">
                                             {
                                                 isMounted &&
-                                                <UserInfo user={{...customer, profile_picture: customer.profile_picture || undefined, id: customer.user_id as number || randomUUID()}} variant="desktop" />
+                                                <UserInfo user={{ ...customer, profile_picture: customer.profile_picture || undefined, id: customer.user_id as number || randomUUID() }} variant="desktop" />
                                             }
                                         </td>
                                         <td className="py-4 px-5">
@@ -131,7 +131,7 @@ export default function CustomersTable({
                                         </td>
                                         <td className="py-4 px-4 text-center">
                                             <p className="text-sm font-medium text-brand-secondary-9 whitespace-nowrap">
-                                                {customer.events_attended}
+                                                {customer.quantity_bought}
                                             </p>
                                         </td>
                                         <td className="py-4 px-5">
@@ -184,7 +184,7 @@ export default function CustomersTable({
                                         </span>
                                         <span className="flex items-center gap-1">
                                             <span className="font-bold capitalize">Attended:</span>
-                                            {customer.events_attended}
+                                            {customer.quantity_bought}
                                         </span>
                                     </div>
                                 </div>
@@ -197,7 +197,7 @@ export default function CustomersTable({
                             <div className="flex items-start flex-wrap justify-between gap-3 mb-4">
                                 {
                                     isMounted &&
-                                    <UserInfo user={{...customer, profile_picture: customer.profile_picture || undefined, id: customer.user_id as number || randomUUID()}} variant="mobile" className="shrink-0" />
+                                    <UserInfo user={{ ...customer, profile_picture: customer.profile_picture || undefined, id: customer.user_id as number || randomUUID() }} variant="mobile" className="shrink-0" />
                                 }
                                 <div className="flex flex-col gap-1 text-[11px] text-brand-secondary-9">
                                     <span className="font-bold">Last Purchase:</span>
