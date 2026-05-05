@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { cn } from '@/lib/utils'
 import { useTransition } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useState, useEffect } from 'react'
 
 interface NotificationsTabProps {
     notifications: DashboardNotification[]
@@ -34,10 +35,20 @@ export default function NotificationsTab({ notifications }: NotificationsTabProp
     const [isFiltering, startFiltering] = useTransition()
 
     const filterValue = searchParams.get('notification_type') || ""
+    const [optimisticFilter, setOptimisticFilter] = useState(filterValue)
     const isCompletelyEmpty = notifications.length === 0 && !filterValue
+
+    // Keep optimistic value in sync with URL when not actively filtering
+    useEffect(() => {
+        if (!isFiltering) {
+            setOptimisticFilter(filterValue)
+        }
+    }, [filterValue, isFiltering])
 
     const handleFilterChange = (v: string) => {
         const newValue = v === filterValue ? "" : v;
+        setOptimisticFilter(newValue); // Update UI immediately
+
         const params = new URLSearchParams(searchParams.toString());
         if (newValue) {
             params.set('notification_type', newValue);
@@ -60,7 +71,7 @@ export default function NotificationsTab({ notifications }: NotificationsTabProp
             {!isCompletelyEmpty && (
                 <div className="flex items-center justify-between">
                     <Select
-                        value={filterValue}
+                        value={optimisticFilter}
                         onValueChange={handleFilterChange}
                     >
                         <SelectTrigger
