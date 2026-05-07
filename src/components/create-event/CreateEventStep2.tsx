@@ -50,7 +50,8 @@ export default function CreateEventStep2() {
         stepKey: "detailsMedia",
         control,
         enabled: !hasDraftAvailable && !isEditMode,
-        eventData
+        eventData,
+        hasMinimumData: !!watch('shortDescription')?.trim(),
     })
 
     const { fields, append, remove } = useFieldArray({ control, name: "socialMediaLinks" })

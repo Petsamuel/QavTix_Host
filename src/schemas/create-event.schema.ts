@@ -21,7 +21,7 @@ const fileOrUrlSchema = yup.mixed<File | string>().test(
     }
 );
 
-const optionalFileOrUrl = yup.mixed<File | string>().test(
+const optionalFileOrUrl = yup.mixed<File | string>().nullable().optional().test(
     'optional-file-or-url',
     'Please provide a valid file or URL',
     (value) => {

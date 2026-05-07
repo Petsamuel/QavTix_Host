@@ -58,7 +58,8 @@ export default function CreateEventStep1() {
         stepKey: "basicInformation",
         control,
         enabled: !hasDraftAvailable && !isEditMode,
-        eventData
+        eventData,
+        hasMinimumData: !!watch('eventTitle')?.trim(),
     })
 
     const eventType = watch("eventType")
@@ -458,8 +459,8 @@ export default function CreateEventStep1() {
                                 data-testid="input-city"
                             />
                             <CustomInput2
-                                label="Postal Code"
-                                placeholder="Enter Postal Code (Optional)"
+                                label="Postal Code/Zip Code"
+                                placeholder="Enter Postal/Zip Code (Optional)"
                                 {...register("postalCode")}
                                 error={errors.postalCode?.message}
                                 data-testid="input-postal-code"

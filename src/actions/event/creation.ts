@@ -76,7 +76,7 @@ export async function saveEventAsDraft({
         const token = await getToken()
         const body = {
             ...buildEventPayload(eventData, "draft", media),
-            ...(scheduledAt ? { is_scheduled: true, scheduled_time: scheduledAt } : {}),
+            ...(scheduledAt ? { is_scheduled: true, schedule_time: scheduledAt } : {}),
         }
 
         const res = await fetch(
@@ -170,7 +170,7 @@ export async function updateEventAsDraft({
         const token = await getToken()
         const body = {
             ...buildEventPayload(eventData, "draft", media),
-            ...(scheduledAt ? { is_scheduled: true, scheduled_time: scheduledAt } : {}),
+            ...(scheduledAt ? { is_scheduled: true, schedule_time: scheduledAt } : {}),
         }
         const endpoint = EVENT_UPDATE.replace("[event_id]", String(eventId))
 

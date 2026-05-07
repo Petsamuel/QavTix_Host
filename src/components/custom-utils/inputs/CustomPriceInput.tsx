@@ -34,7 +34,7 @@ const CustomPriceInput = forwardRef<HTMLInputElement, PriceInputProps>(
 
         const { user } = useAppSelector(store => store.authUser)
 
-        const activeCurrency = currency ?? user?.currency ?? currencies[0]?.value
+        const activeCurrency = user?.currency ?? currencies[0]?.value
 
         const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = e.target.value.replace(/[^0-9.]/g, '')
