@@ -398,6 +398,14 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
 
     const metrics = mapEventsCards(cards)
 
+    const tabCounts: Record<string, number> = {
+        all: (cards.live ?? 0) + (cards.draft ?? 0) + (cards.ended ?? 0) + (cards.cancelled ?? 0) + (cards.sold_out ?? 0),
+        live: cards.live ?? 0,
+        draft: cards.draft ?? 0,
+        ended: cards.ended ?? 0,
+        cancelled: cards.cancelled ?? 0,
+    }
+
     const sharedProps = {
         isLoading: state.isLoading,
         isLoadingMore: state.isLoadingMore,
@@ -461,6 +469,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 onSearch={state.handleSearch}
                 currentSearch={state.search}
                 isLoading={state.isLoading}
+                tabCounts={tabCounts}
             >
                 {activeTab === "all" && (
                     <AllEventsTable

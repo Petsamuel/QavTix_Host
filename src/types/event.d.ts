@@ -44,6 +44,7 @@ interface EventCards {
     live: number
     draft: number
     ended: number
+    cancelled: number
     sold_out: number
 }
 

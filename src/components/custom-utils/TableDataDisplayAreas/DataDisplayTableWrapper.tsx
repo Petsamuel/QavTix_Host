@@ -31,6 +31,8 @@ interface DataDisplayTableWrapperProps {
     statusOptions?:      StatusOption[]
     viewMode?:          "grid" | "list"
     setViewMode?:       Dispatch<SetStateAction<"grid" | "list">>
+    /** Per-tab event counts keyed by tab value, shown as badge on each tab pill */
+    tabCounts?:         Record<string, number>
 }
 
 export default function DataDisplayTableWrapper({
@@ -48,6 +50,7 @@ export default function DataDisplayTableWrapper({
     categories = [],
     children,
     className,
+    tabCounts,
 }: DataDisplayTableWrapperProps) {
 
     const wrapperRef = useRef<HTMLDivElement>(null)
@@ -81,7 +84,7 @@ export default function DataDisplayTableWrapper({
                                         : 'font-medium text-brand-neutral-7 hover:text-brand-neutral-8'
                                 )}
                             >
-                                <DataCountIndicator label={tab.label} />
+                                <DataCountIndicator label={tab.label} count={tabCounts?.[tab.value]} />
                                 {activeTab === tab.value && (
                                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary-6" />
                                 )}

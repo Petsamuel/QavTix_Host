@@ -30,7 +30,7 @@ export default function EventCreationLayout() {
             <div id="step-top" />
             <main>
                 <div className="flex justify-between items-center my-6">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-7">
                         <h2 className={cn(space_grotesk.className, 'capitalize text-lg text-brand-secondary-8 font-bold')}>
                             {isEditMode ? 'Edit Event' : 'Create Event'}
                         </h2>
@@ -38,7 +38,7 @@ export default function EventCreationLayout() {
                             <Button
                                 variant="ghost"
                                 onClick={() => router.back()}
-                                className="underline text-red-700 hover:text-red-600 h-auto p-0 font-medium"
+                                className="underline text-lg text-red-700 hover:text-red-600 h-auto p-0 font-medium"
                             >
                                 Cancel
                             </Button>

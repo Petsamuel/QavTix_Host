@@ -105,6 +105,11 @@ export function EventCreationProvider({
     const discardDraft = useCallback(() => {
         clearEventDraft()
         setHasDraftAvailable(false)
+        // Also clear in-memory state so the draft sync hook cannot
+        // immediately re-write a new draft from stale data on the next render
+        setEventData({})
+        setCurrentStep(1)
+        setCompletedSteps([])
     }, [])
 
     const resetForm = useCallback(() => {

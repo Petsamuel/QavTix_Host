@@ -3,10 +3,13 @@
 import { useFormContext } from 'react-hook-form'
 import { Step3FormData } from '@/schemas/create-event.schema'
 import { PricingBreakdown } from './PricingBreakdown'
+import { useAppSelector } from '@/lib/redux/hooks'
 
 export default function CreateEventPricingSummary() {
     const { watch } = useFormContext<Step3FormData>()
     const ticketTypes = watch('ticketTypes') || []
+
+    const currency = useAppSelector(store => store.authUser.user?.currency) || 'NGN'
 
     const totalPotentialRevenue = ticketTypes.reduce((acc, ticket) => {
         const price = Number(ticket.price) || 0
@@ -20,7 +23,7 @@ export default function CreateEventPricingSummary() {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-NG', {
             style: 'currency',
-            currency: 'NGN',
+            currency: currency,
             maximumFractionDigits: 0,
         }).format(amount).replace('NGN', '₦')
     }

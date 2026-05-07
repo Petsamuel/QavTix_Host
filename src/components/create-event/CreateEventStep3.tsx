@@ -23,6 +23,7 @@ import { PlanGateBanner } from './PlanGateBanner'
 import { CustomDateTimeInput } from '../custom-utils/inputs/CustomDateTimeInput'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
 import { writeEventDraft, useStepDraftSync } from '@/custom-hooks/UseEventDraftPersist'
+import { useAppSelector } from '@/lib/redux/hooks'
 
 const LabelWithTooltip = ({ label, tooltipText }: { label: string, tooltipText: string }) => (
     <div className="flex items-center gap-1.5">
@@ -68,8 +69,11 @@ export default function CreateEventStep3() {
         stepKey: "ticketsPricing",
         control: methods.control,
         enabled: !hasDraftAvailable && !isEditMode,
-        eventData
+        eventData,
+        hasMinimumData: methods.watch('ticketTypes')?.some(t => !!t.ticketType?.trim()),
     })
+
+    const currency = useAppSelector(store => store.authUser.user?.currency)
 
     const { register, control, watch, setValue, handleSubmit, formState: { errors } } = methods
     const { fields, append, remove } = useFieldArray({ control, name: "ticketTypes" })
@@ -184,7 +188,7 @@ export default function CreateEventStep3() {
                                             label="Price"
                                             value={watch(`ticketTypes.${index}.price`) as number}
                                             onChange={(val) => setValue(`ticketTypes.${index}.price`, Number(val))}
-                                            currency={watch(`ticketTypes.${index}.currency`)}
+                                            currency={currency || 'NGN'}
                                             onCurrencyChange={(curr) => setValue(`ticketTypes.${index}.currency`, curr)}
                                             error={errors.ticketTypes?.[index]?.price?.message}
                                             data-testid={`input-ticket-price-${index}`}

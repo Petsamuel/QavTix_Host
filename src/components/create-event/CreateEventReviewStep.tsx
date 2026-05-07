@@ -61,10 +61,22 @@ export default function CreateEventReviewStep() {
         "Optional: Additional images, video",
     ]
 
+    const currency = useAppSelector(store => store.authUser.user?.currency) || 'NGN'
+    const ticketTypes = eventData.ticketsPricing?.ticketTypes || []
+    
+    const totalPotentialRevenue = ticketTypes.reduce((acc, ticket) => {
+        const price = Number(ticket.price) || 0
+        const qty = Number(ticket.quantity) || 0
+        return acc + (price * qty)
+    }, 0)
+
+    const platformFee = totalPotentialRevenue * 0.03
+    const yourEarnings = totalPotentialRevenue - platformFee
+
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('en-NG', {
             style: 'currency',
-            currency: 'NGN',
+            currency: currency,
             maximumFractionDigits: 0,
         }).format(amount).replace('NGN', '₦')
 
@@ -297,10 +309,10 @@ export default function CreateEventReviewStep() {
                                 Pricing Structure
                             </span>
                             <PricingBreakdown
-                                ticketTypes={eventData.ticketsPricing?.ticketTypes || []}
-                                totalPotentialRevenue={5_000_000}
-                                platformFee={150_000}
-                                yourEarnings={4_850_000}
+                                ticketTypes={ticketTypes}
+                                totalPotentialRevenue={totalPotentialRevenue}
+                                platformFee={platformFee}
+                                yourEarnings={yourEarnings}
                                 formatCurrency={formatCurrency}
                             />
                         </div>

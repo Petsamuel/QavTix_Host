@@ -71,36 +71,49 @@ function stripFiles(data: Partial<CompleteEventFormData>): Partial<CompleteEvent
 }
 
 
-import { Control, useWatch } from "react-hook-form"
+import { Control, useWatch, useFormState } from "react-hook-form"
 
 interface UseStepDraftSyncOptions<K extends keyof CompleteEventFormData> {
     stepKey: K
     control: Control<any>
     enabled: boolean
     eventData: Partial<CompleteEventFormData>
+    /**
+     * A boolean computed by the caller that must be true before anything is
+     * written to localStorage.  Use it to confirm at least one meaningful
+     * field has real content (e.g. `!!eventTitle?.trim()`).
+     * Defaults to `true` when omitted so existing call-sites stay compatible.
+     */
+    hasMinimumData?: boolean
 }
 
 /**
  * Persists the event creation draft to localStorage in real-time as the user types.
  * Debounced to avoid hammering storage on every keystroke.
- * Only active when `enabled` is true (i.e. create mode only, and no pending draft decision).
+ *
+ * Guards:
+ *  - `enabled`        : false in edit/duplicate mode or while a draft decision is pending
+ *  - `isDirty`        : the user must have actually changed a field
+ *  - `hasMinimumData` : at least one meaningful field must contain real content
+ *                       (prevents setValue side-effects from saving an empty shell)
  */
 export function useStepDraftSync<K extends keyof CompleteEventFormData>({
     stepKey,
     control,
     enabled,
-    eventData
+    eventData,
+    hasMinimumData = true,
 }: UseStepDraftSyncOptions<K>) {
     const currentValues = useWatch({ control })
+    const { isDirty } = useFormState({ control })
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
-        if (!enabled) return
+        if (!enabled || !isDirty || !hasMinimumData) return
 
         if (timerRef.current) clearTimeout(timerRef.current)
 
         timerRef.current = setTimeout(() => {
-            // Merge current context data with real-time form data
             writeEventDraft({
                 ...eventData,
                 [stepKey]: currentValues
@@ -110,5 +123,5 @@ export function useStepDraftSync<K extends keyof CompleteEventFormData>({
         return () => {
             if (timerRef.current) clearTimeout(timerRef.current)
         }
-    }, [currentValues, eventData, enabled, stepKey])
+    }, [currentValues, eventData, enabled, stepKey, isDirty, hasMinimumData])
 }

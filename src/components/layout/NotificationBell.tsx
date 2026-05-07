@@ -45,8 +45,8 @@ export function NotificationBell({
             {isBadgeVisible && (
                 <div
                     className={cn(
-                        "absolute top-1.5 right-1.5",
-                        "min-w-4.5h-4.5 px-1",
+                        "absolute top-0.5 right-1.5",
+                        "size-4.5 px-1",
                         "flex items-center justify-center",
                         "bg-[#FF0000] text-white font-bold rounded-full",
                         "border-2 border-white",

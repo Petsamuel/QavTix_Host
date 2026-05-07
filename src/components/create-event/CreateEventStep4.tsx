@@ -69,7 +69,11 @@ export default function CreateEventStep4() {
         stepKey: "settings",
         control: methods.control,
         enabled: !hasDraftAvailable && !isEditMode,
-        eventData
+        eventData,
+        // Only persist step 4 when the user has deliberately changed something
+        // (isDirty from useFormState inside the hook handles this, but we also
+        //  guard against side-effect-driven saves via the affiliate flag)
+        hasMinimumData: methods.formState.isDirty,
     })
 
     const { control, watch, register, handleSubmit, formState: { errors } } = methods
