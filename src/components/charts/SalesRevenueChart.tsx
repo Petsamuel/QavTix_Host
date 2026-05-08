@@ -7,7 +7,7 @@ import {
 import { getNiceTicks, formatYTick } from "@/helper-fns/chartFormatters"
 import ChartLoader from "../loaders/ChartLoader"
 import { useAppSelector } from "@/lib/redux/hooks"
-import { formatPrice } from "@/helper-fns/formatPrice"
+import { useFormatPrice } from "@/custom-hooks/UseFormatPrice"
 import LockedChartOverlay from "./LockedChartOverlay"
 
 
@@ -23,14 +23,14 @@ interface SalesRevenueGrowthChartProps {
     locked?: boolean
 }
 
-const CustomTooltip = ({ active, payload, currency }: any) => {
+const CustomTooltip = ({ active, payload, currency, format }: any) => {
     if (!active || !payload?.length) return null
     const point = payload[0].payload as ChartDataPoint
     return (
         <div className="bg-white px-3 py-2 text-xs border border-brand-neutral-3 rounded-lg shadow-sm">
             <p className="font-medium text-brand-neutral-8">{point.displayLabel}</p>
             <p className="text-brand-accent-6 font-semibold">
-                {formatPrice(payload[0].value ?? 0, currency)}
+                {format(payload[0].value ?? 0, currency)}
             </p>
         </div>
     )
@@ -39,6 +39,7 @@ const CustomTooltip = ({ active, payload, currency }: any) => {
 export default function SalesRevenueGrowthChart({ data, isPending, locked }: SalesRevenueGrowthChartProps) {
     const { user } = useAppSelector(store => store.authUser)
     const currency = user?.currency || ""
+    const formatPrice = useFormatPrice()
 
     const chartData: ChartDataPoint[] = data ? data.map(d => ({
         label: d.label,
@@ -85,7 +86,7 @@ export default function SalesRevenueGrowthChart({ data, isPending, locked }: Sal
                                     tickMargin={8}
                                 />
                                 <Tooltip
-                                    content={<CustomTooltip currency={currency} />}
+                                    content={<CustomTooltip currency={currency} format={formatPrice} />}
                                     cursor={{ fill: "transparent" }}
                                 />
                                 <Bar

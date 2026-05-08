@@ -6,7 +6,7 @@ import {
 } from "recharts"
 import { ShoppingCart, Wallet, Rocket } from "lucide-react"
 import { useAppSelector } from "@/lib/redux/hooks"
-import { formatPrice } from "@/helper-fns/formatPrice"
+import { useFormatPrice } from "@/custom-hooks/UseFormatPrice"
 import GeographicBreakdownChartLoader from "../loaders/GeographicBreakdownChartLoader"
 import LockedChartOverlay from "./LockedChartOverlay"
 
@@ -32,6 +32,7 @@ interface GeographicBreakdownChartProps {
 }
 
 export default function GeographicBreakdownChart({ data, isPending, locked }: GeographicBreakdownChartProps) {
+    const formatPrice = useFormatPrice()
     if (isPending) return <GeographicBreakdownChartLoader />
 
     const { user } = useAppSelector(store => store.authUser)

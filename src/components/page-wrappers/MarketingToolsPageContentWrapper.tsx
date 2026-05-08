@@ -12,8 +12,9 @@ import EmailCampaignListTable from "../custom-utils/TableDataDisplayAreas/tables
 import MetricCardsContainer1 from "../cards/MetricCardsContainer1"
 import AddPromoCode from "@/lib/features/promo/AddPromoCode"
 import ExportButton1 from "@/lib/features/export/ExportDataBtn1"
-import ComposeMailBtn from "@/lib/features/compose-mail/ComposeMailBtn"
+import { ComposeMailBtn } from "@/lib/features/compose-mail/ComposeMailBtn"
 import { TabSlice, useDataDisplay } from "@/custom-hooks/UseDataDisplay"
+import { useIsMounted } from "@/custom-hooks/UseIsMounted"
 
 import {
     PROMO_CODES_ENDPOINT,
@@ -39,6 +40,7 @@ export default function MarketingToolsPageContentWrapper({
 
     const { user }    = useAppSelector(store => store.authUser)
     const currency    = user?.currency || ""
+    const isMounted   = useIsMounted()
 
     // Affiliate cards state
     const [affiliateCards, setAffiliateCards] = useState<AffiliateCards>(initialAffiliates.cards)
@@ -90,7 +92,7 @@ export default function MarketingToolsPageContentWrapper({
         setActiveTab(tab as typeof activeTab)
     }
 
-    const affiliateMetrics = mapAffiliateCards(affiliateCards, currency)
+    const affiliateMetrics = mapAffiliateCards(affiliateCards, currency, isMounted)
 
     const activeState =
         activeTab === "promo-codes"       ? promoState     :

@@ -14,6 +14,7 @@ import { useAppSelector } from "@/lib/redux/hooks"
 import { customerListStatusConfig } from "../custom-utils/TableDataDisplayAreas/resources/status-config"
 import MetricsContainerLoader from "../loaders/MetricsContainerLoader"
 import { Icon } from "@iconify/react"
+import { useIsMounted } from "@/custom-hooks/UseIsMounted"
 
 interface ExternalFilters {
     dateRangePreset: DatePreset | null
@@ -34,6 +35,7 @@ export default function CustomersList({
 }: CustomerListProps) {
     const { filterOptions } = DashboardConsumerListFilters
     const { user } = useAppSelector(store => store.authUser)
+    const isMounted = useIsMounted()
 
     const [filters, setFilters] = useState<Partial<FilterValues>>({
         purchaseDate: null,
@@ -91,7 +93,7 @@ export default function CustomersList({
         }
     })
 
-    const metrics = mapCustomerCardsToMetrics(cards, user?.currency || "")
+    const metrics = mapCustomerCardsToMetrics(cards, user?.currency || "", isMounted)
 
     return (
         <section>

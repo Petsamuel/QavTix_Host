@@ -34,6 +34,7 @@ import { TabSlice, useDataDisplay } from "@/custom-hooks/UseDataDisplay"
 import DateRangePresetFilter from "../custom-utils/TableDataDisplayAreas/filters/DateRangePresetFilter"
 import { SALES_ANALYTICS_TRANSACTIONS_ENDPOINT } from "@/endpoints"
 import ChartPresetFilter from "../custom-utils/TableDataDisplayAreas/filters/ChartPresetFilter"
+import { useIsMounted } from "@/custom-hooks/UseIsMounted"
 import { exportSalesAnalyticsFull } from "@/helper-fns/exportData"
 
 
@@ -56,6 +57,7 @@ function SalesAnalyticsPageClient({
 }: Props) {
     const { user } = useAppSelector(store => store.authUser)
     const currency = user?.currency || ""
+    const isMounted = useIsMounted()
 
     // External filters (drive BOTH cards + graphs)
     const [date, setDate] = useState<DatePreset | null>(null)
@@ -171,7 +173,7 @@ function SalesAnalyticsPageClient({
     )
 
     // Derive metric card arrays 
-    const row1And2Metrics = mapSalesAnalyticsCards(cards, currency)
+    const row1And2Metrics = mapSalesAnalyticsCards(cards, currency, isMounted)
     const row1Metrics = row1And2Metrics.slice(0, 4)   // total_revenue, tickets_sold, conversion, aov
     const row2Cards = row1And2Metrics.slice(4)      // page_views, refunds, repeat_buyers
 

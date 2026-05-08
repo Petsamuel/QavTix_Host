@@ -9,11 +9,9 @@ import { cn } from "@/lib/utils"
 import { getNiceTicks, formatYTick } from "@/helper-fns/chartFormatters"
 import ChartLoader from "../loaders/ChartLoader"
 import { useAppSelector } from "@/lib/redux/hooks"
-import { formatPrice } from "@/helper-fns/formatPrice"
+import { useFormatPrice } from "@/custom-hooks/UseFormatPrice"
 import { getCustomerProfile } from "@/actions/customers/client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
-
 
 type ChartRange = "day" | "week" | "month"
 
@@ -26,11 +24,11 @@ function toPoints(data: CustomerProfileChartPoint[]): ChartPoint[] {
     return data.map(d => ({ label: d.label, value: parseFloat(d.amount) }))
 }
 
-const CustomTooltip = ({ active, payload, currency }: any) => {
+const CustomTooltip = ({ active, payload, currency, format }: any) => {
     if (!active || !payload?.length) return null
     return (
         <div className="bg-brand-accent-6 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-semibold">
-            {formatPrice(payload[0].value ?? 0, currency)}
+            {format(payload[0].value ?? 0, currency)}
         </div>
     )
 }
@@ -45,6 +43,7 @@ export function UserRevenueChart({ userID, initialData, className }: UserRevenue
 
     const { user }    = useAppSelector(store => store.authUser)
     const currency    = user?.currency || ""
+    const formatPrice = useFormatPrice()
 
     const [chartRange,  setChartRange]  = useState<ChartRange>("month")
     const [chartData,   setChartData]   = useState<ChartPoint[]>(() => toPoints(initialData))
@@ -127,7 +126,7 @@ export function UserRevenueChart({ userID, initialData, className }: UserRevenue
                                     tickMargin={8}
                                 />
                                 <Tooltip
-                                    content={<CustomTooltip currency={currency} />}
+                                    content={<CustomTooltip currency={currency} format={formatPrice} />}
                                     cursor={{ stroke: "#FF7A00", strokeWidth: 1 }}
                                 />
                                 <Line

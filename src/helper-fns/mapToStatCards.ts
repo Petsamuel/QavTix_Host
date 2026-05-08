@@ -60,7 +60,7 @@ export function mapToStatCards(cards: DashboardCardData): IDashboardStat[] {
     ]
 }
 
-export function mapCustomerCardsToMetrics(cards: CustomersCards, currency: string): MetricCardData[] {
+export function mapCustomerCardsToMetrics(cards: CustomersCards, currency: string, isMounted: boolean = true): MetricCardData[] {
     return [
         {
             id: "total-customers",
@@ -88,7 +88,7 @@ export function mapCustomerCardsToMetrics(cards: CustomersCards, currency: strin
         },
         {
             id: "average-spend",
-            value: `${formatPrice(Number(cards.average_spend), currency)}`,
+            value: `${formatPrice(Number(cards.average_spend), currency, true, isMounted)}`,
             label: "Average Spend",
             description: "Avg. spend per customer.",
             icon: "icon-park-outline:average",
@@ -102,11 +102,12 @@ export function mapCustomerCardsToMetrics(cards: CustomersCards, currency: strin
 export function mapFinancialCards(
     cards: FinancialCards,
     currency: string,
+    isMounted: boolean = true
 ): MetricCardData[] {
     return [
         {
             id: "gross",
-            value: formatPrice(parseFloat(cards.total_revenue), currency),
+            value: formatPrice(parseFloat(cards.total_revenue), currency, true, isMounted),
             label: "Gross",
             description: "Total revenue generated",
             icon: "hugeicons:dollar-square",
@@ -114,7 +115,7 @@ export function mapFinancialCards(
         },
         {
             id: "total-payout",
-            value: formatPrice(parseFloat(cards.total_payout), currency),
+            value: formatPrice(parseFloat(cards.total_payout), currency, true, isMounted),
             label: "Total Payout",
             description: "Total amount paid out",
             icon: "hugeicons:wallet-done-01",
@@ -122,7 +123,7 @@ export function mapFinancialCards(
         },
         {
             id: "available-balance",
-            value: formatPrice(parseFloat(cards.available_balance), currency),
+            value: formatPrice(parseFloat(cards.available_balance), currency, true, isMounted),
             label: "Available Balance",
             description: "Ready to withdraw",
             icon: "hugeicons:discount-01",
@@ -146,6 +147,7 @@ export function mapFinancialCards(
 export function mapAffiliateCards(
     cards: AffiliateCards,
     currency: string,
+    isMounted: boolean = true
 ): MetricCardData[] {
     return [
         {
@@ -174,7 +176,7 @@ export function mapAffiliateCards(
         },
         {
             id: "commission-paid",
-            value: formatPrice(parseFloat(cards.total_commission_paid), currency),
+            value: formatPrice(parseFloat(cards.total_commission_paid), currency, true, isMounted),
             label: "Commission Paid",
             description: "Total earnings distributed.",
             icon: "hugeicons:dollar-square",
@@ -266,6 +268,7 @@ export function mapEventsCards(cards: EventCards): MetricCardData[] {
 export function mapSalesAnalyticsCards(
     cards: SalesAnalyticsCardsData,
     currency: string,
+    isMounted: boolean = true
 ): MetricCardData[] {
     const fmtChange = (val: number) =>
         val > 0 ? `+${val.toLocaleString()}%` :
@@ -274,7 +277,7 @@ export function mapSalesAnalyticsCards(
     return [
         {
             id: "total-revenue",
-            value: formatPrice(parseFloat(cards.total_revenue), currency),
+            value: formatPrice(parseFloat(cards.total_revenue), currency, true, isMounted),
             label: "Total Revenue",
             description: `${fmtChange(parseFloat(cards.total_revenue_change))} change`,
             icon: "/images/vectors/dollar-in.svg",
@@ -300,7 +303,7 @@ export function mapSalesAnalyticsCards(
         },
         {
             id: "aov",
-            value: formatPrice(parseFloat(cards.average_order_value), currency),
+            value: formatPrice(parseFloat(cards.average_order_value), currency, true, isMounted),
             label: "Avg. Order Value",
             description: `${fmtChange(cards.aov_change)} vs last period`,
             icon: "/images/vectors/average-order.svg",

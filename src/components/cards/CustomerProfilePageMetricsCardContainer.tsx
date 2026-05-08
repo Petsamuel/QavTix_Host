@@ -1,5 +1,4 @@
-import { cn } from "@/lib/utils"
-import { formatPrice } from "@/helper-fns/formatPrice"
+import { useFormatPrice } from "@/custom-hooks/UseFormatPrice"
 import UserMetricCard from "./UserMetricsCard"
 
 interface Props {
@@ -47,7 +46,7 @@ export default function CustomersProfilePageMetricCardsContainer({
     currency = "NGN",
     className,
 }: Props) {
-
+    const format = useFormatPrice()
     const totalSpent      = parseFloat(cards.total_spent)
     const lastOrderValue  = parseFloat(cards.last_order_value)
 
@@ -55,7 +54,7 @@ export default function CustomersProfilePageMetricCardsContainer({
         {
             id:            "total-spent",
             label:         "Total Spent",
-            value:         formatPrice(totalSpent, currency),
+            value:         format(totalSpent, currency),
             changePercent: cards.total_spent_change,
             trendData:     makeTrend(totalSpent, cards.total_spent_change),
             isNegativeGood: false,
@@ -79,7 +78,7 @@ export default function CustomersProfilePageMetricCardsContainer({
         {
             id:            "last-order-value",
             label:         "Last Order Value",
-            value:         formatPrice(lastOrderValue, currency),
+            value:         format(lastOrderValue, currency),
             changePercent: cards.last_order_value_change,
             trendData:     makeTrend(lastOrderValue, cards.last_order_value_change),
             isNegativeGood: false,

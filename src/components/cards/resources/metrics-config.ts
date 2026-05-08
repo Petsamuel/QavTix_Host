@@ -38,8 +38,8 @@ export const customerMetricsConfig: Record<string, MetricConfig> = {
         description: 'Avg. spend per customer.',
         icon: "icon-park-outline:average",
         iconColor: 'text-blue-600',
-        valueFormatter: (v: string, currency?: string) =>
-            formatPrice(parseFloat(v ?? "0"), currency)
+        valueFormatter: (v: string, currency?: string, isMounted: boolean = true) =>
+            formatPrice(parseFloat(v ?? "0"), currency, true, isMounted)
     }
 }
 
@@ -51,8 +51,8 @@ export const customerProfileMetricsConfig: Record<string, MetricConfig> = {
         description:    "Cumulative spend by this customer.",
         icon:           "hugeicons:dollar-square",
         iconColor:      "text-[#359160]",
-        valueFormatter: (v: string, currency?: string) =>
-            formatPrice(parseFloat(v ?? "0"), currency),
+        valueFormatter: (v: string, currency?: string, isMounted: boolean = true) =>
+            formatPrice(parseFloat(v ?? "0"), currency, true, isMounted),
     },
     "tickets-bought": {
         id:          "tickets-bought",
@@ -76,8 +76,8 @@ export const customerProfileMetricsConfig: Record<string, MetricConfig> = {
         description:    "Most recent purchase amount.",
         icon:           "icon-park-outline:average",
         iconColor:      "text-blue-600",
-        valueFormatter: (v: string, currency?: string) =>
-            formatPrice(parseFloat(v ?? "0"), currency),
+        valueFormatter: (v: string, currency?: string, isMounted: boolean = true) =>
+            formatPrice(parseFloat(v ?? "0"), currency, true, isMounted),
     },
 }
 
@@ -89,7 +89,8 @@ export const financeMetricsConfig: Record<string, MetricConfig> = {
         description: "Total revenue generated",
         icon: "hugeicons:dollar-square",
         iconColor: 'text-[#359160]',
-        valueFormatter: (value: number) => `₦${value.toLocaleString()}`
+        valueFormatter: (value: number, currency?: string, isMounted: boolean = true) => 
+            formatPrice(value, currency, true, isMounted)
     },
     'platform-fees': {
         id: 'platform-fees',
@@ -97,7 +98,8 @@ export const financeMetricsConfig: Record<string, MetricConfig> = {
         description: 'Total Charges deducted',
         icon: "hugeicons:discount-01",
         iconColor: 'text-[#914613]',
-        valueFormatter: (value: number) => `₦${value.toLocaleString()}`
+        valueFormatter: (value: number, currency?: string, isMounted: boolean = true) => 
+            formatPrice(value, currency, true, isMounted)
     },
     'all-time-payouts': {
         id: 'all-time-payouts',
@@ -145,7 +147,8 @@ export const affiliateMetricsConfig: Record<string, MetricConfig> = {
         description: 'Total earnings distributed.',
         icon: "hugeicons:dollar-square",
         iconColor: 'text-brand-accent-5',
-        valueFormatter: (value: number) => `₦${value.toLocaleString()}`
+        valueFormatter: (value: number, currency?: string, isMounted: boolean = true) => 
+            formatPrice(value, currency, true, isMounted)
     },
 }
 
@@ -193,7 +196,8 @@ export const userProfileMetricsConfig: Record<string, MetricConfig> = {
         description: "Customer's lifetime spend",
         icon: "hugeicons:dollar-square",
         iconColor: 'text-[#359160]',
-        valueFormatter: (value: number) => `₦${value.toLocaleString()}`
+        valueFormatter: (value: number, currency?: string, isMounted: boolean = true) => 
+            formatPrice(value, currency, true, isMounted)
     },
     'tickets-bought': {
         id: 'tickets-bought',
@@ -215,7 +219,8 @@ export const userProfileMetricsConfig: Record<string, MetricConfig> = {
         description: "Most recent purchase amount",
         icon: "hugeicons:shopping-cart-01",
         iconColor: 'text-brand-accent-5',
-        valueFormatter: (value: number) => `₦${value.toLocaleString()}`
+        valueFormatter: (value: number, currency?: string, isMounted: boolean = true) => 
+            formatPrice(value, currency, true, isMounted)
     }
 }
 
@@ -266,7 +271,8 @@ export const salesAnalyticsMetricsConfig: Record<string, MetricConfig> = {
         id: 'total-revenue',
         label: "Total Revenue",
         icon: "/images/vectors/dollar-in.svg",
-        valueFormatter: (value: number) => `₦${value.toLocaleString()}`,
+        valueFormatter: (value: number, currency?: string, isMounted: boolean = true) => 
+            formatPrice(value, currency, true, isMounted),
         iconColor: "",
         description: "",
     },
@@ -290,7 +296,8 @@ export const salesAnalyticsMetricsConfig: Record<string, MetricConfig> = {
         icon: "/images/vectors/average-order.svg",
         description: "",
         iconColor: "",
-        valueFormatter: (value: number) => `₦${value.toLocaleString()}`
+        valueFormatter: (value: number, currency?: string, isMounted: boolean = true) => 
+            formatPrice(value, currency, true, isMounted)
     }
 }
 
