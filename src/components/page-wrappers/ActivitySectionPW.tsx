@@ -8,13 +8,15 @@ import NotificationsTab from '../slots/activity/NotificationTabContent'
 type TabType = 'activity' | 'notifications'
 
 interface ActivitySectionPWProps {
-    activities:    DashboardActivity[]
+    activities: DashboardActivity[]
     notifications: DashboardNotification[]
+    follower_count: number
 }
 
 export default function ActivitySectionPW({
     activities,
     notifications,
+    follower_count
 }: ActivitySectionPWProps) {
     const [activeTab, setActiveTab] = useState<TabType>('activity')
 
@@ -56,7 +58,7 @@ export default function ActivitySectionPW({
 
             <div className="py-3 w-full">
                 {activeTab === 'activity' ? (
-                    <RecentActivityTab activities={activities} />
+                    <RecentActivityTab activities={activities} follower_count={follower_count} />
                 ) : (
                     <NotificationsTab notifications={notifications} />
                 )}

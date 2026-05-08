@@ -8,12 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
-import { useAppSelector } from '@/lib/redux/hooks'
-import { useIsMounted } from '@/custom-hooks/UseIsMounted'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface RecentActivityTabProps {
     activities: DashboardActivity[]
+    follower_count?: number
 }
 
 const FILTER_OPTIONS: { label: string; value: ActivityType }[] = [
@@ -25,15 +24,13 @@ const FILTER_OPTIONS: { label: string; value: ActivityType }[] = [
 
 const PREVIEW_COUNT = 4
 
-export default function RecentActivityTab({ activities }: RecentActivityTabProps) {
+export default function RecentActivityTab({ activities, follower_count }: RecentActivityTabProps) {
     const router = useRouter()
     const pathName = usePathname()
     const searchParams = useSearchParams()
 
     const filterValue = searchParams.get('activity_type') || ""
 
-    const { user } = useAppSelector(store => store.authUser)
-    const isMounted = useIsMounted()
     const [isFiltering, startFiltering] = useTransition()
 
     const isCompletelyEmpty = activities.length === 0 && !filterValue
@@ -81,7 +78,7 @@ export default function RecentActivityTab({ activities }: RecentActivityTabProps
 
 
                 <Badge className='bg-brand-accent-1 text-brand-accent-7'>
-                    {isMounted ? user?.followers : "--"} Followers
+                    {follower_count} Followers
                 </Badge>
             </div>
 

@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils"
 import { space_grotesk } from "@/lib/fonts"
 
 import {
-    getSalesAnalyticsCards,
-    getSalesAnalyticsGraphs,
-} from "@/actions/sales-n-analytics/client"
+    getSalesAnalyticsCardsClient,
+    getSalesAnalyticsGraphsClient,
+} from "@/actions/sales-n-analytics"
 
 import { EventFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventFilter"
 import ExportButton1 from "@/lib/features/export/ExportDataBtn1"
@@ -103,14 +103,14 @@ function SalesAnalyticsPageClient({
     const fetchCards = (datePreset: DatePreset | null, nextEvent: string | null) => {
         startCardsTransition(async () => {
             // Map DateRange → date_range preset (crude mapping; adjust if needed)
-            const params: Parameters<typeof getSalesAnalyticsCards>[0] = {}
+            const params: Parameters<typeof getSalesAnalyticsCardsClient>[0] = {}
             if (nextEvent) params.event = nextEvent
 
             if (datePreset) {
                 params.date_range = datePreset
             }
 
-            const result = await getSalesAnalyticsCards(params)
+            const result = await getSalesAnalyticsCardsClient(params)
             if (result.success && result.data) {
                 setCards(result.data)
                 setCardsError(false)
@@ -124,11 +124,11 @@ function SalesAnalyticsPageClient({
     const fetchGraphs = (chartPreset: ChartPreset | null, nextEvent: string | null) => {
         startGraphsTransition(async () => {
             const { chart, year } = deriveChartFilter(chartPreset)
-            const params: Parameters<typeof getSalesAnalyticsGraphs>[0] = { chart }
+            const params: Parameters<typeof getSalesAnalyticsGraphsClient>[0] = { chart }
             if (nextEvent) params.event = nextEvent
             if (year) params.year = year
 
-            const result = await getSalesAnalyticsGraphs(params)
+            const result = await getSalesAnalyticsGraphsClient(params)
             if (result.success && result.data) {
                 setGraphs(result.data)
                 setGraphsError(false)
@@ -187,7 +187,7 @@ function SalesAnalyticsPageClient({
 
             {/* Top filter bar  */}
             <div className="flex justify-between items-center gap-5 mb-5 mt-10 lg:mt-0">
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-end gap-2 gap-y-4 flex-wrap">
                     <DateRangePresetFilter
                         value={date}
                         onChange={handleDatePresetChange}
@@ -198,7 +198,7 @@ function SalesAnalyticsPageClient({
                         icon="hugeicons:calendar-02"
                     />
                     <div>
-                        <p className="text-[10px] text-brand-secondary-9 -mt-3.5">Chart Preset</p>
+                        <p className="text-[10px] text-brand-secondary-9">Chart Preset</p>
                         <ChartPresetFilter
                             value={chartPreset}
                             onChange={handleChartPresetChange}
