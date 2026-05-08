@@ -38,3 +38,25 @@ export async function getCheckInAttendees(token: string, params: CheckInParams =
         return { success: false, message: "Failed to load attendees." }
     }
 }
+
+import { getServerAxios } from "@/lib/axios"
+
+export async function getCheckInMetricsClient(params: CheckInParams = {}): Promise<GetCheckInResult> {
+    try {
+        const axios = await getServerAxios()
+        const { data } = await axios.get(`/${CHECKIN_OVERVIEW_ENDPOINT}`, { params })
+        return { success: true, data: data.data ?? data }
+    } catch (err) {
+        return { success: false, message: "Failed to load check-in metrics." }
+    }
+}
+
+export async function getCheckInAttendeesClient(params: CheckInParams = {}): Promise<GetAttendeesResult> {
+    try {
+        const axios = await getServerAxios()
+        const { data } = await axios.get(`/${CHECKIN_ATTENDEES_ENDPOINT}`, { params })
+        return { success: true, data: data.data ?? data }
+    } catch (err) {
+        return { success: false, message: "Failed to load attendees." }
+    }
+}

@@ -7,7 +7,7 @@ export default async function ActivitySection(props: { searchParams: Promise<{ [
     const searchParams = await props.searchParams;
     const cookieStore = await cookies()
     const token = cookieStore.get("host_access_token")?.value;
-    
+
     const params: Record<string, any> = {};
     if (searchParams?.activity_type) params.activity_type = searchParams.activity_type;
     if (searchParams?.notification_type) params.notification_type = searchParams.notification_type;
@@ -28,6 +28,7 @@ export default async function ActivitySection(props: { searchParams: Promise<{ [
             <ActivitySectionPW
                 activities={result.data.activities}
                 notifications={result.data.notifications}
+                follower_count={result.data.follower_count}
             />
         </div>
     )

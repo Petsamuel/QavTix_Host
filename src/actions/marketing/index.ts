@@ -4,6 +4,7 @@ import {
     AFFILIATE_LINKS_HOST_ENDPOINT,
     EMAIL_CAMPAIGNS_ENDPOINT
 } from "@/endpoints"
+import { getServerAxios } from "@/lib/axios"
 
 async function apiFetch(token: string, endpoint: string, params: Record<string, any> = {}, tags?: string[]) {
     const query = new URLSearchParams()
@@ -57,6 +58,47 @@ export async function getEmailCampaigns(token: string, params: {
         const data = await apiFetch(token, EMAIL_CAMPAIGNS_ENDPOINT, params, [CACHE_TAGS.MARKETING_CAMPAIGNS])
         return { success: true, data }
     } catch {
+        return { success: false, message: "Failed to load email campaigns." }
+    }
+}
+
+
+
+export async function getPromoCodesClient(params: {
+    page?: number
+    search?: string
+    status?: string
+    event?: string
+} = {}): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+        const axios = await getServerAxios()
+        const { data } = await axios.get(`/${PROMO_CODES_ENDPOINT}`, { params })
+        return { success: true, data: data.data ?? data }
+    } catch (err) {
+        return { success: false, message: "Failed to load promo codes." }
+    }
+}
+
+export async function getAffiliateLinksClient(params: {
+    page?: number
+} = {}): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+        const axios = await getServerAxios()
+        const { data } = await axios.get(`/${AFFILIATE_LINKS_HOST_ENDPOINT}`, { params })
+        return { success: true, data: data.data ?? data }
+    } catch (err) {
+        return { success: false, message: "Failed to load affiliate links." }
+    }
+}
+
+export async function getEmailCampaignsClient(params: {
+    page?: number
+} = {}): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+        const axios = await getServerAxios()
+        const { data } = await axios.get(`/${EMAIL_CAMPAIGNS_ENDPOINT}`, { params })
+        return { success: true, data: data.data ?? data }
+    } catch (err) {
         return { success: false, message: "Failed to load email campaigns." }
     }
 }

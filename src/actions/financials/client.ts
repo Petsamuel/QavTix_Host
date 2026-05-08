@@ -2,38 +2,11 @@
 
 import { revalidateTag } from "next/cache"
 import { CACHE_TAGS } from "@/cache-tags"
-import { FINANCIALS_ENDPOINT, PAYOUT_ADD_ENDPOINT, PAYOUT_LIST_ENDPOINT, REMOVE_PAYOUT_ENDPOINT, WITHDRAWAL_ENDPOINT } from "@/endpoints"
+import { PAYOUT_ADD_ENDPOINT, PAYOUT_LIST_ENDPOINT, REMOVE_PAYOUT_ENDPOINT, WITHDRAWAL_ENDPOINT } from "@/endpoints"
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 import { getServerAxios } from "@/lib/axios"
 import { randomUUID } from "crypto"
-
-export async function getFinancials(
-    params: FinancialsParams = {}
-): Promise<GetFinancialsResult> {
-    try {
-        const axios = await getServerAxios()
-        const urlParams = new URLSearchParams()
-        if (params.date_range) urlParams.set("date_range", params.date_range)
-        if (params.start_date) urlParams.set("start_date", params.start_date)
-        if (params.end_date) urlParams.set("end_date", params.end_date)
-        if (params.page) urlParams.set("page", String(params.page))
-
-        const { data } = await axios.get(`/${FINANCIALS_ENDPOINT}?${urlParams.toString()}`)
-        return { success: true, data: data.data }
-    } catch (err) {
-        return { success: false, message: "Failed to load financials." }
-    }
-}
-
-export async function getPayoutAccounts(): Promise<{ success: boolean; data?: PayoutAccountItem[]; message?: string }> {
-    try {
-        const axios = await getServerAxios()
-        const { data } = await axios.get(`/${PAYOUT_LIST_ENDPOINT}`)
-        return { success: true, data: Array.isArray(data.data) ? data.data : [] }
-    } catch (err) {
-        return { success: false, message: "Failed to load payout accounts." }
-    }
-}
+import { getFinancialsClient } from ".";
 
 export async function submitWithdrawal(
     payload: WithdrawPayload
@@ -48,7 +21,7 @@ export async function submitWithdrawal(
 
         revalidateTag(CACHE_TAGS.FINANCIALS, "max")
 
-        const fresh = await getFinancials()
+        const fresh = await getFinancialsClient()
 
         return {
             success: true,

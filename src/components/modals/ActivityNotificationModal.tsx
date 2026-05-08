@@ -18,6 +18,7 @@ interface Props {
     initialNotifications?: DashboardNotification[]
     initialPage?: number
     initialHasMore?: boolean
+    follower_count?: number
 }
 
 export default function AllActivityNotificationsModal({
@@ -25,6 +26,7 @@ export default function AllActivityNotificationsModal({
     initialNotifications = [],
     initialPage = 1,
     initialHasMore = false,
+    follower_count = 0,
 }: Props) {
     const router = useRouter()
 
@@ -129,7 +131,7 @@ export default function AllActivityNotificationsModal({
             <div className="space-y-2 px-6 pb-2 pt-3">
                 {isActivityTab ? (
                     activities.length > 0
-                        ? <RecentActivityTab activities={activities} />
+                        ? <RecentActivityTab activities={activities} follower_count={follower_count} />
                         : <EmptyState icon="hugeicons:clock-01" message="No activity found" />
                 ) : (
                     notifications.length > 0

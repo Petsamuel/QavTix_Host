@@ -6,17 +6,16 @@ import { Badge } from "@/components/ui/badge"
 import { Icon } from "@iconify/react"
 import { format, parseISO } from "date-fns"
 import PaginationControls from "../tools/PaginationControl"
-import { getFinancials } from "@/actions/financials/client"
-import { getAuthToken } from "@/helper-fns/getAuthToken"
+import { getFinancialsClient } from "@/actions/financials"
 import { payoutStatusConfig } from "../resources/status-config"
 import TableLoader from "@/components/loaders/TableLoader"
 
 
 interface Props {
-    initialData:    WithdrawalHistoryPaginated
-    externalDate:   DatePreset | null
-    onCards:        (cards: FinancialCards) => void
-    onCardsError:   () => void
+    initialData: WithdrawalHistoryPaginated
+    externalDate: DatePreset | null
+    onCards: (cards: FinancialCards) => void
+    onCardsError: () => void
     onCardsLoading: (loading: boolean) => void
     onCardsSuccess: () => void
 }
@@ -30,16 +29,16 @@ export default function PayoutHistoryTable({
     onCardsSuccess,
 }: Props) {
 
-    const [items,       setItems]       = useState<WithdrawalHistoryItem[]>(initialData.results)
-    const [count,       setCount]       = useState(initialData.count)
-    const [totalPages,  setTotalPages]  = useState(initialData.total_pages)
+    const [items, setItems] = useState<WithdrawalHistoryItem[]>(initialData.results)
+    const [count, setCount] = useState(initialData.count)
+    const [totalPages, setTotalPages] = useState(initialData.total_pages)
     const [currentPage, setCurrentPage] = useState(initialData.page)
-    const [isLoading,   setIsLoading]   = useState(false)
-    const [isError,     setIsError]     = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isError, setIsError] = useState(false)
 
-    const isFetching    = useRef(false)
+    const isFetching = useRef(false)
 
-    const lastFetchedKey = useRef(externalDate) 
+    const lastFetchedKey = useRef(externalDate)
     const initialized = useRef(false)
 
     const fetchData = useCallback(async (page: number, isFilterChange = false) => {
@@ -49,7 +48,7 @@ export default function PayoutHistoryTable({
         setIsLoading(true)
         if (isFilterChange) onCardsLoading(true)
 
-        const result = await getFinancials({
+        const result = await getFinancialsClient({
             date_range: externalDate || undefined,
             page,
         })

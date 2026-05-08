@@ -2,7 +2,7 @@
 
 import { revalidateTag } from "next/cache"
 import { CACHE_TAGS } from "@/cache-tags"
-import { 
+import {
     CREATE_PROMO_CODES_ENDPOINT,
     PROMO_CODES_ENDPOINT,
     AFFILIATE_LINKS_HOST_ENDPOINT,
@@ -29,45 +29,6 @@ export async function createPromoCode(
         return { success: true, message: "Promo code created successfully." }
     } catch (err: any) {
         return { success: false, message: handleApiError(err?.response?.data) }
-    }
-}
-
-export async function getPromoCodes(params: {
-    page?: number
-    search?: string
-    status?: string
-    event?: string
-} = {}): Promise<{ success: boolean; data?: any; message?: string }> {
-    try {
-        const axios = await getServerAxios()
-        const { data } = await axios.get(`/${PROMO_CODES_ENDPOINT}`, { params })
-        return { success: true, data: data.data ?? data }
-    } catch (err) {
-        return { success: false, message: "Failed to load promo codes." }
-    }
-}
-
-export async function getAffiliateLinks(params: {
-    page?: number
-} = {}): Promise<{ success: boolean; data?: any; message?: string }> {
-    try {
-        const axios = await getServerAxios()
-        const { data } = await axios.get(`/${AFFILIATE_LINKS_HOST_ENDPOINT}`, { params })
-        return { success: true, data: data.data ?? data }
-    } catch (err) {
-        return { success: false, message: "Failed to load affiliate links." }
-    }
-}
-
-export async function getEmailCampaigns(params: {
-    page?: number
-} = {}): Promise<{ success: boolean; data?: any; message?: string }> {
-    try {
-        const axios = await getServerAxios()
-        const { data } = await axios.get(`/${EMAIL_CAMPAIGNS_ENDPOINT}`, { params })
-        return { success: true, data: data.data ?? data }
-    } catch (err) {
-        return { success: false, message: "Failed to load email campaigns." }
     }
 }
 
