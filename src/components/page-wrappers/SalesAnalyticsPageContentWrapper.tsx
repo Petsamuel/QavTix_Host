@@ -36,6 +36,7 @@ import { SALES_ANALYTICS_TRANSACTIONS_ENDPOINT } from "@/endpoints"
 import ChartPresetFilter from "../custom-utils/TableDataDisplayAreas/filters/ChartPresetFilter"
 import { useIsMounted } from "@/custom-hooks/UseIsMounted"
 import { exportSalesAnalyticsFull } from "@/helper-fns/exportData"
+import GatedPageModal from "../modals/GatedPageModal"
 
 
 interface Props {
@@ -46,6 +47,12 @@ interface Props {
 
 
 export default function SalesAnalyticsPageContentWrapper(props: Props) {
+    const { user } = useAppSelector(store => store.authUser)
+
+    if (user && user.plan_type !== "pro" && user.plan_type !== "enterprise") {
+        return <GatedPageModal type="plan" featureName="Sales Analytics" requiredPlan="Pro" />
+    }
+
     return <SalesAnalyticsPageClient {...props} />
 }
 
@@ -200,7 +207,7 @@ function SalesAnalyticsPageClient({
                         icon="hugeicons:calendar-02"
                     />
                     <div>
-                        <p className="text-[10px] text-brand-secondary-9">Chart Preset</p>
+                        <p className="text-[10px] text-brand-secondary-8">Chart Preset</p>
                         <ChartPresetFilter
                             value={chartPreset}
                             onChange={handleChartPresetChange}

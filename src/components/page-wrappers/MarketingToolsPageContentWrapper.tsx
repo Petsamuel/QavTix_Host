@@ -12,7 +12,6 @@ import EmailCampaignListTable from "../custom-utils/TableDataDisplayAreas/tables
 import MetricCardsContainer1 from "../cards/MetricCardsContainer1"
 import AddPromoCode from "@/lib/features/promo/AddPromoCode"
 import ExportButton1 from "@/lib/features/export/ExportDataBtn1"
-import { ComposeMailBtn } from "@/lib/features/compose-mail/ComposeMailBtn"
 import { TabSlice, useDataDisplay } from "@/custom-hooks/UseDataDisplay"
 import { useIsMounted } from "@/custom-hooks/UseIsMounted"
 
@@ -22,11 +21,12 @@ import {
     EMAIL_CAMPAIGNS_ENDPOINT,
 } from "@/endpoints"
 import { mapAffiliateCards } from "@/helper-fns/mapToStatCards"
+import ComposeMailBtn from "@/lib/features/compose-mail/ComposeMailBtn"
 
 interface Props {
     initialPromoCodes: TabSlice<PromoCode>
     initialAffiliates: TabSlice<AffiliateLink> & { cards: AffiliateCards }
-    initialCampaigns:  TabSlice<EmailCampaign>
+    initialCampaigns: TabSlice<EmailCampaign>
 }
 
 export default function MarketingToolsPageContentWrapper({
@@ -38,9 +38,9 @@ export default function MarketingToolsPageContentWrapper({
     const { tabList: tabListData } = MarketingToolsFilter
     const [activeTab, setActiveTab] = useState<typeof MarketingToolsFilter.tabList[number]["value"]>("promo-codes")
 
-    const { user }    = useAppSelector(store => store.authUser)
-    const currency    = user?.currency || ""
-    const isMounted   = useIsMounted()
+    const { user } = useAppSelector(store => store.authUser)
+    const currency = user?.currency || ""
+    const isMounted = useIsMounted()
 
     // Affiliate cards state
     const [affiliateCards, setAffiliateCards] = useState<AffiliateCards>(initialAffiliates.cards)
@@ -61,10 +61,10 @@ export default function MarketingToolsPageContentWrapper({
         {
             endpoint: AFFILIATE_LINKS_HOST_ENDPOINT,
             tabs: [{
-                key:         "affiliate-program",
+                key: "affiliate-program",
                 initialData: initialAffiliates,
                 staticParams: {},
-                onCards:     (cards: AffiliateCards | null) => {
+                onCards: (cards: AffiliateCards | null) => {
                     if (cards) setAffiliateCards(cards)
                 },
             }],
@@ -95,9 +95,9 @@ export default function MarketingToolsPageContentWrapper({
     const affiliateMetrics = mapAffiliateCards(affiliateCards, currency, isMounted)
 
     const activeState =
-        activeTab === "promo-codes"       ? promoState     :
-        activeTab === "affiliate-program" ? affiliateState :
-        campaignState
+        activeTab === "promo-codes" ? promoState :
+            activeTab === "affiliate-program" ? affiliateState :
+                campaignState
 
     return (
         <main className="pt-6 pb-10">
@@ -105,9 +105,9 @@ export default function MarketingToolsPageContentWrapper({
                 <h2 className={cn(space_grotesk.className, "text-brand-secondary-8 font-bold text-lg mb-4 capitalize")}>
                     {activeTab.replace("-", " ")}
                 </h2>
-                {activeTab === "promo-codes"       && <AddPromoCode />}
+                {activeTab === "promo-codes" && <AddPromoCode />}
                 {activeTab === "affiliate-program" && <ExportButton1 showFormatSelector />}
-                {activeTab === "email-campaigns"   && <ComposeMailBtn />}
+                {activeTab === "email-campaigns" && <ComposeMailBtn />}
             </div>
 
             {activeTab === "affiliate-program" && (
@@ -124,9 +124,9 @@ export default function MarketingToolsPageContentWrapper({
                     showSearch
                     currentSearch={activeState.search}
                     searchPlaceholder={
-                        activeTab === "promo-codes"     ? "Search promo codes..." :
-                        activeTab === "email-campaigns" ? "Search campaigns..."   :
-                        "Search affiliates..."
+                        activeTab === "promo-codes" ? "Search promo codes..." :
+                            activeTab === "email-campaigns" ? "Search campaigns..." :
+                                "Search affiliates..."
                     }
                     onSearch={activeState.handleSearch}
                     isLoading={activeState.isLoading}

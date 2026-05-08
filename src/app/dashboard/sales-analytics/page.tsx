@@ -83,8 +83,8 @@ export default async function SalesAndAnalyticsPage() {
         return <GatedPageModal type="verification" />
     }
 
-    if (profile && !profile.plan_type) {
-        return <GatedPageModal type="plan" featureName="Sales & Analytics" requiredPlan="Free" />
+    if (profile && profile.plan_type !== "pro" && profile.plan_type !== "enterprise") {
+        return <GatedPageModal type="plan" featureName="Sales Analytics" requiredPlan="Pro" />
     }
 
     const cards = cardsResult.status === "fulfilled" && cardsResult.value.success
