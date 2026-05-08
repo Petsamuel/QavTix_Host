@@ -3,7 +3,7 @@ import AllActivityNotificationsModal from "@/components/modals/ActivityNotificat
 import { cookies } from "next/headers";
 
 export default async function AllActivityModalPage(props: { searchParams: Promise<{ [key: string]: string | undefined }> }) {
-    const cookieStore = await cookies();
+    const cookieStore = await cookies()
     const token = cookieStore.get("host_access_token")?.value;
     const searchParams = await props.searchParams;
     const params: Record<string, any> = { page: 1 };
