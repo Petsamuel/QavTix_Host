@@ -1,4 +1,5 @@
 import { useFormatPrice } from "@/custom-hooks/UseFormatPrice"
+import { cn } from "@/lib/utils"
 import UserMetricCard from "./UserMetricsCard"
 
 interface Props {
