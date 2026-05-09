@@ -24,9 +24,9 @@ const CANCELLED_BULK_ACTIONS: BulkEventAction[] = [
 ]
 
 const ALL_BULK_ACTIONS: BulkEventAction[] = [
-    { id: "bulk-download",    label: "Download Attendees",icon: "hugeicons:download-01"      },
-    { id: "bulk-cancel",      label: "Cancel Events",     icon: "iconoir:cancel", variant: "danger" },
-    { id: "bulk-delete",      label: "Delete",            icon: "hugeicons:delete-02", variant: "danger" },
+    { id: "bulk-download",    label: "Download Attendees", icon: "hugeicons:download-01"      },
+    { id: "bulk-cancel",      label: "Cancel Events",      icon: "iconoir:cancel", variant: "danger" },
+    { id: "bulk-delete",      label: "Delete",             icon: "hugeicons:delete-02", variant: "danger" },
 ]
 
 export function getBulkActionsForTab(tab: string): BulkEventAction[] {
@@ -41,7 +41,7 @@ export function getBulkActionsForTab(tab: string): BulkEventAction[] {
 
 
 interface EventsBulkActionsBarProps {
-    selectedCount:   number
+    selectedEvents: { id: string; status: string }[]
     tab:             string
     onAction:        (actionId: BulkEventActionId) => Promise<void>
     onClearSelection: () => void
@@ -49,14 +49,40 @@ interface EventsBulkActionsBarProps {
 
 
 export default function EventsBulkActionsBar({
-    selectedCount,
+    selectedEvents,
     tab,
     onAction,
     onClearSelection,
 }: EventsBulkActionsBarProps) {
 
     const [loadingAction, setLoadingAction] = useState<BulkEventActionId | null>(null)
-    const actions = getBulkActionsForTab(tab)
+    const selectedCount = selectedEvents.length
+
+    const baseActions = getBulkActionsForTab(tab)
+
+    // Filter actions dynamically based on selected event statuses
+    const actions = baseActions.filter(action => {
+        if (action.id === "bulk-cancel") {
+            // Don't show cancel if ANY selected event is already cancelled, ended, or banned
+            const hasUncancellable = selectedEvents.some(e => 
+                e.status === "cancelled" || e.status === "ended" || e.status === "banned"
+            )
+            return !hasUncancellable
+        }
+        if (action.id === "bulk-unpublish") {
+            // Only show unpublish if ALL selected events are active (live)
+            const allActive = selectedEvents.every(e => e.status === "active")
+            return allActive
+        }
+        if (action.id === "bulk-delete") {
+            // Only draft, ended, cancelled can be deleted
+            const hasUndeletable = selectedEvents.some(e => 
+                e.status !== "draft" && e.status !== "ended" && e.status !== "cancelled"
+            )
+            return !hasUndeletable
+        }
+        return true
+    })
 
     const containerRef = useRef<HTMLDivElement>(null)
 

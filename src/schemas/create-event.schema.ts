@@ -68,13 +68,13 @@ export const step1Schema = yup.object({
     // Location
     locationType: yup.string().oneOf(['physical', 'online', 'tba'] as const).required(),
     venueName: yup.string().optional()
-        .test('max-words', 'Venue name cannot exceed 15 words', v => !v || v.split(/\s+/).filter(Boolean).length <= 15),
+        .max(100, 'Venue name must not exceed 100 characters'),
     address: yup.string().optional()
-        .test('max-words', 'Address cannot exceed 30 words', v => !v || v.split(/\s+/).filter(Boolean).length <= 30),
+        .max(200, 'Street address must not exceed 200 characters'),
     country: yup.string().optional(),
     state: yup.string().optional(),
     city: yup.string().optional()
-        .test('max-words', 'City cannot exceed 10 words', v => !v || v.split(/\s+/).filter(Boolean).length <= 10),
+        .max(60, 'City name must not exceed 60 characters'),
     postalCode: yup.string().optional(),
     onlineLink: yup.string().optional(),
 })

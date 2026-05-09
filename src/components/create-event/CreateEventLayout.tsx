@@ -89,9 +89,11 @@ export default function EventCreationLayout() {
 
                 <CreateEventStepperHeader />
                 <div className="py-12">
-                    {isMounted && !hasDraftAvailable ? (
-                        <CreateEventStepContent step={currentStep} />
-                    ) : (
+                    {!isMounted ? (
+                        <div className="flex justify-center items-center py-20">
+                            <Icon icon="lucide:loader-2" className="w-8 h-8 animate-spin text-brand-primary-6" />
+                        </div>
+                    ) : hasDraftAvailable ? (
                         <div className="flex flex-col items-center justify-center py-20 px-4 border-2 border-dashed border-brand-accent-6 rounded-2xl bg-brand-accent-1/30">
                             <Icon icon="hugeicons:file-edit" className="w-12 h-12 text-brand-accent-6 mb-4 opacity-50" />
                             <h3 className={cn(space_grotesk.className, "text-lg font-semibold text-brand-secondary-9 mb-2 text-center")}>Unfinished Event Draft Found</h3>
@@ -99,6 +101,8 @@ export default function EventCreationLayout() {
                                 Please choose to restore your saved draft or discard it to start a new event.
                             </p>
                         </div>
+                    ) : (
+                        <CreateEventStepContent step={currentStep} />
                     )}
                 </div>
             </main>

@@ -148,23 +148,23 @@ export async function bulkUnpublishEvents(
 
 export async function bulkDownloadAttendees(
     { eventIds }: BulkActionParams
-): Promise<ActionResult & { blobs?: Array<{ eventId: string; blob: Blob }> }> {
+): Promise<ActionResult & { files?: Array<{ eventId: string; content: string }> }> {
     try {
         const results = await Promise.allSettled(
             eventIds.map((id) => getAttendeesExport({ eventId: id }))
         )
 
-        const blobs: Array<{ eventId: string; blob: Blob }> = []
+        const files: Array<{ eventId: string; content: string }> = []
         results.forEach((r, i) => {
-            if (r.status === "fulfilled" && r.value.success && r.value.blob) {
-                blobs.push({ eventId: eventIds[i], blob: r.value.blob })
+            if (r.status === "fulfilled" && r.value.success && r.value.content) {
+                files.push({ eventId: eventIds[i], content: r.value.content })
             }
         })
 
-        if (blobs.length === 0)
+        if (files.length === 0)
             return { success: false, message: "Failed to download any attendee lists." }
 
-        return { success: true, message: `${blobs.length} attendee list(s) downloaded.`, blobs }
+        return { success: true, message: `${files.length} attendee list(s) downloaded.`, files }
     } catch (err) {
         return { success: false, message: "Failed to download attendee lists." }
     }
@@ -206,8 +206,8 @@ export async function getAttendeesExport({ eventId }: { eventId: string }): Prom
     try {
         const endpoint = CUSTOMER_LIST_DOWNLOAD_ENDPOINT.replace("[event_id]", eventId)
         const axios = await getServerAxios()
-        const res = await axios.get(`/${endpoint}`, { responseType: 'blob' })
-        return { success: true, blob: res.data }
+        const res = await axios.get(`/${endpoint}`, { responseType: 'text' })
+        return { success: true, content: res.data }
     } catch (err) {
         return { success: false, message: "Failed to download attendee list." }
     }

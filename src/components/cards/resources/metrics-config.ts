@@ -6,7 +6,7 @@ export interface MetricConfig {
     description: string
     icon: string
     iconColor: string
-    valueFormatter?: (value: any, currency?: string) => string
+    valueFormatter?: (value: any, currency?: string, isMounted?: boolean) => string
 }
 
 
