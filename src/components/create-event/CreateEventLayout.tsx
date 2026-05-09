@@ -23,8 +23,6 @@ export default function EventCreationLayout() {
 
     const isMounted = useIsMounted()
 
-    const showCancelBtn = isEditMode && (eventStatus === 'draft' || eventStatus === 'active')
-
     return (
         <>
             <div id="step-top" />
@@ -34,15 +32,6 @@ export default function EventCreationLayout() {
                         <h2 className={cn(space_grotesk.className, 'capitalize text-lg text-brand-secondary-8 font-bold')}>
                             {isEditMode ? 'Edit Event' : 'Create Event'}
                         </h2>
-                        {showCancelBtn && (
-                            <Button
-                                variant="ghost"
-                                onClick={() => router.back()}
-                                className="underline text-lg text-red-700 hover:text-red-600 h-auto p-0 font-medium"
-                            >
-                                Cancel
-                            </Button>
-                        )}
                     </div>
                     <SaveAsDraftBtn />
                 </div>

@@ -108,7 +108,7 @@ export default function CreateEventReviewStep() {
                     : await publishEvent({ eventData: sanitizedEventData, media })
 
                 if (result.success) {
-                    setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: (result as any).eventId ?? eventID })
+                    setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: result.eventId ?? eventID })
                     dispatch(finishConfirmAction())
                     dispatch(resetConfirmationStatus())
                     clearEventDraft()
@@ -178,12 +178,7 @@ export default function CreateEventReviewStep() {
     }
 
     const handleOnclose = () => {
-        if (statusModal.type === "FAILED") {
-            setStatusModal(prev => ({ ...prev, isOpen: false }))
-            return
-        }
-        resetForm()
-        router.push(NAVIGATION_LINKS.MY_EVENTS.href)
+        setStatusModal(prev => ({ ...prev, isOpen: false }))
     }
 
 
@@ -373,10 +368,14 @@ export default function CreateEventReviewStep() {
                 isOpen={statusModal.isOpen}
                 onClose={handleOnclose}
                 type={statusModal.type}
-                onViewDashboard={() => router.push(NAVIGATION_LINKS.MY_EVENTS.href)}
+                onViewDashboard={() => {
+                    resetForm()
+                    router.push(NAVIGATION_LINKS.MY_EVENTS.href)
+                }}
                 eventId={statusModal.eventId}
                 errorMessage={statusModal.errorMsg}
                 onShare={() => {
+                    setStatusModal(prev => ({ ...prev, isOpen: false }))
                     setIsShareModalOpen(true)
                 }}
                 onCreateAnother={() => {

@@ -89,7 +89,6 @@ export default function PayoutHistoryTable({
             lastFetchedKey.current = externalDate
             fetchData(1, true)
         }
-        fetchData(1, true)
     }, [externalDate, fetchData])
 
     const fetchPage = (page: number) => {

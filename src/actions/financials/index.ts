@@ -54,9 +54,15 @@ export async function getFinancialsClient(
         if (params.end_date) urlParams.set("end_date", params.end_date)
         if (params.page) urlParams.set("page", String(params.page))
 
-        const { data } = await axios.get(`/${FINANCIALS_ENDPOINT}?${urlParams.toString()}`)
-        return { success: true, data: data.data }
+        const queryString = urlParams.toString()
+        const url = queryString ? `/${FINANCIALS_ENDPOINT}?${queryString}` : `/${FINANCIALS_ENDPOINT}`
+
+        const { data } = await axios.get(url)
+        // Handle both { data: { ... } } and { ... } structures
+        const resultData = data?.data ?? data
+        return { success: true, data: resultData }
     } catch (err) {
+        console.error("[getFinancialsClient] Error:", err)
         return { success: false, message: "Failed to load financials." }
     }
 }
@@ -65,8 +71,10 @@ export async function getPayoutAccountsClient(): Promise<{ success: boolean; dat
     try {
         const axios = await getServerAxios()
         const { data } = await axios.get(`/${PAYOUT_LIST_ENDPOINT}`)
-        return { success: true, data: Array.isArray(data.data) ? data.data : [] }
+        const resultData = data?.data ?? data
+        return { success: true, data: Array.isArray(resultData) ? resultData : [] }
     } catch (err) {
+        console.error("[getPayoutAccountsClient] Error:", err)
         return { success: false, message: "Failed to load payout accounts." }
     }
 }

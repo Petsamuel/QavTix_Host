@@ -96,7 +96,7 @@ export const getBrandFetchLogoUrl = (bankName: string): string | null => {
     const domain    = resolveDomain(bankName)
     const clientId  = process.env.NEXT_PUBLIC_BRAND_FETCH_CLIENT_ID
     if (!domain || !clientId) return null
-    return `https://cdn.brandfetch.io/domain/firstbanknigeria.com/w/400/h/400?c=${clientId}`
+    return `https://cdn.brandfetch.io/domain/${domain}/w/400/h/400?c=${clientId}`
 }
 
 export const getBankConvLogoUrl = (bankName: string): string | null => {

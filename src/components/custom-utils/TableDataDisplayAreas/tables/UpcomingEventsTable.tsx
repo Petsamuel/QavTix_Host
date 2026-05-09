@@ -8,6 +8,8 @@ import Link from "next/link"
 import { format } from "date-fns"
 import { eventPerformanceConfig } from "../resources/status-config"
 import PaginationControls from "../tools/PaginationControl"
+import { EVENT_DETAILS_LINK } from "@/enums/navigation"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 
 interface UpcomingEventsTableProps {
@@ -126,13 +128,22 @@ export default function UpcomingEventsTable({
                                     </td>
 
                                     <td className="py-4 px-4">
-                                        <Link href={`/events/${event.id}`}>
-                                            <Button size="icon" variant="ghost" className="size-10 rounded-full bg-brand-primary-1 hover:bg-brand-primary-2">
-                                                <span className="bg-brand-primary-4 rounded size-5 flex items-center justify-center text-white">
-                                                    <Icon icon="iconamoon:edit-light" width="24" height="24" />
-                                                </span>
-                                            </Button>
-                                        </Link>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Link href={EVENT_DETAILS_LINK.replace("[event_id]", event.id.toString())} target="_blank">
+                                                        <Button size="icon" variant="ghost" className="size-10 rounded-full bg-brand-primary-1 hover:bg-brand-primary-2">
+                                                            <span className="bg-brand-primary-4 rounded size-5 flex items-center justify-center text-white">
+                                                                <Icon icon="hugeicons:view" width="24" height="24" />
+                                                            </span>
+                                                        </Button>
+                                                    </Link>
+                                                </TooltipTrigger>
+                                                <TooltipContent className="bg-brand-secondary-9 text-white border-brand-secondary-9">
+                                                    <p>View Event On Web</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
                                     </td>
                                 </tr>
                             )
@@ -162,10 +173,10 @@ export default function UpcomingEventsTable({
                                         {event.tickets_sold}/{event.tickets_listed} ({event.tickets_sold_percentage}%)
                                     </span>
                                 </span>
-                                <Link href={`/events/${event.id}`}>
+                                <Link href={EVENT_DETAILS_LINK.replace("[event_id]", event.id.toString())} target="_blank">
                                     <Button size="icon" variant="ghost" className="size-8 rounded-full bg-brand-primary-1 hover:bg-brand-primary-2">
                                         <span className="bg-brand-primary-4 rounded size-4 flex items-center justify-center text-white">
-                                            <Icon icon="iconamoon:edit-light" width="24" height="24" />
+                                            <Icon icon="hugeicons:view" width="24" height="24" />
                                         </span>
                                     </Button>
                                 </Link>
