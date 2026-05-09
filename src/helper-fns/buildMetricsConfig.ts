@@ -4,6 +4,7 @@ export function buildMetricsFromConfig(
     config:   Record<string, MetricConfig>,
     apiData:  Record<string, any>,
     currency?: string,
+    isMounted: boolean = true
 ) {
     return Object.keys(config).map(key => {
         const metricConfig = config[key]
@@ -11,7 +12,7 @@ export function buildMetricsFromConfig(
         return {
             ...metricConfig,
             value: metricConfig.valueFormatter
-                ? metricConfig.valueFormatter(value, currency)
+                ? metricConfig.valueFormatter(value, currency, isMounted)
                 : value,
         }
     })

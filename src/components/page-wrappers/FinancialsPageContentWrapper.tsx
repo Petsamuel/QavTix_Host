@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { Icon } from "@iconify/react"
 import { mapFinancialCards } from "@/helper-fns/mapToStatCards"
 import MetricsContainerLoader from "../loaders/MetricsContainerLoader"
+import { useIsMounted } from "@/custom-hooks/UseIsMounted"
 import { useOnRevalidate } from "@/custom-hooks/UseRevalidate"
 import { getFinancialsClient, getPayoutAccountsClient } from "@/actions/financials"
 
@@ -31,6 +32,7 @@ export default function FinancialsPageContentWrapper({
 }: Props) {
     const { user } = useAppSelector(store => store.authUser)
     const currency = user?.currency || ""
+    const isMounted = useIsMounted()
 
     const [datePreset, setDatePreset] = useState<DatePreset | null>(null)
 
@@ -71,7 +73,7 @@ export default function FinancialsPageContentWrapper({
         }
     })
 
-    const metrics = mapFinancialCards(cards, currency)
+    const metrics = mapFinancialCards(cards, currency, isMounted)
 
     if (pageLoading) return <FinancialPageLoader />
 

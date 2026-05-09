@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 import { formatYTick, getNiceTicks } from "@/helper-fns/chartFormatters"
 import ChartLoader from "../loaders/ChartLoader"
 import { useAppSelector } from "@/lib/redux/hooks"
-import { formatPrice } from "@/helper-fns/formatPrice"
+import { useFormatPrice } from "@/custom-hooks/UseFormatPrice"
 import { getDashboardOverview } from "@/actions/dashboard/client"
 
 type TimeFilter = "annual" | "month" | "week"
@@ -52,7 +52,7 @@ function buildParams(
     return params
 }
 
-const CustomTooltip = ({ active, payload, chartFilter }: any) => {
+const CustomTooltip = ({ active, payload, chartFilter, format }: any) => {
     const { user } = useAppSelector(store => store.authUser)
     if (!active || !payload?.length) return null
     const point = payload[0].payload as ChartDataPoint
@@ -61,7 +61,7 @@ const CustomTooltip = ({ active, payload, chartFilter }: any) => {
             <p className="font-medium text-brand-neutral-8">{point.displayLabel}</p>
             <p className="text-brand-accent-6 font-semibold">
                 {chartFilter === "revenue"
-                    ? `${formatPrice((payload[0].value ?? 0), user?.currency)}`
+                    ? `${format((payload[0].value ?? 0), user?.currency)}`
                     : `${payload[0].value?.toLocaleString()} tickets`
                 }
             </p>
@@ -74,6 +74,7 @@ export default function RevenueGrowthChart({
     chartFilter,
     onChartDataChange,
 }: RevenueGrowthChartProps) {
+    const formatPrice = useFormatPrice()
     const [timeFilter, setTimeFilter] = useState<TimeFilter>("annual")
     const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR)
     const [chartData, setChartData] = useState<ChartDataPoint[]>(() => toChartPoints(initialChartData))
@@ -162,7 +163,7 @@ export default function RevenueGrowthChart({
                                 <CartesianGrid strokeDasharray="4px" vertical={false} stroke="#d4d9e0" strokeWidth={0.5} />
                                 <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "#9CA3AF", fontSize: 12, fontWeight: 500 }} tickMargin={12} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fill: "#9CA3AF", fontSize: 12 }} tickFormatter={formatYTick} domain={[0, yMax]} ticks={ticks} tickMargin={8} />
-                                <Tooltip content={<CustomTooltip chartFilter={chartFilter} />} cursor={{ fill: "transparent" }} />
+                                <Tooltip content={<CustomTooltip chartFilter={chartFilter} format={formatPrice} />} cursor={{ fill: "transparent" }} />
                                 <Bar dataKey="value" fill="#FFAB73" radius={[4, 4, 2, 2]} maxBarSize={7} barSize={8} isAnimationActive={true} animationBegin={0} animationDuration={500} animationEasing="ease-in-out" background={{ fill: "#E5E7EB", radius: "16px" }} />
                             </BarChart>
                         </ResponsiveContainer>

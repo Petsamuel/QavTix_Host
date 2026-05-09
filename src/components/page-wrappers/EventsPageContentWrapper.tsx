@@ -373,8 +373,9 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
             case "bulk-download": {
                 const result = await bulkDownloadAttendees({ eventIds: selectedEvents })
 
-                if (result.success && result.blobs?.length) {
-                    result.blobs.forEach(({ eventId, blob }) => {
+                if (result.success && result.files?.length) {
+                    result.files.forEach(({ eventId, content }) => {
+                        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
                         downloadBlob(blob, `attendees-${eventId}.csv`)
                     })
                     dispatch(showAlert({
@@ -449,7 +450,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
             </div>
 
             <EventsBulkActionsBar
-                selectedCount={selectedEvents.length}
+                selectedEvents={selectedEvents.map(getEventById).filter(Boolean) as OrganizerEvent[]}
                 tab={activeTab}
                 onAction={handleBulkAction}
                 onClearSelection={() => setSelectedEvents([])}

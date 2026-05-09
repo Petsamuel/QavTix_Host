@@ -133,7 +133,7 @@ export async function initializeHostSubscription(payload: {
         }
         return { success: true, checkout_url }
     } catch (error: any) {
-        return { success: false, message: "Subscription initialization failed." }
+        return { success: false, message: handleApiError(error?.response?.data) || "Subscription initialization failed." }
     }
 }
 

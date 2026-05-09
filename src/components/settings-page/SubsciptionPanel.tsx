@@ -60,7 +60,7 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
     })
 
     // Derived state
-    const currentPlanSlug = (data?.plan_slug ?? "standard") as PlanSlug
+    const currentPlanSlug = (data?.plan_slug === "free" ? "standard" : (data?.plan_slug ?? "standard")) as PlanSlug
     const currentPlanIndex = PLAN_ORDER.indexOf(currentPlanSlug)
     const isHighestPlan = currentPlanIndex === PLAN_ORDER.length - 1
     const isExpired = data?.is_expired ?? false
@@ -110,8 +110,9 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
     const handleUpgrade = useCallback(() => {
         const nextPlan = hostPricingData.plans[currentPlanIndex + 1]
         if (!nextPlan) return
+
         subscribe(nextPlan)
-    }, [currentPlanIndex, subscribe])
+    }, [currentPlanIndex, currentPlanSlug, subscribe])
 
     const handleCancel = () => setCancelOpenSubModal(true)
 

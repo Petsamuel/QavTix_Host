@@ -12,7 +12,7 @@ import SchedulePublishModal from './SchedulePublishModal'
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks'
 import { showAlert } from '@/lib/redux/slices/alertSlice'
 import { triggerPopupAlert } from '@/lib/redux/slices/popupAlertSlice'
-import { EVENT_DETAILS_LINK, NAVIGATION_LINKS } from '@/enums/navigation'
+import { CREATE_EVENT, EVENT_DETAILS_LINK, NAVIGATION_LINKS } from '@/enums/navigation'
 import { openConfirmation, resetConfirmationStatus, finishConfirmAction } from '@/lib/redux/slices/confirmationSlice'
 import EventPublishStatusModal from './EventPublishStatusModal'
 import ShareEventModal from '../modals/ShareEventModal'
@@ -21,6 +21,7 @@ import { publishEvent, saveEventAsDraft, updateAndPublishEvent, updateEventAsDra
 import { useRouter } from 'next/navigation'
 import { uploadEventMedia } from '@/helper-fns/uploadEventMedia'
 import { sanitizeEventDataForServer } from '@/lib/cloudinary'
+import { clearEventDraft } from '@/custom-hooks/UseEventDraftPersist'
 
 
 
@@ -28,7 +29,7 @@ import { sanitizeEventDataForServer } from '@/lib/cloudinary'
 export default function CreateEventReviewStep() {
 
     const dispatch = useAppDispatch()
-    const { eventData, resetForm, discardDraft, categories, isEditMode, eventID } = useEventCreation()
+    const { eventData, resetForm, categories, isEditMode, eventID } = useEventCreation()
     const { goToPreviousStep } = useStepper()
 
     const { isConfirmed, lastConfirmedAction } = useAppSelector((state) => state.confirmation)
@@ -63,7 +64,7 @@ export default function CreateEventReviewStep() {
 
     const currency = useAppSelector(store => store.authUser.user?.currency) || 'NGN'
     const ticketTypes = eventData.ticketsPricing?.ticketTypes || []
-    
+
     const totalPotentialRevenue = ticketTypes.reduce((acc, ticket) => {
         const price = Number(ticket.price) || 0
         const qty = Number(ticket.quantity) || 0
@@ -85,8 +86,8 @@ export default function CreateEventReviewStep() {
     const handleConfirmImmediatePublish = () => {
         dispatch(openConfirmation({
             title: isEditMode ? "Update & Publish Event" : "Publish Event",
-            description: isEditMode 
-                ? "Are you sure you want to update and publish this event?" 
+            description: isEditMode
+                ? "Are you sure you want to update and publish this event?"
                 : "Are you sure you want to publish this event? It will be visible to attendees immediately.",
             actionType: "PUBLISH_EVENT",
         }))
@@ -101,7 +102,7 @@ export default function CreateEventReviewStep() {
             try {
                 const media = await uploadEventMedia(eventData.detailsMedia)
                 const sanitizedEventData = sanitizeEventDataForServer(eventData, media)
-                
+
                 const result = isEditMode && eventID
                     ? await updateAndPublishEvent({ eventId: eventID, eventData: sanitizedEventData, media })
                     : await publishEvent({ eventData: sanitizedEventData, media })
@@ -110,7 +111,7 @@ export default function CreateEventReviewStep() {
                     setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: (result as any).eventId ?? eventID })
                     dispatch(finishConfirmAction())
                     dispatch(resetConfirmationStatus())
-                    discardDraft()
+                    clearEventDraft()
                 } else {
                     setStatusModal({ isOpen: true, type: 'FAILED', errorMsg: result.message })
                     dispatch(finishConfirmAction())
@@ -146,7 +147,7 @@ export default function CreateEventReviewStep() {
         try {
             const media = await uploadEventMedia(eventData.detailsMedia)
             const sanitizedEventData = sanitizeEventDataForServer(eventData, media)
-            
+
             const result = isEditMode && eventID
                 ? await updateEventAsDraft({ eventId: eventID, eventData: sanitizedEventData, scheduledAt: new Date(`${v.date}T${v.time}`).toISOString(), media })
                 : await saveEventAsDraft({ eventData: sanitizedEventData, scheduledAt: new Date(`${v.date}T${v.time}`).toISOString(), media })
@@ -162,7 +163,7 @@ export default function CreateEventReviewStep() {
                     navigateTo: NAVIGATION_LINKS.MY_EVENTS.href,
                 }))
 
-                discardDraft()
+                clearEventDraft()
                 resetForm()
             } else {
                 dispatch(showAlert({
@@ -381,6 +382,7 @@ export default function CreateEventReviewStep() {
                 onCreateAnother={() => {
                     setStatusModal(prev => ({ ...prev, isOpen: false }))
                     resetForm()
+                    router.push(CREATE_EVENT.href)
                 }}
                 onRetry={handleConfirmImmediatePublish}
             />

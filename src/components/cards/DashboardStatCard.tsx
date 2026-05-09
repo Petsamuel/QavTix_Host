@@ -1,4 +1,4 @@
-import { formatPrice } from "@/helper-fns/formatPrice"
+import { useFormatPrice } from "@/custom-hooks/UseFormatPrice"
 import { space_grotesk } from "@/lib/fonts"
 import { useAppSelector } from "@/lib/redux/hooks"
 import { cn } from "@/lib/utils"
@@ -7,10 +7,11 @@ import Link from "next/link"
 
 export default function DashboardStatCard({ cardData }: { cardData: IDashboardStat }) {
     const { user } = useAppSelector(store => store.authUser)
+    const format = useFormatPrice()
 
     const isRevenue  = cardData.label.includes("Revenue") || cardData.label.includes("Payout")
     const rawNumber  = isRevenue
-        ? formatPrice(parseFloat(cardData.number as string), user?.currency)
+        ? format(parseFloat(cardData.number as string), user?.currency)
         : Number(cardData.number).toLocaleString()
 
     return (

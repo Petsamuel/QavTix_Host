@@ -3,10 +3,18 @@ import { LOCALE_MAP, PLATFORM_CURRENCY } from "@/components-data/currencies"
 export function formatPrice(
     amount:    number,
     currency?:  string,
-    useSymbol: boolean = true
+    useSymbol: boolean = true,
+    isMounted: boolean = true
 ): string {
     const code   = currency ? currency.toUpperCase() : PLATFORM_CURRENCY
     const locale = LOCALE_MAP[code] ?? "en-US"
+
+    if (!isMounted) {
+        return new Intl.NumberFormat(locale, {
+            minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+            maximumFractionDigits: 2,
+        }).format(amount)
+    }
 
     return new Intl.NumberFormat(locale, {
         style:                 "currency",

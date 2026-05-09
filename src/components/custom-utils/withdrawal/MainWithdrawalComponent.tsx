@@ -12,8 +12,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { openSuccessModal } from "@/lib/redux/slices/successModalSlice"
 import ActionButton1 from "../buttons/ActionBtn1"
-import { useIsMounted } from "@/custom-hooks/UseIsMounted"
-import { formatPrice } from "@/helper-fns/formatPrice"
+import { useFormatPrice } from "@/custom-hooks/UseFormatPrice"
 import BankLogo from "@/components/financials/BankLogo"
 import { CURRENCY_SYMBOL_MAP } from "@/components-data/currencies"
 import { finishConfirmAction, openConfirmation, parseConfirmationSession, resetConfirmationStatus } from "@/lib/redux/slices/confirmationSlice"
@@ -32,7 +31,7 @@ export default function MainWithdrawalComponent({
 }: Props) {
 
     const dispatch = useAppDispatch()
-    const isMounted = useIsMounted()
+    const format = useFormatPrice()
     const { user } = useAppSelector(store => store.authUser)
     const [amount, setAmount] = useState("")
     const [selectedAccount, setSelectedAccount] = useState("")
@@ -87,7 +86,7 @@ export default function MainWithdrawalComponent({
             dispatch(showAlert({
                 variant: "destructive",
                 title: "Insufficient balance",
-                description: `You can only withdraw up to ${isMounted ? formatPrice(balance, user?.currency) : balance.toLocaleString()}.`,
+                description: `You can only withdraw up to ${format(balance, user?.currency)}.`,
             }))
             return
         }
@@ -179,10 +178,7 @@ export default function MainWithdrawalComponent({
                 <div className="relative z-10 space-y-6">
                     <p className="text-white text-sm font-medium opacity-90">Available Balance</p>
                     <h2 className={cn(space_grotesk.className, "text-white text-3xl font-bold")}>
-                        {isMounted
-                            ? formatPrice(parseFloat(availableBalance), user?.currency)
-                            : `${availableBalance}`
-                        }
+                        {format(balance, user?.currency)}
                     </h2>
                 </div>
             </div>
@@ -191,7 +187,7 @@ export default function MainWithdrawalComponent({
             <div className="mb-6 flex gap-2 border-b border-b-neutral-5">
                 <div className="border-e pe-3 pb-2 border-e-neutral-5 flex items-center">
                     <span className="text-brand-secondary-8 text-xl">
-                        {isMounted && user?.currency
+                        {user?.currency
                             ? CURRENCY_SYMBOL_MAP[user.currency] ?? user.currency
                             : "₦"
                         }
@@ -219,7 +215,7 @@ export default function MainWithdrawalComponent({
                                 : "bg-brand-neutral-4 text-brand-secondary-4 hover:bg-brand-neutral-5"
                         )}
                     >
-                        {isMounted ? formatPrice(q, user?.currency) : `₦${q.toLocaleString()}`}
+                        {format(q, user?.currency)}
                     </button>
                 ))}
             </div>

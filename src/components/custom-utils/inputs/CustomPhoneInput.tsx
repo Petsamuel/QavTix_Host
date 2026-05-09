@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import PhoneInput, { getCountryCallingCode, Country } from 'react-phone-number-input'
+import PhoneInput, { getCountryCallingCode, Country, parsePhoneNumber } from 'react-phone-number-input'
 import flags from 'react-phone-number-input/flags'
 import 'react-phone-number-input/style.css'
 import { cn } from '@/lib/utils'
@@ -47,6 +47,21 @@ export default function PhoneNumberInput({
         ? undefined // The library will handle deriving it from the string
         : defaultCountry;
 
+    // Fix E.164 warning: if value is local (e.g. '080...'), convert it using the default country.
+    // If it's invalid or empty, pass undefined to avoid console errors.
+    let safeValue: string | undefined = undefined;
+    if (value) {
+        if (value.startsWith('+')) safeValue = value;
+        else {
+            try {
+                const parsed = parsePhoneNumber(value, defaultCountry as Country);
+                safeValue = parsed?.number || undefined;
+            } catch {
+                safeValue = undefined;
+            }
+        }
+    }
+
     return (
         <div className={cn("w-full space-y-2", className)}>
             <label className="block text-sm font-medium text-secondary-9">
@@ -59,10 +74,8 @@ export default function PhoneNumberInput({
                 error ? "border-red-400" : "border-secondary-5 hover:border-secondary-6"
             )}>
                 <PhoneInput
-                    international
-                    withCountryCallingCode
                     defaultCountry={defaultCountry}
-                    value={value ?? ''}
+                    value={safeValue}
                     onChange={onChange}
                     placeholder={placeholder}
                     autoComplete="off"
