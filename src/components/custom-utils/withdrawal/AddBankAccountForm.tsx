@@ -227,10 +227,10 @@ export default function AddBankAccountForm({
                         label="Account Name"
                         required
                         placeholder="Account holder name"
-                        readOnly={isNigerian && verifyState === "success"}
+                        readOnly={isNigerian}
                         error={errors.account_name?.message}
                         className={cn(
-                            isNigerian && verifyState === "success" && "bg-brand-neutral-3 text-brand-secondary-6"
+                            isNigerian && "bg-brand-neutral-3 text-brand-secondary-6 cursor-not-allowed"
                         )}
                         {...register("account_name")}
                     />

@@ -8,7 +8,7 @@ import { space_grotesk } from "@/lib/fonts"
 import {
     getSalesAnalyticsCardsClient,
     getSalesAnalyticsGraphsClient,
-} from "@/actions/sales-n-analytics"
+} from "@/actions/sales-n-analytics/client"
 
 import { EventFilter } from "../custom-utils/TableDataDisplayAreas/filters/EventFilter"
 import ExportButton1 from "@/lib/features/export/ExportDataBtn1"

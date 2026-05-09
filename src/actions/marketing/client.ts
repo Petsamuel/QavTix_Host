@@ -32,3 +32,41 @@ export async function createPromoCode(
     }
 }
 
+export async function getPromoCodesClient(params: {
+    page?: number
+    search?: string
+    status?: string
+    event?: string
+} = {}): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+        const axios = await getServerAxios()
+        const { data } = await axios.get(`/${PROMO_CODES_ENDPOINT}`, { params })
+        return { success: true, data: data.data ?? data }
+    } catch (err) {
+        return { success: false, message: "Failed to load promo codes." }
+    }
+}
+
+export async function getAffiliateLinksClient(params: {
+    page?: number
+} = {}): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+        const axios = await getServerAxios()
+        const { data } = await axios.get(`/${AFFILIATE_LINKS_HOST_ENDPOINT}`, { params })
+        return { success: true, data: data.data ?? data }
+    } catch (err) {
+        return { success: false, message: "Failed to load affiliate links." }
+    }
+}
+
+export async function getEmailCampaignsClient(params: {
+    page?: number
+} = {}): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+        const axios = await getServerAxios()
+        const { data } = await axios.get(`/${EMAIL_CAMPAIGNS_ENDPOINT}`, { params })
+        return { success: true, data: data.data ?? data }
+    } catch (err) {
+        return { success: false, message: "Failed to load email campaigns." }
+    }
+}

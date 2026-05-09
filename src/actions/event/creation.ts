@@ -120,7 +120,7 @@ export async function updateAndPublishEvent({
     eventId: string | number
     eventData: Partial<CompleteEventFormData>
     media?: any[]
-}): Promise<{ success: boolean; message?: string }> {
+}): Promise<{ success: boolean; message?: string; eventId?: string }> {
     try {
         const token = await getToken()
         const body = buildEventPayload(eventData, "active", media)
@@ -135,8 +135,6 @@ export async function updateAndPublishEvent({
             }
         )
 
-        console.log(res)
-
         const json = await res.json().catch(() => ({}))
 
         if (!res.ok) {
@@ -148,6 +146,7 @@ export async function updateAndPublishEvent({
         return {
             success: true,
             message: "Event updated and published successfully.",
+            eventId: String(eventId)
         }
     } catch (err) {
         console.error("[updateAndPublishEvent] error:", err)
