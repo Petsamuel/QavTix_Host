@@ -6,6 +6,7 @@ import { Icon } from "@iconify/react"
 import Image from "next/image"
 import Link from "next/link"
 import { format } from "date-fns"
+import { formatLocation } from "@/helper-fns/formatLocation"
 import { eventPerformanceConfig } from "../resources/status-config"
 import PaginationControls from "../tools/PaginationControl"
 import { EVENT_DETAILS_LINK } from "@/enums/navigation"
@@ -112,7 +113,7 @@ export default function UpcomingEventsTable({
                                     </td>
 
                                     <td className="py-4 px-4">
-                                        <p className="text-xs text-brand-secondary-6 max-w-50">{event.event_location}</p>
+                                        <p className="text-xs text-brand-secondary-6 max-w-50 truncate">{formatLocation(event.event_location)}</p>
                                     </td>
 
                                     <td className="py-4 px-4">
@@ -203,7 +204,7 @@ export default function UpcomingEventsTable({
                                         <p className="text-[11px] text-brand-secondary-8">{event.category}</p>
                                     </div>
                                 </div>
-                                <p className="text-xs text-brand-neutral-7 text-right max-w-32">{event.event_location}</p>
+                                <p className="text-xs text-brand-neutral-7 text-right max-w-32 truncate">{formatLocation(event.event_location)}</p>
                             </div>
 
                             <div className="flex mt-2 justify-between items-center text-[11px] text-brand-secondary-9">
