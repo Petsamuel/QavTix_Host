@@ -148,16 +148,16 @@ export async function bulkUnpublishEvents(
 
 export async function bulkDownloadAttendees(
     { eventIds }: BulkActionParams
-): Promise<ActionResult & { files?: Array<{ eventId: string; content: string }> }> {
+): Promise<ActionResult & { files?: Array<{ eventId: string; buffer: ArrayBuffer }> }> {
     try {
         const results = await Promise.allSettled(
             eventIds.map((id) => getAttendeesExport({ eventId: id }))
         )
 
-        const files: Array<{ eventId: string; content: string }> = []
+        const files: Array<{ eventId: string; buffer: ArrayBuffer }> = []
         results.forEach((r, i) => {
-            if (r.status === "fulfilled" && r.value.success && r.value.content) {
-                files.push({ eventId: eventIds[i], content: r.value.content })
+            if (r.status === "fulfilled" && r.value.success && r.value.buffer) {
+                files.push({ eventId: eventIds[i], buffer: r.value.buffer })
             }
         })
 
@@ -206,8 +206,12 @@ export async function getAttendeesExport({ eventId }: { eventId: string }): Prom
     try {
         const endpoint = CUSTOMER_LIST_DOWNLOAD_ENDPOINT.replace("[event_id]", eventId)
         const axios = await getServerAxios()
-        const res = await axios.get(`/${endpoint}`, { responseType: 'text' })
-        return { success: true, content: res.data }
+        const res = await axios.get(`/${endpoint}`, { responseType: 'arraybuffer' })
+        
+        // Convert to ArrayBuffer if it's a Buffer (standard for Node axios)
+        const buffer = res.data instanceof Buffer ? res.data.buffer : res.data
+        
+        return { success: true, buffer }
     } catch (err) {
         return { success: false, message: "Failed to download attendee list." }
     }

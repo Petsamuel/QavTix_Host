@@ -44,6 +44,7 @@ export interface PlanFeatures {
     attendee_export_limit: number | null   // null = unlimited
     customer_profile_insights: boolean
     max_ticket_sales: number | null    // null = unlimited
+    customize_sender_name: boolean
 }
 
 // ─── Static plan registry ─────────────────────────────────────────────────────
@@ -78,6 +79,7 @@ const PLAN_FEATURES: Record<string, PlanFeatures> = {
         attendee_export_limit: 250,
         customer_profile_insights: false,
         max_ticket_sales: 750,
+        customize_sender_name: false,
     },
     pro: {
         affiliate: true,
@@ -107,6 +109,7 @@ const PLAN_FEATURES: Record<string, PlanFeatures> = {
         attendee_export_limit: 1000,
         customer_profile_insights: false,
         max_ticket_sales: 2500,
+        customize_sender_name: true,
     },
     enterprise: {
         affiliate: true,
@@ -136,6 +139,7 @@ const PLAN_FEATURES: Record<string, PlanFeatures> = {
         attendee_export_limit: null,
         customer_profile_insights: true,
         max_ticket_sales: 10000,
+        customize_sender_name: true,
     },
 }
 
@@ -243,6 +247,7 @@ export function usePlanRestrictions(): PlanRestrictions {
                 resale_controls: "Resale Controls",
                 revenue_chart: "Revenue Chart",
                 week_analysis: "Weekly Analysis",
+                customize_sender_name: "Customize Sender Name",
             }
 
             const label = featureLabels[feature] ?? String(feature).replace(/_/g, " ")
