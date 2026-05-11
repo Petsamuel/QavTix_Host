@@ -233,7 +233,7 @@ export default function CreateEventStep1() {
 
                 {/* Single */}
                 {eventType === "single" && (
-                    <div className="grid grid-cols-2 gap-5 max-w-lg" data-testid="single-event-dates">
+                    <div className="grid grid-cols-2 gap-5 max-w-xl" data-testid="single-event-dates">
                         <Controller
                             name="startDateTime"
                             control={control}
@@ -267,7 +267,7 @@ export default function CreateEventStep1() {
 
                 {/* Recurring */}
                 {eventType === "recurring" && (
-                    <div className="space-y-6 max-w-lg" data-testid="recurring-event-dates">
+                    <div className="space-y-6 max-w-xl" data-testid="recurring-event-dates">
                         {fields.map((field, index) => (
                             <div key={field.id} className="flex flex-wrap md:flex-nowrap flex-row items-start sm:items-end gap-4" data-testid={`recurring-date-row-${index}`}>
 

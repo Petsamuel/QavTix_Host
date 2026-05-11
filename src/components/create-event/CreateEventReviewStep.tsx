@@ -333,7 +333,7 @@ export default function CreateEventReviewStep() {
                         type="button"
                         onClick={() => setOpenScheduleLaterModal(true)}
                         disabled={isPublishing || isSavingDraft}
-                        className="h-12 w-full text-sm sm:w-auto md:h-14 text-brand-primary-6 bg-white hover:shadow flex items-center gap-2 justify-center px-6 py-3 rounded-[30px] border border-brand-primary-6 font-medium md:text-sm hover:bg-brand-primary-1 hover:border-brand-primary-7 active:bg-brand-primary-1 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-primary-4 focus:ring-offset-2 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="w-full text-sm sm:w-auto h-14 text-brand-primary-6 bg-white hover:shadow flex items-center gap-2 justify-center px-6 py-3 rounded-[30px] border border-brand-primary-6 font-medium md:text-sm hover:bg-brand-primary-1 hover:border-brand-primary-7 active:bg-brand-primary-1 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-primary-4 focus:ring-offset-2 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
                         data-testid="btn-schedule-later"
                     >
                         {isSavingDraft
