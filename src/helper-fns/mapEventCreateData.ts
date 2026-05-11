@@ -188,7 +188,7 @@ export function buildEventPayload(
                     code: t.promoCode.codeWord,
                     discount_percentage: t.promoCode.discountAmount ?? 0,
                     maximum_users: t.promoCode.maximumUsers ?? null,
-                    valid_till: t.promoCode.validTill ?? null,
+                    valid_till: t.promoCode.validTill ? t.promoCode.validTill.slice(0, 10) : null,
                 },
             ]
             : [],

@@ -190,35 +190,36 @@ export const step2Schema = yup.object({
 const promoCodeSchema = yup.object({
     codeWord: yup.string().optional(),
     discountAmount: yup.number()
-        .typeError('Please enter a valid discount amount')
+        .transform((val) => (isNaN(val) ? undefined : val))
         .min(0, 'Discount cannot be negative')
         .optional(),
     maximumUsers: yup.number()
-        .typeError('Please enter a valid number of users')
-        .min(1, 'At least 1 user must be allowed')
+        .transform((val) => (isNaN(val) ? undefined : val))
         .optional(),
     validTill: yup.string().optional(),
 }).test('promo-complete', 'Please fill in all promo code fields', function (value) {
-    // If codeWord is absent, treat the whole promo block as empty — skip all validation
     const hasPromoCode = !!value?.codeWord?.trim()
     if (!hasPromoCode) return true
 
-    // codeWord exists — now validate the rest of the fields
     const errors: yup.ValidationError[] = []
+    const base = this.path ? `${this.path}.` : ''   // ← add this
 
-    if (value?.discountAmount === undefined || value?.discountAmount === null || (value?.discountAmount as any) === '')
-        errors.push(this.createError({ path: 'discountAmount', message: 'Discount amount is required' }))
+    if (value?.discountAmount === undefined || value?.discountAmount === null)
+        errors.push(this.createError({ path: `${base}discountAmount`, message: 'Discount amount is required' }))
 
-    if (!value?.maximumUsers)
-        errors.push(this.createError({ path: 'maximumUsers', message: 'Maximum number of users is required' }))
+    if (!value?.maximumUsers || value.maximumUsers < 1)
+        errors.push(this.createError({ path: `${base}maximumUsers`, message: 'Maximum number of users is required' }))
 
     if (!value?.validTill?.trim())
-        errors.push(this.createError({ path: 'validTill', message: 'Expiry date is required' }))
+        errors.push(this.createError({ path: `${base}validTill`, message: 'Expiry date is required' }))
 
     if (errors.length > 0) throw new yup.ValidationError(errors)
 
     return true
 }).optional()
+
+
+
 
 const ticketTypeSchema = yup.object({
     id: yup.string().required(),

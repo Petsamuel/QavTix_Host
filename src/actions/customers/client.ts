@@ -26,11 +26,15 @@ export async function getCustomerProfile(params: CustomerProfileParams): Promise
     }
 }
 
-export async function getAttendeesExport(): Promise<{ success: boolean; message?: string; blob?: Blob }> {
+export async function getAttendeesExport(): Promise<{ success: boolean; message?: string; buffer?: ArrayBuffer }> {
     try {
         const axios = await getServerAxios()
-        const res = await axios.get(`/${CUSTOMER_LIST_DOWNLOAD_ENDPOINT}`, { responseType: 'blob' })
-        return { success: true, blob: res.data }
+        const res = await axios.get(`/${CUSTOMER_LIST_DOWNLOAD_ENDPOINT}`, { responseType: 'arraybuffer' })
+        
+        // Convert to ArrayBuffer if it's a Buffer (standard for Node axios)
+        const buffer = res.data instanceof Buffer ? res.data.buffer : res.data
+        
+        return { success: true, buffer }
     } catch (err) {
         return { success: false, message: "Failed to download attendee list." }
     }

@@ -53,7 +53,8 @@ export default function CreateEventStep3() {
     const plan = usePlanRestrictions()
 
     const methods = useForm<Step3FormData>({
-        resolver: yupResolver(step3Schema, { abortEarly: false, context: { maxTickets: plan.ticketSalesLimit ?? 750 } }) as any,
+        resolver: yupResolver(step3Schema, { abortEarly: false }) as any,
+        context: { maxTickets: plan.ticketSalesLimit ?? 750 },
         mode: 'onTouched',
         defaultValues: {
             ticketTypes: eventData.ticketsPricing?.ticketTypes ?? [{ id: crypto.randomUUID(), ticketType: '', price: 0, currency: 'NGN', quantity: 1, promoCode: { discountAmount: 0, codeWord: '', maximumUsers: undefined, validTill: '' } }],
@@ -76,7 +77,7 @@ export default function CreateEventStep3() {
 
     const currency = useAppSelector(store => store.authUser.user?.currency)
 
-    const { register, control, watch, setValue, handleSubmit, formState: { errors } } = methods
+    const { register, control, watch, setValue, clearErrors, handleSubmit, formState: { errors } } = methods
     const { fields, append, remove } = useFieldArray({ control, name: "ticketTypes" })
     const refundPolicy = watch('refundPolicy')
     const allTickets = watch("ticketTypes") ?? []
@@ -267,6 +268,13 @@ export default function CreateEventStep3() {
                                                         error={errors.ticketTypes?.[index]?.promoCode?.codeWord?.message}
                                                         {...register(`ticketTypes.${index}.promoCode.codeWord`)}
                                                         data-testid={`input-promo-code-${index}`}
+                                                        onInput={(e) => {
+                                                            if (!e.currentTarget.value.trim()) {
+                                                                clearErrors(`ticketTypes.${index}.promoCode.discountAmount`)
+                                                                clearErrors(`ticketTypes.${index}.promoCode.maximumUsers`)
+                                                                clearErrors(`ticketTypes.${index}.promoCode.validTill`)
+                                                            }
+                                                        }}
                                                     />
                                                     <CustomPercentageInput
                                                         label="Discount Amount"

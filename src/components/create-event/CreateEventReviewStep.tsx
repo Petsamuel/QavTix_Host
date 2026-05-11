@@ -377,10 +377,13 @@ export default function CreateEventReviewStep() {
                 onShare={() => {
                     setStatusModal(prev => ({ ...prev, isOpen: false }))
                     setIsShareModalOpen(true)
+                    resetForm()
+                    clearEventDraft()
                 }}
                 onCreateAnother={() => {
                     setStatusModal(prev => ({ ...prev, isOpen: false }))
                     resetForm()
+                    clearEventDraft()
                     router.push(CREATE_EVENT.href)
                 }}
                 onRetry={handleConfirmImmediatePublish}
@@ -388,7 +391,10 @@ export default function CreateEventReviewStep() {
 
             <ShareEventModal
                 isOpen={isShareModalOpen}
-                onClose={() => setIsShareModalOpen(false)}
+                onClose={() => {
+                    setIsShareModalOpen(false)
+                    router.push(NAVIGATION_LINKS.MY_EVENTS.href)
+                }}
                 shareUrl={`${EVENT_DETAILS_LINK.replace("[event_id]", statusModal.eventId?.toString() || "")}`}
             />
         </div>

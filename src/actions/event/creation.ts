@@ -42,10 +42,14 @@ export async function publishEvent({
             }
         )
 
-        const json = await res.json().catch(() => ({}))
+        const json = await res.json().catch(async () => {
+            const text = await res.clone().text().catch(() => "No response body")
+            return { detail: `Status ${res.status}: ${text}` }
+        })
 
         if (!res.ok) {
-            return { success: false, message: handleApiError(json) || "Failed to publish event." }
+            console.error("[publishEvent] API Error:", { status: res.status, json })
+            return { success: false, message: handleApiError(json) || `Publish failed (Status ${res.status})` }
         }
 
         revalidateTag(CACHE_TAGS.EVENTS, 'max')
@@ -88,11 +92,17 @@ export async function saveEventAsDraft({
             }
         )
 
-        const json = await res.json()
-
+        const json = await res.json().catch(async () => {
+            const text = await res.clone().text().catch(() => "No response body")
+            return { detail: `Status ${res.status}: ${text}` }
+        })
 
         if (!res.ok) {
-            return { success: false, message: handleApiError(json) || "Failed to save draft." }
+            console.error("[saveEventAsDraft] API Error:", { status: res.status, json: JSON.stringify(json, null, 2), body: JSON.stringify(body, null, 2) })
+            return { 
+                success: false, 
+                message: handleApiError(json) || `Save failed (Status ${res.status})` 
+            }
         }
 
         revalidateTag(CACHE_TAGS.EVENTS, 'max')
@@ -103,8 +113,8 @@ export async function saveEventAsDraft({
             eventId: json.data?.id ?? json.id,
         }
     } catch (err) {
-        console.error("[saveEventAsDraft] error:", err)
-        return { success: false, message: "Failed to save draft." }
+        console.error("[saveEventAsDraft] catch error:", err)
+        return { success: false, message: "A network error occurred. Please try again." }
     }
 }
 
@@ -135,10 +145,14 @@ export async function updateAndPublishEvent({
             }
         )
 
-        const json = await res.json().catch(() => ({}))
+        const json = await res.json().catch(async () => {
+            const text = await res.clone().text().catch(() => "No response body")
+            return { detail: `Status ${res.status}: ${text}` }
+        })
 
         if (!res.ok) {
-            return { success: false, message: handleApiError(json) || "Failed to update event." }
+            console.error("[updateAndPublishEvent] API Error:", { status: res.status, json })
+            return { success: false, message: handleApiError(json) || `Update failed (Status ${res.status})` }
         }
 
         revalidateTag(CACHE_TAGS.EVENTS, 'max')
@@ -182,10 +196,17 @@ export async function updateEventAsDraft({
             }
         )
 
-        const json = await res.json().catch(() => ({}))
+        const json = await res.json().catch(async () => {
+            const text = await res.clone().text().catch(() => "No response body")
+            return { detail: `Status ${res.status}: ${text}` }
+        })
 
         if (!res.ok) {
-            return { success: false, message: handleApiError(json) || "Failed to update draft." }
+            console.error("[updateEventAsDraft] API Error:", { status: res.status, json: JSON.stringify(json, null, 2), body: JSON.stringify(body, null, 2) })
+            return { 
+                success: false, 
+                message: handleApiError(json) || `Update failed (Status ${res.status})` 
+            }
         }
 
         revalidateTag(CACHE_TAGS.EVENTS, 'max')
@@ -196,8 +217,8 @@ export async function updateEventAsDraft({
             eventId: String(eventId)
         }
     } catch (err) {
-        console.error("[updateEventAsDraft] error:", err)
-        return { success: false, message: "Failed to update draft." }
+        console.error("[updateEventAsDraft] catch error:", err)
+        return { success: false, message: "A network error occurred. Please try again." }
     }
 }
 

@@ -32,8 +32,8 @@ export default function DownloadAttendeesModal({
         setIsDownloading(true)
 
         const result = await getAttendeesExport()
-
-        if (!result.success || !result.blob) {
+        
+        if (!result.success || !result.buffer) {
             dispatch(showAlert({
                 variant: "destructive",
                 title: "Download Failed",
@@ -44,7 +44,8 @@ export default function DownloadAttendeesModal({
         }
 
         try {
-            const url = URL.createObjectURL(result.blob)
+            const blob = new Blob([result.buffer], { type: 'text/csv' })
+            const url = URL.createObjectURL(blob)
             const link = document.createElement("a")
             const timestamp = new Date().toISOString().split('T')[0]
 
@@ -96,7 +97,7 @@ export default function DownloadAttendeesModal({
 
             <div className="p-6 space-y-2">
                 {[
-                    { name: 'Free', limit: '250', type: 'free' },
+                    { name: 'Standard', limit: '250', type: 'standard' },
                     { name: 'Pro', limit: '1,000', type: 'pro' },
                     { name: 'Enterprise', limit: 'Unlimited', type: 'enterprise' },
                 ].map((plan) => {
