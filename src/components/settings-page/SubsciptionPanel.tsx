@@ -6,12 +6,14 @@ import { Icon } from "@iconify/react"
 import { cn } from "@/lib/utils"
 import { useAppDispatch } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
+import { setUser } from "@/lib/redux/slices/authUserSlice"
 import { ToggleItem } from "@/components/custom-utils/inputs/CustomToggleItem"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import { renewSubscription, toggleAutoRenew } from "@/actions/settings/client"
 import { hostPricingData } from "@/components-data/pricing-plans"
 import { usePricingCheckout } from "@/contexts/checkout/PricingCheckoutContext"
+import { useOnRevalidate } from "@/custom-hooks/UseRevalidate"
 import PricingCard from "../cards/PricingCard"
 import ActionButton1 from "../custom-utils/buttons/ActionBtn1"
 import PlanUpgradeSuccessMessage from "../modals/PlanUpgradeSuccessMessage"
@@ -58,6 +60,31 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
     const { control } = useForm({
         defaultValues: { autoRenew: initialData?.auto_renew ?? false },
     })
+
+    const refreshProfile = useCallback(async () => {
+        try {
+            const res = await fetch("/api/auth/profile")
+            if (res.ok) {
+                const { user } = await res.json()
+                if (user) {
+                    dispatch(setUser(user))
+                }
+            }
+        } catch (error) {
+            console.error("Failed to refresh profile:", error)
+        }
+    }, [dispatch])
+
+    useOnRevalidate("subscription", () => {
+        router.refresh()
+    })
+
+    useEffect(() => {
+        if (initialData) {
+            setData(initialData)
+            refreshProfile()
+        }
+    }, [initialData, refreshProfile])
 
     // Derived state
     const currentPlanSlug = (data?.plan_slug === "free" ? "standard" : (data?.plan_slug ?? "standard")) as PlanSlug

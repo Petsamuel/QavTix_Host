@@ -19,6 +19,7 @@ import { useStepper } from "@/contexts/create-event/StepperProvider";
 import { useEffect } from "react";
 import { generateMapLink } from "@/helper-fns/generateMapLink";
 import { writeEventDraft, useStepDraftSync } from "@/custom-hooks/UseEventDraftPersist";
+import MultiStepFormButtonDuo from "../custom-utils/buttons/MultiStepFormButtonDuo";
 
 export default function CreateEventStep1() {
 
@@ -508,14 +509,7 @@ export default function CreateEventStep1() {
                 )}
             </section>
 
-            <ActionButton1
-                buttonText="Continue to details"
-                iconPosition="right"
-                buttonType="submit"
-                icon="gravity-ui:arrow-right"
-                className="mt-4"
-                data-testid="btn-step1-submit"
-            />
+            <MultiStepFormButtonDuo />
         </form>
     )
 }

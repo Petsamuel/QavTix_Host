@@ -24,6 +24,7 @@ import { CustomDateTimeInput } from '../custom-utils/inputs/CustomDateTimeInput'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
 import { writeEventDraft, useStepDraftSync } from '@/custom-hooks/UseEventDraftPersist'
 import { useAppSelector } from '@/lib/redux/hooks'
+import { useEffect } from 'react'
 
 const LabelWithTooltip = ({ label, tooltipText }: { label: string, tooltipText: string }) => (
     <div className="flex items-center gap-1.5">
@@ -52,12 +53,12 @@ export default function CreateEventStep3() {
     const plan = usePlanRestrictions()
 
     const methods = useForm<Step3FormData>({
-        resolver: yupResolver(step3Schema, { abortEarly: false }) as any,
+        resolver: yupResolver(step3Schema, { abortEarly: false, context: { maxTickets: plan.ticketSalesLimit ?? 750 } }) as any,
         mode: 'onTouched',
         defaultValues: {
-            ticketTypes: eventData.ticketsPricing?.ticketTypes ?? [{ id: crypto.randomUUID(), ticketType: '', price: 0, currency: 'NGN', quantity: 1 }],
+            ticketTypes: eventData.ticketsPricing?.ticketTypes ?? [{ id: crypto.randomUUID(), ticketType: '', price: 0, currency: 'NGN', quantity: 1, promoCode: { discountAmount: 0, codeWord: '', maximumUsers: undefined, validTill: '' } }],
             refundPolicy: eventData.ticketsPricing?.refundPolicy ?? 'no',
-            customRefundPercentage: eventData.ticketsPricing?.customRefundPercentage ?? 1,
+            customRefundPercentage: eventData.ticketsPricing?.customRefundPercentage ?? 10,
             salesPeriod: eventData.ticketsPricing?.salesPeriod ?? {
                 startDateTime: '',
                 endDateTime: '',
@@ -99,6 +100,10 @@ export default function CreateEventStep3() {
         goToNextStep()
     }
 
+
+    // useEffect(() => {
+    //     console.log(errors)
+    // }, [refundPolicy])
 
 
     return (
@@ -225,7 +230,7 @@ export default function CreateEventStep3() {
                                                     Promo Code
                                                 </label>
                                                 <PlanGateBanner
-                                                    message="Promo Codes are not available on the free plan."
+                                                    message={plan.promoCodeLimitMsg!}
                                                     data-testid={`promo-gate-${index}`}
                                                 />
                                             </div>
@@ -266,7 +271,7 @@ export default function CreateEventStep3() {
                                                     <CustomPercentageInput
                                                         label="Discount Amount"
                                                         value={watch(`ticketTypes.${index}.promoCode.discountAmount`) as number}
-                                                        onChange={(val) => setValue(`ticketTypes.${index}.promoCode.discountAmount`, Number(val))}
+                                                        onChange={(val) => setValue(`ticketTypes.${index}.promoCode.discountAmount`, val === "" ? undefined : Number(val))}
                                                         error={errors.ticketTypes?.[index]?.promoCode?.discountAmount?.message}
                                                         data-testid={`input-promo-discount-${index}`}
                                                     />
@@ -348,7 +353,7 @@ export default function CreateEventStep3() {
                     </section>
 
                     {/* ── Sales Period  */}
-                    <section className="space-y-6 md:max-w-md" data-testid="section-sales-period">
+                    <section className="space-y-6 md:max-w-lg" data-testid="section-sales-period">
                         <h3 className="text-brand-secondary-8 font-bold text-sm md:text-base">Sales Period</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Controller
@@ -419,7 +424,7 @@ export default function CreateEventStep3() {
                                 render={({ field }) => (
                                     <CustomPercentageInput
                                         label="Enter Refund Percentage"
-                                        onChange={(val) => field.onChange(val ? Number(val) : val)}
+                                        onChange={(val) => field.onChange(val === "" ? undefined : Number(val))}
                                         inputContainerStyles="max-w-29.25"
                                         value={field.value as number}
                                         error={errors.customRefundPercentage?.message as string}

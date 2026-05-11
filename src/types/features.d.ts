@@ -13,4 +13,4 @@ interface FilterValues {
     sortBy?: string | null
 }
 
-type RevalidateTarget = "financials" | "marketing" | "upcoming-events" | "customers" | "checkin" | "events"
+type RevalidateTarget = "financials" | "marketing" | "upcoming-events" | "customers" | "checkin" | "events" | "subscription"

@@ -48,7 +48,7 @@ export default function CreateEventStep4() {
             },
             affiliateProgram: eventData.settings?.affiliateProgram ?? {
                 enabled: false,
-                percentageCommission: 10,
+                percentageCommission: 0,
             },
             permissions: eventData.settings?.permissions ?? {
                 collaborators: [
@@ -272,7 +272,7 @@ export default function CreateEventStep4() {
                                         <CustomPercentageInput
                                             label="Percentage Commission"
                                             value={watch('affiliateProgram.percentageCommission') as number}
-                                            onChange={(val) => methods.setValue('affiliateProgram.percentageCommission', parseInt(val))}
+                                            onChange={(val) => methods.setValue('affiliateProgram.percentageCommission', val === "" ? undefined : Number(val))}
                                             error={errors.affiliateProgram?.percentageCommission?.message}
                                             inputContainerStyles="max-w-30"
                                             data-testid="input-affiliate-commission"
