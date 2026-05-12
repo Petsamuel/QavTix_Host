@@ -12,6 +12,8 @@ import { NAVIGATION_LINKS } from "@/enums/navigation"
 import { uploadEventMedia } from "@/helper-fns/uploadEventMedia"
 import { sanitizeEventDataForServer } from "@/lib/cloudinary"
 import { saveEventAsDraft, updateEventAsDraft, updateAndPublishEvent } from "@/actions/event/creation"
+import { clearEventDraft } from "@/custom-hooks/UseEventDraftPersist"
+import { EVENT_DETAILS_LINK } from "@/enums/navigation"
 
 
 export default function SaveAsDraftBtn() {
@@ -26,6 +28,46 @@ export default function SaveAsDraftBtn() {
 
     const handleSave = async () => {
         if (saving) return
+
+        const bInfo = eventData.basicInformation
+        const dMedia = eventData.detailsMedia
+        const missingFields: string[] = []
+
+        if (!bInfo?.eventTitle?.trim()) missingFields.push("Event Title")
+        if (bInfo?.eventType === "single") {
+            if (!bInfo?.startDateTime) missingFields.push("Start Date")
+            if (!bInfo?.endDateTime) missingFields.push("End Date")
+        } else if (bInfo?.eventType === "recurring") {
+            if (!bInfo?.dates?.length) missingFields.push("Recurring Dates")
+        } else {
+            missingFields.push("Event Type")
+            missingFields.push("Start/End Date")
+        }
+
+        if (bInfo?.locationType === "physical") {
+            if (!bInfo?.venueName || !bInfo?.address || !bInfo?.city || !bInfo?.country) {
+                missingFields.push("Physical Location Details")
+            }
+        } else if (bInfo?.locationType === "online") {
+            if (!bInfo?.onlineLink) missingFields.push("Online Event Link")
+        } else if (!bInfo?.locationType && bInfo?.locationType !== "tba") {
+            missingFields.push("Location Type")
+        }
+
+        if (!dMedia?.shortDescription?.trim()) missingFields.push("Short Description")
+        if (!dMedia?.fullDescription?.trim()) missingFields.push("Full Description")
+        if (!dMedia?.organizerDisplayName?.trim()) missingFields.push("Organiser Name")
+        if (!dMedia?.publicEmail?.trim()) missingFields.push("Public Email")
+
+        if (missingFields.length > 0) {
+            dispatch(showAlert({
+                title: "Incomplete Draft Details",
+                description: `Please fill in the following required fields to save a draft: ${missingFields.join(", ")}`,
+                variant: "warning",
+            }))
+            return
+        }
+
         setSaving(true)
         try {
             const media = await uploadEventMedia(eventData.detailsMedia)
@@ -48,9 +90,13 @@ export default function SaveAsDraftBtn() {
                     description: isEditMode ? "Your event changes have been saved." : "Your event progress has been saved.",
                     variant: "success",
                 }))
-                discardDraft()
+                clearEventDraft()
                 trigger()
-                router.push(NAVIGATION_LINKS.MY_EVENTS.href)
+                if (isEditMode && isLive && eventID) {
+                    router.push(EVENT_DETAILS_LINK.replace("[event_id]", String(eventID)))
+                } else {
+                    router.push(NAVIGATION_LINKS.MY_EVENTS.href)
+                }
             } else {
                 dispatch(showAlert({
                     title: "Save Failed",
