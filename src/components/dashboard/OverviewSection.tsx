@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"
 import DashboardStatCard from "../cards/DashboardStatCard"
 import CreateEventBtn from "@/lib/features/create-event/CreateEventBtn"
 import { Button } from "../ui/button"
@@ -21,6 +22,10 @@ export default function OverviewSection({ cards }: OverviewSectionProps) {
     const statCards = mapToStatCards(cards)
     const router = useRouter()
 
+    // Defer time-based greeting to client-only to avoid SSR/client hydration mismatch
+    const [greeting, setGreeting] = useState<string | null>(null)
+    useEffect(() => { setGreeting(getGreeting()) }, [])
+
     return (
         <section className="w-full overflow-hidden mt-10 lg:mt-0">
             <div className="flex justify-between items-center">
@@ -33,7 +38,7 @@ export default function OverviewSection({ cards }: OverviewSectionProps) {
             <div className="relative mt-12 grid grid-cols-1 py-0 xsm:grid-cols-2 items-stretch gap-6 px-6 md:px-10 bg-linear-to-br from-brand-primary-5.2 to-brand-primary min-h-35 w-full rounded-xl overflow-hidden">
                 <div className="text-white relative z-10 py-6 flex flex-col justify-center">
                     <h3 className={cn(space_grotesk.className, "capitalize text-lg md:text-2xl leading-tight font-bold wrap-break-words")}>
-                        {getGreeting()} {user?.full_name.split(" ")[0]}!
+                        {greeting} {user?.full_name.split(" ")[0]}!
                     </h3>
                     <p className="text-xs md:text-sm lg:text-base mt-2 opacity-90 wrap-break-words">
                         You have {cards.active_events} active event{cards.active_events !== 1 ? "s" : ""} and {cards.tickets_sold} tickets sold
