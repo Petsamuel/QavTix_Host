@@ -23,27 +23,38 @@ const redirectToLogin = (requestUrl?: string) => {
     return res
 }
 
-async function verifyToken(token: string): Promise<"valid" | "invalid" | "network_error"> {
+/**
+ * Decodes a JWT and checks if it's expired or close to expiring.
+ * Returns true if expired or invalid.
+ */
+function isTokenExpiredLocally(token: string): boolean {
     try {
-        const res = await fetch(`${API_BASE_URL}/${TOKEN_VERIFY_ENDPOINT}`, {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ token }),
-        })
-        return res.ok ? "valid" : "invalid"
+        const payloadBase64 = token.split('.')[1]
+        if (!payloadBase64) return true
+
+        // Use atob (standard in Edge/Browser) to decode the payload
+        const decoded = JSON.parse(atob(payloadBase64))
+        const exp = decoded.exp
+
+        if (!exp) return true
+
+        // Return true if token expires in less than 30 seconds
+        const currentTime = Math.floor(Date.now() / 1000)
+        return exp < (currentTime + 30)
     } catch {
-        return "network_error"
+        return true
     }
 }
+
 
 async function refreshAccessToken(
     refreshToken: string,
 ): Promise<{ success: true; accessToken: string } | { success: false; networkError: boolean }> {
     try {
         const res = await fetch(`${API_BASE_URL}/${REFRESH_TOKEN_ENDPOINT}`, {
-            method:  'POST',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ refresh: refreshToken }),
+            body: JSON.stringify({ refresh: refreshToken }),
         })
 
         if (res.ok) {
@@ -57,10 +68,8 @@ async function refreshAccessToken(
     }
 }
 
-// Cookie options scoped to the host domain
 const hostAccessCookieOptions = {
     ...accessCookieOptions,
-    // Ensure these never bleed into the public attendee site
     domain: process.env.NEXT_PUBLIC_HOST_COOKIE_DOMAIN,
 }
 
@@ -68,32 +77,31 @@ export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl
     const response = NextResponse.next()
 
-    // Root redirect
     if (pathname === '/') {
         return NextResponse.redirect(new URL(NAVIGATION_LINKS.DASHBOARD.href, request.url))
     }
 
     if (isSkippedPath(pathname)) return response
 
-    const accessToken  = request.cookies.get('host_access_token')?.value
+    const accessToken = request.cookies.get('host_access_token')?.value
     const refreshToken = request.cookies.get('host_refresh_token')?.value
 
-    // No tokens — definitely not authenticated
     if (!accessToken && !refreshToken) {
         return redirectToLogin(request.url)
     }
 
-    // Verify access token
-    if (accessToken) {
-        const status = await verifyToken(accessToken)
-
-        if (status === "valid")         return response
-        if (status === "network_error") return response
-        // status === "invalid" — fall through to refresh
+    // Access token exists and is still valid — fast path, no network call
+    if (accessToken && !isTokenExpiredLocally(accessToken)) {
+        return response
     }
 
-    // Access token confirmed invalid — try refresh
+    // Access token missing or expiring — try refresh
     if (refreshToken) {
+        // Don't bother calling API if refresh token is also expired
+        if (isTokenExpiredLocally(refreshToken)) {
+            return redirectToLogin(request.url)
+        }
+
         const result = await refreshAccessToken(refreshToken)
 
         if (result.success) {
@@ -101,16 +109,10 @@ export async function proxy(request: NextRequest) {
             return response
         }
 
-        if (result.networkError) return response
+        if (result.networkError) return response  // backend down — let them through
 
-        // Refresh token confirmed expired by server — log out
         return redirectToLogin(request.url)
     }
 
-    // Had an access token but no refresh token, and access was invalid
     return redirectToLogin(request.url)
-}
-
-export const config = {
-    matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }

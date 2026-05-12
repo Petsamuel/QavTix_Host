@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Dispatch, SetStateAction } from "react"
 import EventsItemDropdown from "../../dropdown/ItemActionDropdown"
 import { formatDateTime } from "@/helper-fns/date-utils"
+import { formatLocation } from "@/helper-fns/formatLocation"
 import TableLoader from "@/components/loaders/TableLoader"
 import EmptyTicketsState from "../empty-state"
 import { buildEndedEventActions, buildLiveEventActions } from "../../dropdown/resources/events-actions"
@@ -133,7 +134,7 @@ export default function AllEventsTable({
                                             <p className="text-xs text-brand-secondary-9 whitespace-nowrap">{formatDateTime(event.start_datetime)}</p>
                                         </td>
                                         <td className="p-4">
-                                            <p className="text-[11px] text-brand-secondary-6 max-w-[15em]">{event.event_location}</p>
+                                            <p className="text-[11px] text-brand-secondary-6 max-w-[15em] truncate">{formatLocation(event.event_location)}</p>
                                         </td>
                                         <td className="p-4 text-center">
                                             <div className="flex flex-col text-[11px]">
@@ -181,7 +182,7 @@ export default function AllEventsTable({
                     return (
                         <div key={event.id} className={cn("border border-brand-neutral-3 rounded-lg p-2", isSelected && "bg-brand-primary-1 border-brand-primary-3")}>
                             <div className="space-y-3">
-                                <div className="flex items-center justify-between text-xs pb-2 border-b border-brand-neutral-2">
+                                <div className="flex flex-wrap gap-2 items-center justify-between text-xs pb-2 border-b border-brand-neutral-2">
                                     <div className="flex items-center gap-3">
                                         <Checkbox checked={isSelected} onCheckedChange={() => handleSelectEvent(event.id)} />
                                         <div className="flex items-center gap-1">
@@ -225,7 +226,7 @@ export default function AllEventsTable({
                                 <div className="text-[11px] text-brand-secondary-6">
                                     <div className="flex items-start gap-1">
                                         <Icon icon="lucide:map-pin" className="w-3 h-3 mt-0.5 shrink-0" />
-                                        <span>{event.event_location}</span>
+                                        <span className="truncate max-w-[15em]">{formatLocation(event.event_location)}</span>
                                     </div>
                                 </div>
                             </div>

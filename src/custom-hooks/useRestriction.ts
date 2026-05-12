@@ -13,6 +13,7 @@
 
 import { useAppSelector } from "@/lib/redux/hooks"
 import { useMemo } from "react"
+import { useEventCreation } from "@/contexts/create-event/CreateEventProvider"
 
 
 export interface PlanFeatures {
@@ -42,6 +43,8 @@ export interface PlanFeatures {
     email_campaign_limit: number
     attendee_export_limit: number | null   // null = unlimited
     customer_profile_insights: boolean
+    max_ticket_sales: number | null    // null = unlimited
+    customize_sender_name: boolean
 }
 
 // ─── Static plan registry ─────────────────────────────────────────────────────
@@ -75,6 +78,8 @@ const PLAN_FEATURES: Record<string, PlanFeatures> = {
         email_campaign_limit: 0,
         attendee_export_limit: 250,
         customer_profile_insights: false,
+        max_ticket_sales: 750,
+        customize_sender_name: false,
     },
     pro: {
         affiliate: true,
@@ -103,6 +108,8 @@ const PLAN_FEATURES: Record<string, PlanFeatures> = {
         email_campaign_limit: 100,
         attendee_export_limit: 1000,
         customer_profile_insights: false,
+        max_ticket_sales: 2500,
+        customize_sender_name: true,
     },
     enterprise: {
         affiliate: true,
@@ -131,6 +138,8 @@ const PLAN_FEATURES: Record<string, PlanFeatures> = {
         email_campaign_limit: 100,
         attendee_export_limit: null,
         customer_profile_insights: true,
+        max_ticket_sales: 10000,
+        customize_sender_name: true,
     },
 }
 
@@ -162,20 +171,42 @@ export interface PlanRestrictions {
 
     // Upgrade prompt text (null when feature is available)
     upgradePromptFor: (feature: keyof PlanFeatures) => string | null
+
+    // Ticket sales limit
+    ticketSalesLimit: number | null
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function usePlanRestrictions(): PlanRestrictions {
-    // Adjust the selector path to match your authSlice shape:
-    // e.g. state.auth.user.plan_slug  or  state.auth.plan  etc.
     const planSlug: string = useAppSelector(
-        (state: any) => state.auth?.user?.plan_slug ?? state.auth?.plan_slug ?? "free"
+        (state: any) =>
+            state.authUser?.user?.plan_type ??
+            state.authUser?.user?.subscription?.plan_slug ??
+            state.authUser?.user?.plan_slug ??
+            "free"
     )
+
+    // Try to get dynamic plans from context
+    let context: any = null
+    try { context = useEventCreation() } catch (e) { /* ignore */ }
+    const dynamicPlans = context?.plans
 
     return useMemo<PlanRestrictions>(() => {
         const slug = planSlug?.toLowerCase() ?? "free"
-        const features = PLAN_FEATURES[slug] ?? FREE_FEATURES
+        let features = PLAN_FEATURES[slug] ?? FREE_FEATURES
+
+        // Override with dynamic API data if available
+        if (dynamicPlans && Array.isArray(dynamicPlans)) {
+            const dynamicPlan = dynamicPlans.find((p: any) => p.slug?.toLowerCase() === slug)
+            if (dynamicPlan?.features) {
+                features = {
+                    ...features,
+                    ...dynamicPlan.features,
+                    // Ensure max_ticket_sales is preserved or mapped correctly
+                    max_ticket_sales: dynamicPlan.features.max_ticket_sales ?? features.max_ticket_sales
+                }
+            }
+        }
 
         const planDisplayNames: Record<string, string> = {
             free: "Free",
@@ -216,6 +247,7 @@ export function usePlanRestrictions(): PlanRestrictions {
                 resale_controls: "Resale Controls",
                 revenue_chart: "Revenue Chart",
                 week_analysis: "Weekly Analysis",
+                customize_sender_name: "Customize Sender Name",
             }
 
             const label = featureLabels[feature] ?? String(feature).replace(/_/g, " ")
@@ -241,6 +273,7 @@ export function usePlanRestrictions(): PlanRestrictions {
             canUseTeamPermissions: features.team_permissions > 0,
 
             upgradePromptFor,
+            ticketSalesLimit: features.max_ticket_sales,
         }
     }, [planSlug])
 }

@@ -9,7 +9,7 @@ interface PercentageInputProps extends Omit<React.InputHTMLAttributes<HTMLInputE
     required?: boolean
     helperText?: string
     inputContainerStyles?: string
-    value: number;
+    value?: number | string;
     onChange?: (value: string) => void
 }
 
@@ -22,7 +22,7 @@ export const CustomPercentageInput = forwardRef<HTMLInputElement, PercentageInpu
         inputContainerStyles, 
         className = '', 
         onChange,
-        value = 0,
+        value,
         ...props 
     }, ref) => {
         
@@ -57,8 +57,8 @@ export const CustomPercentageInput = forwardRef<HTMLInputElement, PercentageInpu
                 <div className={cn("relative flex items-center", inputContainerStyles)}>
                     <input
                         ref={ref}
-                        type="number"
-                        value={value}
+                        type="text"
+                        value={value ?? ''}
                         inputMode="numeric"
                         onChange={handleInputChange}
                         // Hide spinners using Tailwind's arbitrary values or utility classes

@@ -2,6 +2,7 @@ import { cn }              from "@/lib/utils"
 import PaginationControls from "../tools/PaginationControl"
 import { Icon }           from "@iconify/react"
 import EventInfo          from "../../event/EventInfo"
+import { formatLocation } from "@/helper-fns/formatLocation"
 import Link               from "next/link"
 import { draftStatusConfig } from "../resources/status-config"
 import { formatDateTime }    from "@/helper-fns/date-utils"
@@ -93,7 +94,7 @@ export default function DraftedEventsTable({
                                             <p className="text-xs text-brand-secondary-9 whitespace-nowrap">{formatDateTime(event.start_datetime)}</p>
                                         </td>
                                         <td className="py-4 px-5">
-                                            <p className="text-[11px] text-brand-secondary-6 max-w-[15em]">{event.event_location}</p>
+                                            <p className="text-[11px] text-brand-secondary-6 max-w-[15em] truncate">{formatLocation(event.event_location)}</p>
                                         </td>
                                         <td className="py-4 px-5">
                                             <div className="flex items-center justify-center gap-3">
@@ -185,7 +186,7 @@ export default function DraftedEventsTable({
                                 <div className="text-[11px] text-brand-secondary-6">
                                     <div className="flex items-start gap-1">
                                         <Icon icon="lucide:map-pin" className="w-3 h-3 mt-0.5 shrink-0" />
-                                        <span>{event.event_location}</span>
+                                        <span className="truncate max-w-[15em]">{formatLocation(event.event_location)}</span>
                                     </div>
                                 </div>
                                 <div className="pt-1">

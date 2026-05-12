@@ -19,6 +19,7 @@ import { useStepper } from "@/contexts/create-event/StepperProvider";
 import { useEffect } from "react";
 import { generateMapLink } from "@/helper-fns/generateMapLink";
 import { writeEventDraft, useStepDraftSync } from "@/custom-hooks/UseEventDraftPersist";
+import MultiStepFormButtonDuo from "../custom-utils/buttons/MultiStepFormButtonDuo";
 
 export default function CreateEventStep1() {
 
@@ -232,7 +233,7 @@ export default function CreateEventStep1() {
 
                 {/* Single */}
                 {eventType === "single" && (
-                    <div className="grid grid-cols-2 gap-5 max-w-lg" data-testid="single-event-dates">
+                    <div className="grid grid-cols-2 gap-5 max-w-xl" data-testid="single-event-dates">
                         <Controller
                             name="startDateTime"
                             control={control}
@@ -266,7 +267,7 @@ export default function CreateEventStep1() {
 
                 {/* Recurring */}
                 {eventType === "recurring" && (
-                    <div className="space-y-6 max-w-lg" data-testid="recurring-event-dates">
+                    <div className="space-y-6 max-w-xl" data-testid="recurring-event-dates">
                         {fields.map((field, index) => (
                             <div key={field.id} className="flex flex-wrap md:flex-nowrap flex-row items-start sm:items-end gap-4" data-testid={`recurring-date-row-${index}`}>
 
@@ -508,14 +509,7 @@ export default function CreateEventStep1() {
                 )}
             </section>
 
-            <ActionButton1
-                buttonText="Continue to details"
-                iconPosition="right"
-                buttonType="submit"
-                icon="gravity-ui:arrow-right"
-                className="mt-4"
-                data-testid="btn-step1-submit"
-            />
+            <MultiStepFormButtonDuo />
         </form>
     )
 }

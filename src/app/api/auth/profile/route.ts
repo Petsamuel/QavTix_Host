@@ -43,7 +43,16 @@ export async function GET(req: NextRequest) {
             )
         }
 
-        return NextResponse.json({ user: json.data }, { status: 200 })
+        const profile = json.data.host
+            ? {
+                ...json.data.host,
+                subscription: json.data.subscription,
+                verified_badge: json.data.verified_badge,
+                payout_available: json.data.payout_available
+            }
+            : null
+
+        return NextResponse.json({ user: profile }, { status: 200 })
 
     } catch {
         return NextResponse.json(

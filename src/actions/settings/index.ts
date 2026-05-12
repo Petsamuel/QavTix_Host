@@ -2,6 +2,7 @@ import { CACHE_TAGS } from "@/cache-tags";
 import {
     GET_PRIVACY_SETTINGS_ENDPOINT,
     GET_SUBSCRIPTION_ENDPOINT,
+    PLANS_ENDPOINT,
 } from "@/endpoints";
 import { handleApiError } from "@/helper-fns/handleApiErrors"
 
@@ -60,6 +61,29 @@ export async function getSubscription(token: string | undefined): Promise<GetSub
 
     } catch (err) {
         return { success: false, message: "Failed to load subscription." }
+    }
+}
+
+export async function getPlans(): Promise<{ success: boolean; data?: SubscriptionPlan[]; message?: string }> {
+    try {
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/${PLANS_ENDPOINT}`,
+            {
+                headers: { "Content-Type": "application/json" },
+                next: { tags: [CACHE_TAGS.PLANS], revalidate: 3600 }
+            }
+        )
+
+        if (!res.ok) {
+            const json = await res.json()
+            return { success: false, message: handleApiError(json) }
+        }
+
+        const json = await res.json()
+        return { success: true, data: json.data }
+
+    } catch (error: any) {
+        return { success: false, message: "Failed to load pricing plans." }
     }
 }
 

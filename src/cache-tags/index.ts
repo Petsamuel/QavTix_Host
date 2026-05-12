@@ -24,4 +24,5 @@ export const CACHE_TAGS = {
     PROFILE: "profile",
     PRIVACY_SETTINGS: "privacy_settings",
     TWO_FACTOR: "two_factor",
+    PLANS: "plans",
 }

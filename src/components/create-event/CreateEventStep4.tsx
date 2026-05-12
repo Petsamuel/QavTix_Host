@@ -48,7 +48,7 @@ export default function CreateEventStep4() {
             },
             affiliateProgram: eventData.settings?.affiliateProgram ?? {
                 enabled: false,
-                percentageCommission: 10,
+                percentageCommission: 0,
             },
             permissions: eventData.settings?.permissions ?? {
                 collaborators: [
@@ -222,22 +222,35 @@ export default function CreateEventStep4() {
                             </p>
                         </div>
                         <div className="space-y-4">
-                            {EMAIL_NOTIFICATION_FIELDS.map(({ key, label }) => (
-                                <div key={key} className="flex items-center justify-between">
-                                    <label className="text-sm text-brand-secondary-9">{label}</label>
-                                    <Controller
-                                        name={`emailNotifications.${key}` as any}
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                                data-testid={`switch-email-${key}`}
+                            {EMAIL_NOTIFICATION_FIELDS.map(({ key, label }) => {
+                                const isCustomSender = key === 'customizeSenderName'
+                                const isRestricted = isCustomSender && !plan.features.customize_sender_name
+
+                                return (
+                                    <div key={key} className="flex items-center justify-between">
+                                        <label className="text-sm text-brand-secondary-9">{label}</label>
+                                        {!isRestricted ? (
+                                            <Controller
+                                                name={`emailNotifications.${key}` as any}
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Switch
+                                                        checked={field.value}
+                                                        onCheckedChange={field.onChange}
+                                                        data-testid={`switch-email-${key}`}
+                                                    />
+                                                )}
+                                            />
+                                        ) : (
+                                            <PlanGateBanner
+                                                message={plan.upgradePromptFor("customize_sender_name") ?? ""}
+                                                data-testid="sender-name-plan-gate"
+                                                variant='inline'
                                             />
                                         )}
-                                    />
-                                </div>
-                            ))}
+                                    </div>
+                                )
+                            })}
                         </div>
                     </section>
 
@@ -272,7 +285,7 @@ export default function CreateEventStep4() {
                                         <CustomPercentageInput
                                             label="Percentage Commission"
                                             value={watch('affiliateProgram.percentageCommission') as number}
-                                            onChange={(val) => methods.setValue('affiliateProgram.percentageCommission', parseInt(val))}
+                                            onChange={(val) => methods.setValue('affiliateProgram.percentageCommission', val === "" ? undefined : Number(val))}
                                             error={errors.affiliateProgram?.percentageCommission?.message}
                                             inputContainerStyles="max-w-30"
                                             data-testid="input-affiliate-commission"

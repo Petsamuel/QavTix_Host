@@ -108,7 +108,7 @@ export default function CreateEventReviewStep() {
                     : await publishEvent({ eventData: sanitizedEventData, media })
 
                 if (result.success) {
-                    setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: (result as any).eventId ?? eventID })
+                    setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: result.eventId ?? eventID })
                     dispatch(finishConfirmAction())
                     dispatch(resetConfirmationStatus())
                     clearEventDraft()
@@ -178,12 +178,7 @@ export default function CreateEventReviewStep() {
     }
 
     const handleOnclose = () => {
-        if (statusModal.type === "FAILED") {
-            setStatusModal(prev => ({ ...prev, isOpen: false }))
-            return
-        }
-        resetForm()
-        router.push(NAVIGATION_LINKS.MY_EVENTS.href)
+        setStatusModal(prev => ({ ...prev, isOpen: false }))
     }
 
 
@@ -338,7 +333,7 @@ export default function CreateEventReviewStep() {
                         type="button"
                         onClick={() => setOpenScheduleLaterModal(true)}
                         disabled={isPublishing || isSavingDraft}
-                        className="h-12 w-full text-sm sm:w-auto md:h-14 text-brand-primary-6 bg-white hover:shadow flex items-center gap-2 justify-center px-6 py-3 rounded-[30px] border border-brand-primary-6 font-medium md:text-sm hover:bg-brand-primary-1 hover:border-brand-primary-7 active:bg-brand-primary-1 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-primary-4 focus:ring-offset-2 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="w-full text-sm sm:w-auto h-14 text-brand-primary-6 bg-white hover:shadow flex items-center gap-2 justify-center px-6 py-3 rounded-[30px] border border-brand-primary-6 font-medium md:text-sm hover:bg-brand-primary-1 hover:border-brand-primary-7 active:bg-brand-primary-1 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-primary-4 focus:ring-offset-2 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
                         data-testid="btn-schedule-later"
                     >
                         {isSavingDraft
@@ -373,15 +368,22 @@ export default function CreateEventReviewStep() {
                 isOpen={statusModal.isOpen}
                 onClose={handleOnclose}
                 type={statusModal.type}
-                onViewDashboard={() => router.push(NAVIGATION_LINKS.MY_EVENTS.href)}
+                onViewDashboard={() => {
+                    resetForm()
+                    router.push(NAVIGATION_LINKS.MY_EVENTS.href)
+                }}
                 eventId={statusModal.eventId}
                 errorMessage={statusModal.errorMsg}
                 onShare={() => {
+                    setStatusModal(prev => ({ ...prev, isOpen: false }))
                     setIsShareModalOpen(true)
+                    resetForm()
+                    clearEventDraft()
                 }}
                 onCreateAnother={() => {
                     setStatusModal(prev => ({ ...prev, isOpen: false }))
                     resetForm()
+                    clearEventDraft()
                     router.push(CREATE_EVENT.href)
                 }}
                 onRetry={handleConfirmImmediatePublish}
@@ -389,7 +391,10 @@ export default function CreateEventReviewStep() {
 
             <ShareEventModal
                 isOpen={isShareModalOpen}
-                onClose={() => setIsShareModalOpen(false)}
+                onClose={() => {
+                    setIsShareModalOpen(false)
+                    router.push(NAVIGATION_LINKS.MY_EVENTS.href)
+                }}
                 shareUrl={`${EVENT_DETAILS_LINK.replace("[event_id]", statusModal.eventId?.toString() || "")}`}
             />
         </div>

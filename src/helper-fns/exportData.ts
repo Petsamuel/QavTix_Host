@@ -1,3 +1,4 @@
+import logoSrc from "@/public-assets/logo/logo-1.png"
 type Primitive = string | number | boolean | null | undefined
 
 /**
@@ -125,6 +126,15 @@ async function toPDF(
     const headers = Object.keys(rows[0] ?? {}).map(formatHeader)
     const data    = rows.map(row => Object.values(row).map(v => String(v ?? '')))
 
+    const pageWidth = doc.internal.pageSize.getWidth()
+    
+    // Logo
+    try {
+        doc.addImage(logoSrc.src, 'PNG', pageWidth - 40, 10, 26, 10)
+    } catch (e) {
+        console.error('[toPDF] Failed to add logo:', e)
+    }
+
     // Title
     doc.setFontSize(14)
     doc.setFont('helvetica', 'bold')
@@ -140,7 +150,7 @@ async function toPDF(
     autoTable(doc, {
         head:       [headers],
         body:       data,
-        startY:     28,
+        startY:     30,
         styles:     { fontSize: 8, cellPadding: 3 },
         headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
         alternateRowStyles: { fillColor: [239, 246, 255] },

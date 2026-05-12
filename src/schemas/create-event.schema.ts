@@ -188,47 +188,38 @@ export const step2Schema = yup.object({
 // ─── Step 3: Tickets & Pricing ────────────────────────────────────────────────
 
 const promoCodeSchema = yup.object({
-    // Fields are optional individually — the .test below decides when they're required
     codeWord: yup.string().optional(),
     discountAmount: yup.number()
-        .typeError('Please enter a valid discount amount')
+        .transform((val) => (isNaN(val) ? undefined : val))
         .min(0, 'Discount cannot be negative')
         .optional(),
     maximumUsers: yup.number()
-        .typeError('Please enter a valid number of users')
-        .min(1, 'At least 1 user must be allowed')
+        .transform((val) => (isNaN(val) ? undefined : val))
         .optional(),
     validTill: yup.string().optional(),
 }).test('promo-complete', 'Please fill in all promo code fields', function (value) {
-    // If NOTHING in the promo object has been filled → skip entirely (fully optional)
-    const hasAnyValue =
-        !!value?.codeWord?.trim() ||
-        (value?.discountAmount !== undefined && value?.discountAmount !== null && value?.discountAmount !== ('' as any)) ||
-        (value?.maximumUsers !== undefined && value?.maximumUsers !== null && value?.maximumUsers !== ('' as any)) ||
-        !!value?.validTill?.trim()
+    const hasPromoCode = !!value?.codeWord?.trim()
+    if (!hasPromoCode) return true
 
-    if (!hasAnyValue) return true
-
-    // At least one field was touched — collect ALL missing required fields at once
     const errors: yup.ValidationError[] = []
+    const base = this.path ? `${this.path}.` : ''   // ← add this
 
-    if (!value?.codeWord?.trim())
-        errors.push(this.createError({ path: 'codeWord', message: 'Promo code word is required' }))
+    if (value?.discountAmount === undefined || value?.discountAmount === null)
+        errors.push(this.createError({ path: `${base}discountAmount`, message: 'Discount amount is required' }))
 
-    if (value?.discountAmount === undefined || value?.discountAmount === null || (value?.discountAmount as any) === '')
-        errors.push(this.createError({ path: 'discountAmount', message: 'Discount amount is required' }))
-
-    if (!value?.maximumUsers)
-        errors.push(this.createError({ path: 'maximumUsers', message: 'Maximum number of users is required' }))
+    if (!value?.maximumUsers || value.maximumUsers < 1)
+        errors.push(this.createError({ path: `${base}maximumUsers`, message: 'Maximum number of users is required' }))
 
     if (!value?.validTill?.trim())
-        errors.push(this.createError({ path: 'validTill', message: 'Expiry date is required' }))
+        errors.push(this.createError({ path: `${base}validTill`, message: 'Expiry date is required' }))
 
-    if (errors.length > 0)
-        throw new yup.ValidationError(errors)
+    if (errors.length > 0) throw new yup.ValidationError(errors)
 
     return true
-}).optional();
+}).optional()
+
+
+
 
 const ticketTypeSchema = yup.object({
     id: yup.string().required(),
@@ -236,8 +227,28 @@ const ticketTypeSchema = yup.object({
     description: yup.string().optional(),
     price: yup.number().typeError('Please enter a valid price').min(0, 'Price cannot be negative').required('Price is required'),
     currency: yup.string().required('Please select a currency'),
-    quantity: yup.number().typeError('Please enter a quantity').min(1, 'Quantity must be at least 1').max(750, 'Quantity exceeds 750 limit, Upgrade your plan').required('Please enter a quantity'),
-    perPersonMax: yup.number().typeError('Please enter a valid limit').min(1).max(750, 'Limit cannot exceed 750 attendees').optional(),
+    quantity: yup.number()
+        .typeError('Please enter a quantity')
+        .min(1, 'Quantity must be at least 1')
+        .test('max-tickets', function (value) {
+            const max = this.options.context?.maxTickets ?? 750
+            if (value && value > max) {
+                return this.createError({ message: `Quantity exceeds ${max} limit, Upgrade your plan` })
+            }
+            return true
+        })
+        .required('Please enter a quantity'),
+    perPersonMax: yup.number()
+        .typeError('Please enter a valid limit')
+        .min(1)
+        .test('max-per-person', function (value) {
+            const max = this.options.context?.maxTickets ?? 750
+            if (value && value > max) {
+                return this.createError({ message: `Limit cannot exceed ${max} attendees` })
+            }
+            return true
+        })
+        .optional(),
     promoCode: promoCodeSchema,
 });
 

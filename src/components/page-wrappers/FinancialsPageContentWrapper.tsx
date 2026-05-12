@@ -14,7 +14,7 @@ import { mapFinancialCards } from "@/helper-fns/mapToStatCards"
 import MetricsContainerLoader from "../loaders/MetricsContainerLoader"
 import { useIsMounted } from "@/custom-hooks/UseIsMounted"
 import { useOnRevalidate } from "@/custom-hooks/UseRevalidate"
-import { getFinancialsClient, getPayoutAccountsClient } from "@/actions/financials"
+import { getFinancialsClient, getPayoutAccountsClient } from "@/actions/financials/client"
 
 import FinancialPageLoader from "../loaders/FinancialPageLoader"
 import DateRangePresetFilter from "../custom-utils/TableDataDisplayAreas/filters/DateRangePresetFilter"

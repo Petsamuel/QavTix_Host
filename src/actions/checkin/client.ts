@@ -16,7 +16,7 @@ export async function scanCheckIn(token: string): Promise<ScanCheckInResult> {
     }
 }
 
-export async function getCheckInMetrics(params: CheckInParams = {}): Promise<GetCheckInResult> {
+export async function getCheckInMetricsClient(params: CheckInParams = {}): Promise<GetCheckInResult> {
     try {
         const axios = await getServerAxios()
         const { data } = await axios.get(`/${CHECKIN_OVERVIEW_ENDPOINT}`, { params })
@@ -26,7 +26,7 @@ export async function getCheckInMetrics(params: CheckInParams = {}): Promise<Get
     }
 }
 
-export async function getCheckInAttendees(params: CheckInParams = {}): Promise<GetAttendeesResult> {
+export async function getCheckInAttendeesClient(params: CheckInParams = {}): Promise<GetAttendeesResult> {
     try {
         const axios = await getServerAxios()
         const { data } = await axios.get(`/${CHECKIN_ATTENDEES_ENDPOINT}`, { params })

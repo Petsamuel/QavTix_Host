@@ -24,6 +24,7 @@ interface EventCreationContextType {
     hasDraftAvailable: boolean
     restoreDraft: () => void
     discardDraft: () => void
+    plans?: SubscriptionPlan[]
 }
 
 interface ProviderProps {
@@ -33,6 +34,7 @@ interface ProviderProps {
     eventID?: string
     eventStatus?: 'draft' | 'active' | 'cancelled' | 'completed'
     isDuplicate?: boolean
+    plans?: SubscriptionPlan[]
 }
 
 const EventCreationContext = createContext<EventCreationContextType | undefined>(undefined)
@@ -53,6 +55,7 @@ export function EventCreationProvider({
     isDuplicate,
     eventID,
     eventStatus,
+    plans,
 }: ProviderProps) {
 
     const isEditMode = !!eventID && !isDuplicate
@@ -139,6 +142,7 @@ export function EventCreationProvider({
                 hasDraftAvailable,
                 restoreDraft,
                 discardDraft,
+                plans,
             }}
         >
             {children}

@@ -18,17 +18,17 @@ import { cancelEvent, deleteEvent, updateEventStatus } from "@/actions/event/cli
 import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 
 export type ItemAction = {
-    id:       LiveEventActionID | EndedEventActionID | "view-profile"
-    label:    string
-    icon:     string
+    id: LiveEventActionID | EndedEventActionID | "view-profile"
+    label: string
+    icon: string
     variant?: 'default' | 'danger'
     onClick?: () => void | Promise<void>
 }
 
 interface ItemActionDropdownProps {
-    actions:    ItemAction[]
-    disabled?:  boolean
-    eventID?:   string
+    actions: ItemAction[]
+    disabled?: boolean
+    eventID?: string
     eventName?: string
     onRefresh?: () => void
 }
@@ -44,12 +44,12 @@ function ItemActionDropdownInner({
     const { trigger: triggerRevalidation } = useRevalidate("events")
     const { promoteToFeatured } = useFeatureCheckout()
 
-    const [loadingAction,          setLoadingAction]          = useState<string | null>(null)
-    const [isOpen,                 setIsOpen]                 = useState(false)
-    const [showShareModal,         setShowShareModal]         = useState(false)
-    const [eventUrl,               setEventUrl]               = useState("")
-    const [openEmail,              setOpenEmail]              = useState(false)
-    const [openDownloadModal,      setOpenDownloadModal]      = useState(false)
+    const [loadingAction, setLoadingAction] = useState<string | null>(null)
+    const [isOpen, setIsOpen] = useState(false)
+    const [showShareModal, setShowShareModal] = useState(false)
+    const [eventUrl, setEventUrl] = useState("")
+    const [openEmail, setOpenEmail] = useState(false)
+    const [openDownloadModal, setOpenDownloadModal] = useState(false)
     const [openAddToFeaturedModal, setOpenAddToFeaturedModal] = useState(false)
 
     const handleAction = async (action: ItemAction) => {
@@ -140,7 +140,7 @@ function ItemActionDropdownInner({
                 <DropdownMenuTrigger asChild disabled={disabled} className="p-0">
                     <button
                         className={cn(
-                            "px-1 h-fit border border-brand-neutral-5 rounded-md transition-colors",
+                            "px-1 h-fit md:border border-brand-neutral-5 rounded-md transition-colors",
                             disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-brand-neutral-2"
                         )}
                         disabled={disabled}
@@ -152,7 +152,7 @@ function ItemActionDropdownInner({
 
                 <DropdownMenuContent align="end" className="w-52 text-brand-secondary-9 space-y-1.5">
                     {actions.map((action) => {
-                        const isActionLoading  = loadingAction === action.id
+                        const isActionLoading = loadingAction === action.id
                         const isActionDisabled = loadingAction !== null && !isActionLoading
 
                         return (

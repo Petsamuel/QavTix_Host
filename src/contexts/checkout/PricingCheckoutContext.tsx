@@ -14,6 +14,7 @@ import { extractAccessCode } from "@/helper-fns/extractAccessCode"
 import { PLATFORM_CURRENCY } from "@/components-data/currencies"
 import { useCurrencyConversion } from "../../custom-hooks/useCurrencyConversion"
 import { getUserLocationClient as getUserLocation, initializeHostSubscription, verifyHostSubscription } from "@/actions/settings/client"
+import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 
 
 type BillingCycle = "monthly" | "annual"
@@ -52,6 +53,8 @@ export function PricingCheckoutProvider({ children }: Props) {
 
     const { user } = useAppSelector(store => store.authUser)
     const currencyCode = user?.currency || PLATFORM_CURRENCY
+
+    const { trigger } = useRevalidate("subscription")
 
     const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null)
     const [successPlan, setSuccessPlan] = useState<PricingPlan | null>(null)
@@ -131,6 +134,9 @@ export function PricingCheckoutProvider({ children }: Props) {
                         setProcessingPlanId(null)
                         return
                     }
+
+                    // Trigger revalidation for any components listening for subscription updates
+                    trigger()
 
                     // FLIP TO SUCCESS — STORE WHICH PLAN SUCCEEDED FOR THE SUCCESS SCREEN
                     setSelectedPlan(plan)

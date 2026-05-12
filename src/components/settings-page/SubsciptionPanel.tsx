@@ -6,12 +6,14 @@ import { Icon } from "@iconify/react"
 import { cn } from "@/lib/utils"
 import { useAppDispatch } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
+import { setUser } from "@/lib/redux/slices/authUserSlice"
 import { ToggleItem } from "@/components/custom-utils/inputs/CustomToggleItem"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import { renewSubscription, toggleAutoRenew } from "@/actions/settings/client"
 import { hostPricingData } from "@/components-data/pricing-plans"
 import { usePricingCheckout } from "@/contexts/checkout/PricingCheckoutContext"
+import { useOnRevalidate } from "@/custom-hooks/UseRevalidate"
 import PricingCard from "../cards/PricingCard"
 import ActionButton1 from "../custom-utils/buttons/ActionBtn1"
 import PlanUpgradeSuccessMessage from "../modals/PlanUpgradeSuccessMessage"
@@ -59,6 +61,31 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
         defaultValues: { autoRenew: initialData?.auto_renew ?? false },
     })
 
+    const refreshProfile = useCallback(async () => {
+        try {
+            const res = await fetch("/api/auth/profile")
+            if (res.ok) {
+                const { user } = await res.json()
+                if (user) {
+                    dispatch(setUser(user))
+                }
+            }
+        } catch (error) {
+            console.error("Failed to refresh profile:", error)
+        }
+    }, [dispatch])
+
+    useOnRevalidate("subscription", () => {
+        router.refresh()
+    })
+
+    useEffect(() => {
+        if (initialData) {
+            setData(initialData)
+            refreshProfile()
+        }
+    }, [initialData, refreshProfile])
+
     // Derived state
     const currentPlanSlug = (data?.plan_slug === "free" ? "standard" : (data?.plan_slug ?? "standard")) as PlanSlug
     const currentPlanIndex = PLAN_ORDER.indexOf(currentPlanSlug)
@@ -67,9 +94,7 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
     const isCancelled = data?.status === "cancelled"
     const isActive = data?.status === "active" || data?.status === "trialing"
     const canRenew = isExpired || isCancelled
-    const canUpgrade = !isHighestPlan && isActive
-
-    // Hide cancel button for free / standard plans
+    const canUpgrade = !isHighestPlan
     const canCancel = isActive && CANCELLABLE_PLANS.includes(currentPlanSlug)
 
     const currentPricingPlan = hostPricingData.plans.find(p => p.id === currentPlanSlug)
@@ -175,15 +200,15 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                                 <h3 className="text-base font-bold text-brand-secondary-9">Status</h3>
                                 <span className={cn(
                                     "text-xs font-semibold px-2.5 py-1 rounded-full border flex items-center gap-1.5",
-                                    PLAN_STATUS_STYLES[data.status]
+                                    PLAN_STATUS_STYLES[data.status] || PLAN_STATUS_STYLES.active
                                 )}>
                                     <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                                    {PLAN_STATUS_LABEL[data.status]}
+                                    {PLAN_STATUS_LABEL[data.status] || PLAN_STATUS_LABEL.active}
                                 </span>
                             </div>
                             <p className="text-sm text-brand-secondary-9 font-medium mt-1">
                                 You are currently subscribed to the{" "}
-                                <span className="font-bold">{data.plan.name}</span>
+                                <span className="font-bold">{currentPricingPlan.name}</span>
                             </p>
                         </header>
                         <div className="w-full border-t-[1.5px] border-dashed border-brand-secondary-2" />

@@ -374,8 +374,8 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 const result = await bulkDownloadAttendees({ eventIds: selectedEvents })
 
                 if (result.success && result.files?.length) {
-                    result.files.forEach(({ eventId, content }) => {
-                        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
+                    result.files.forEach(({ eventId, buffer }) => {
+                        const blob = new Blob([buffer], { type: 'text/csv;charset=utf-8;' })
                         downloadBlob(blob, `attendees-${eventId}.csv`)
                     })
                     dispatch(showAlert({

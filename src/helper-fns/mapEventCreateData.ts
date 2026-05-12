@@ -10,23 +10,25 @@ export function mapEventToFormData(
     categories: ApiCategory[],
 ): Partial<CompleteEventFormData> {
 
-    const categoryId = categories.find(c => c.id === event.category)?.id?.toString() ?? ""
+    const rawCategory = (event as any).category
+    const catId = typeof rawCategory === 'object' ? rawCategory?.id : rawCategory
+    const categoryId = categories.find(c => Number(c.id) === Number(catId))?.id?.toString() ?? catId?.toString() ?? ""
 
     console.log(event.event_location.state)
     const countryValue = countries.find(v => v.label === event.event_location?.country)?.value ?? event.event_location?.country ?? ""
     const stateValue = getStates(countryValue).find(v => v.label === event.event_location?.state)?.value ?? event.event_location?.state ?? ""
 
-    // Featured image — use the media url marked as featured (or first image)
-    const featuredMedia = event.media?.find(m => m.is_featured) ?? event.media?.[0]
-    const featuredImageUrl: string | undefined = featuredMedia?.image_url ?? undefined
+    // Featured image — find the first media item with an image_url that is featured, or just the first image
+    const featuredMedia = event.media?.find(m => m.is_featured && m.image_url) ?? event.media?.find(m => m.image_url)
+    const featuredImageUrl = featuredMedia?.image_url || undefined
 
-    // Additional images — all non-featured images
+    // Additional images — all other media items with an image_url
     const additionalImageUrls: string[] = event.media
-        ?.filter(m => !m.is_featured && m.image_url)
+        ?.filter(m => m.image_url && m.image_url !== featuredImageUrl)
         ?.map(m => m.image_url) ?? []
 
-    // Video
-    const videoUrl: string | undefined = featuredMedia?.video_url ?? undefined
+    // Video - find the first media item that has a video_url
+    const videoUrl = event.media?.find(m => m.video_url)?.video_url || undefined
 
     // Social links
     const socialMediaLinks = (event.social_links ?? []).map((l, i) => ({
@@ -63,7 +65,7 @@ export function mapEventToFormData(
 
     return {
         basicInformation: {
-            eventTitle: event.event_name,
+            eventTitle: event.event_name || (event as any).title || "",
             eventCategory: categoryId,
             additionalTags: event.tags ?? [],
             eventType: event.event_type ?? "single",
@@ -186,7 +188,7 @@ export function buildEventPayload(
                     code: t.promoCode.codeWord,
                     discount_percentage: t.promoCode.discountAmount ?? 0,
                     maximum_users: t.promoCode.maximumUsers ?? null,
-                    valid_till: t.promoCode.validTill ?? null,
+                    valid_till: t.promoCode.validTill ? t.promoCode.validTill.slice(0, 10) : null,
                 },
             ]
             : [],

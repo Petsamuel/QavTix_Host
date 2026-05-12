@@ -145,6 +145,7 @@ export default function MainWithdrawalComponent({
                     title: "Account removed",
                     description: "Bank account removed successfully.",
                 }))
+                trigger()
             } else {
                 dispatch(showAlert({
                     variant: "destructive",
