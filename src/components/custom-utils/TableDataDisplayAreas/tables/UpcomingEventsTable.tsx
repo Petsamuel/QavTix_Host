@@ -70,7 +70,7 @@ export default function UpcomingEventsTable({
                     <tbody className="divide-y divide-brand-neutral-2">
                         {items.map((event) => {
                             const statusKey = event.performance as keyof typeof eventPerformanceConfig
-                            const status    = eventPerformanceConfig[statusKey]
+                            const status    = eventPerformanceConfig[statusKey] || { label: event.performance || 'Unknown', color: 'text-brand-neutral-5' }
                             const dateLabel = format(new Date(event.start_datetime), "MMM dd, yyyy")
                             const timeLabel = format(new Date(event.start_datetime), "h:mm a")
 
@@ -157,7 +157,7 @@ export default function UpcomingEventsTable({
             <div className="md:hidden space-y-3">
                 {items.map((event) => {
                     const statusKey = event.performance as keyof typeof eventPerformanceConfig
-                    const status    = eventPerformanceConfig[statusKey]
+                    const status    = eventPerformanceConfig[statusKey] || { label: event.performance || 'Unknown', color: 'text-brand-neutral-5' }
                     const dateLabel = format(new Date(event.start_datetime), "MMM dd, yyyy")
                     const timeLabel = format(new Date(event.start_datetime), "h:mm a")
 
