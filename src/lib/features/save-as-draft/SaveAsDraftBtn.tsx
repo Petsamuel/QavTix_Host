@@ -18,7 +18,7 @@ import { EVENT_DETAILS_LINK } from "@/enums/navigation"
 
 export default function SaveAsDraftBtn() {
 
-    const { eventData, isEditMode, eventID, eventStatus, discardDraft } = useEventCreation()
+    const { eventData, isEditMode, eventID, eventStatus, discardDraft, resetForm } = useEventCreation()
     const dispatch = useAppDispatch()
     const router = useRouter()
     const { trigger } = useRevalidate("events")
@@ -91,6 +91,7 @@ export default function SaveAsDraftBtn() {
                     variant: "success",
                 }))
                 clearEventDraft()
+                resetForm()
                 trigger()
                 if (isEditMode && isLive && eventID) {
                     router.push(EVENT_DETAILS_LINK.replace("[event_id]", String(eventID)))
