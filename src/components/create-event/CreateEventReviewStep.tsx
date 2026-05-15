@@ -165,6 +165,7 @@ export default function CreateEventReviewStep() {
 
                 clearEventDraft()
                 resetForm()
+                router.push(NAVIGATION_LINKS.MY_EVENTS.href)
             } else {
                 dispatch(showAlert({
                     title: "Schedule Failed",
