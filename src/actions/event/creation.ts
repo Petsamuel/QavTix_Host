@@ -83,6 +83,8 @@ export async function saveEventAsDraft({
             ...(scheduledAt ? { is_scheduled: true, schedule_time: scheduledAt } : {}),
         }
 
+        console.log(body)
+
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_CREATE}`,
             {
@@ -99,9 +101,9 @@ export async function saveEventAsDraft({
 
         if (!res.ok) {
             console.error("[saveEventAsDraft] API Error:", { status: res.status, json: JSON.stringify(json, null, 2), body: JSON.stringify(body, null, 2) })
-            return { 
-                success: false, 
-                message: handleApiError(json) || `Save failed (Status ${res.status})` 
+            return {
+                success: false,
+                message: handleApiError(json) || `Save failed (Status ${res.status})`
             }
         }
 
@@ -203,9 +205,9 @@ export async function updateEventAsDraft({
 
         if (!res.ok) {
             console.error("[updateEventAsDraft] API Error:", { status: res.status, json: JSON.stringify(json, null, 2), body: JSON.stringify(body, null, 2) })
-            return { 
-                success: false, 
-                message: handleApiError(json) || `Update failed (Status ${res.status})` 
+            return {
+                success: false,
+                message: handleApiError(json) || `Update failed (Status ${res.status})`
             }
         }
 

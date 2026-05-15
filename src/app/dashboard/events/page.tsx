@@ -12,8 +12,6 @@ export const metadata: Metadata = {
 }
 
 
-
-
 export default async function EventsPage() {
     const cookieStore = await cookies();
     const token = cookieStore.get("host_access_token")?.value;

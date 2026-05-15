@@ -17,7 +17,8 @@ export default function EventCreationLayout() {
         eventStatus,
         hasDraftAvailable,
         restoreDraft,
-        discardDraft
+        discardDraft,
+        resetForm
     } = useEventCreation()
     const router = useRouter()
 
@@ -33,7 +34,19 @@ export default function EventCreationLayout() {
                             {isEditMode ? 'Edit Event' : 'Create Event'}
                         </h2>
                     </div>
-                    <SaveAsDraftBtn />
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                resetForm()
+                                router.back()
+                            }}
+                            className="text-sm font-bold text-brand-secondary-7 hover:text-brand-secondary-9 hover:bg-brand-neutral-2 px-4 py-2 rounded-lg transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <SaveAsDraftBtn />
+                    </div>
                 </div>
 
                 <AnimatePresence>

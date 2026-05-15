@@ -102,16 +102,20 @@ export default function CreateEventStep3() {
     }
 
 
-    // useEffect(() => {
-    //     console.log(errors)
-    // }, [refundPolicy])
-
+    const onError = () => {
+        setTimeout(() => {
+            const errorElement = document.querySelector('.text-red-500, .text-red-600');
+            if (errorElement) {
+                errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
+    };
 
     return (
         <FormProvider {...methods}>
             <form
                 className="flex flex-col lg:flex-row gap-10 items-start"
-                onSubmit={handleSubmit(handleStep3Submit)}
+                onSubmit={handleSubmit(handleStep3Submit, onError)}
                 data-testid="create-event-step-3-form"
             >
                 <div

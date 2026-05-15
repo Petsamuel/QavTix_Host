@@ -6,6 +6,7 @@ import { inter } from "@/lib/fonts"
 import ReduxStoreProvider from "@/lib/redux/ReduxStoreProvider"
 import { ReactNode } from "react"
 import PopUpsRenderer from "@/components/modals/"
+import { cookies } from "next/headers"
 import { getServerAxios } from "@/lib/axios"
 import { Suspense } from "react"
 import { GET_PROFILE_ENDPOINT } from "@/endpoints"
@@ -18,8 +19,12 @@ type LayoutProps = {
     children: ReactNode
 }
 
+
 async function getLayoutData() {
     try {
+        const cookieStore = await cookies()
+        const token = cookieStore.get('host_access_token')?.value
+        if (!token) return null
         const axiosInstance = await getServerAxios()
         const { data } = await axiosInstance.get(GET_PROFILE_ENDPOINT)
         const hostData = data.host
