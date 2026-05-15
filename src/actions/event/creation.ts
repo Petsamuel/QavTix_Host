@@ -78,12 +78,14 @@ export async function saveEventAsDraft({
 }): Promise<{ success: boolean; message?: string; eventId?: string }> {
     try {
         const token = await getToken()
+        const payload = buildEventPayload(eventData, scheduledAt ? "active" : "draft", media)
         const body = {
-            ...buildEventPayload(eventData, "draft", media),
-            ...(scheduledAt ? { is_scheduled: true, schedule_time: scheduledAt } : {}),
+            ...payload,
+            is_scheduled: !!scheduledAt,
+            schedule_time: scheduledAt || null,
         }
 
-        console.log(body)
+        console.log("[saveEventAsDraft] Payload:", JSON.stringify(body, null, 2))
 
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_CREATE}`,
@@ -183,10 +185,14 @@ export async function updateEventAsDraft({
 }): Promise<{ success: boolean; message?: string; eventId?: string }> {
     try {
         const token = await getToken()
+        const payload = buildEventPayload(eventData, scheduledAt ? "active" : "draft", media)
         const body = {
-            ...buildEventPayload(eventData, "draft", media),
-            ...(scheduledAt ? { is_scheduled: true, schedule_time: scheduledAt } : {}),
+            ...payload,
+            is_scheduled: !!scheduledAt,
+            schedule_time: scheduledAt || null,
         }
+
+        console.log("[updateEventAsDraft] Payload:", JSON.stringify(body, null, 2))
         const endpoint = EVENT_UPDATE.replace("[event_id]", String(eventId))
 
         const res = await fetch(
