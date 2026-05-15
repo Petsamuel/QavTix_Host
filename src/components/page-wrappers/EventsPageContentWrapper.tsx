@@ -351,7 +351,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 askConfirmation(
                     {
                         title: "Delete Events",
-                        description: `Delete ${eligibleIds.length} event${eligibleIds.length > 1 ? "s" : ""}?${skipped > 0 ? ` (${skipped} active/sold-out events cannot be deleted and will be skipped)` : ""} This cannot be undone.`,
+                        description: `Delete ${eligibleIds.length} event${eligibleIds.length > 1 ? "s" : ""}?${skipped > 0 ? ` (${skipped} active/sold_out events cannot be deleted and will be skipped)` : ""} This cannot be undone.`,
                         confirmText: "Yes, delete all",
                         actionType: "BULK_DELETE_EVENTS",
                     },

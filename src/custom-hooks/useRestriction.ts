@@ -179,10 +179,8 @@ export interface PlanRestrictions {
 
 export function usePlanRestrictions(): PlanRestrictions {
     const planSlug: string = useAppSelector(
-        (state: any) =>
+        (state) =>
             state.authUser?.user?.plan_type ??
-            state.authUser?.user?.subscription?.plan_slug ??
-            state.authUser?.user?.plan_slug ??
             "free"
     )
 

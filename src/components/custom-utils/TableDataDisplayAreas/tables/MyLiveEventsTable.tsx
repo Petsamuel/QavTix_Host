@@ -91,8 +91,7 @@ export default function MyLiveEventsTable({
         )
     }
 
-    const status = liveEventsStatusConfig["selling-fast" as keyof typeof liveEventsStatusConfig]
-        ?? liveEventsStatusConfig["selling-fast"]
+
 
     return (
         <div className="w-full space-y-4 mt-5">
@@ -130,18 +129,29 @@ export default function MyLiveEventsTable({
                                             <Checkbox checked={isSelected} onCheckedChange={() => handleSelectEvent(event.id)} />
                                         </td>
                                         <td className="py-4 px-5">
-                                            <div className="flex items-center gap-1 whitespace-nowrap">
-                                                <Icon icon="mdi:circle" className={cn("w-2 h-2", status.color)} />
-                                                <span className={cn("text-xs font-medium", status.color)}>{status.label}</span>
-                                            </div>
+                                            {(() => {
+                                                const statusCfg = liveEventsStatusConfig[event.status as keyof typeof liveEventsStatusConfig] 
+                                                    ?? { label: "Live", color: "text-green-600" };
+                                                return (
+                                                    <div className="flex items-center gap-1 whitespace-nowrap">
+                                                        <Icon icon="mdi:circle" className={cn("w-2 h-2", statusCfg.color)} />
+                                                        <span className={cn("text-xs font-medium", statusCfg.color)}>{statusCfg.label}</span>
+                                                    </div>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="py-4 px-5">
-                                            <EventInfo
-                                                variant="desktop"
-                                                category={event.category}
-                                                image={event.event_image?.image_url ?? ""}
-                                                title={event.title}
-                                            />
+                                            <div className="flex items-center gap-2">
+                                                <EventInfo
+                                                    variant="desktop"
+                                                    category={event.category}
+                                                    image={event.event_image?.image_url ?? ""}
+                                                    title={event.title}
+                                                />
+                                                {event.is_featured && (
+                                                    <Icon icon="mdi:feature-highlight" width="20" height="20" className="text-brand-accent-6" />
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="py-4 px-5">
                                             <p className="text-xs text-brand-secondary-9 whitespace-nowrap">
@@ -175,7 +185,7 @@ export default function MyLiveEventsTable({
                                                         eventName={event.title}
                                                         eventID={event.id}
                                                         actions={
-                                                            event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                            event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold_out" ?
                                                                 buildLiveEventActions(event.id, event.is_featured, router)
                                                                 :
                                                                 buildEndedEventActions(event.id, router)
@@ -208,8 +218,16 @@ export default function MyLiveEventsTable({
                                     <div className="flex items-center gap-3">
                                         <Checkbox checked={isSelected} onCheckedChange={() => handleSelectEvent(event.id)} />
                                         <div className="flex items-center gap-1">
-                                            <Icon icon="mdi:circle" className={cn("w-2 h-2", status.color)} />
-                                            <span className={cn("font-medium", status.color)}>{status.label}</span>
+                                            {(() => {
+                                                const statusCfg = liveEventsStatusConfig[event.status as keyof typeof liveEventsStatusConfig] 
+                                                    ?? { label: "Live", color: "text-green-600" };
+                                                return (
+                                                    <>
+                                                        <Icon icon="mdi:circle" className={cn("w-2 h-2", statusCfg.color)} />
+                                                        <span className={cn("font-medium", statusCfg.color)}>{statusCfg.label}</span>
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1">
@@ -220,6 +238,9 @@ export default function MyLiveEventsTable({
                                         <span className="font-bold">Views:</span>
                                         <span>{event.views_count}</span>
                                     </div>
+                                    {event.is_featured && (
+                                        <Icon icon="mdi:feature-highlight" width="18" height="18" className="text-brand-accent-6" />
+                                    )}
                                     {
                                         event.status === "draft" ?
                                             null
@@ -228,7 +249,7 @@ export default function MyLiveEventsTable({
                                                 eventName={event.title}
                                                 eventID={event.id}
                                                 actions={
-                                                    event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                    event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold_out" ?
                                                         buildLiveEventActions(event.id, event.is_featured, router)
                                                         :
                                                         buildEndedEventActions(event.id, router)

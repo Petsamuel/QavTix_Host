@@ -248,6 +248,13 @@ const ticketTypeSchema = yup.object({
             }
             return true
         })
+        .test('per-person-less-than-total', function (value) {
+            const { quantity } = this.parent;
+            if (value && quantity && value > quantity) {
+                return this.createError({ message: `Per-person limit cannot exceed total ticket quantity (${quantity})` });
+            }
+            return true;
+        })
         .optional(),
     promoCode: promoCodeSchema,
 });

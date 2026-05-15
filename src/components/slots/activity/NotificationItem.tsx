@@ -23,9 +23,9 @@ export default function NotificationItem({ notification }: NotificationItemProps
 
     return (
         <div className={cn(
-            "flex items-start gap-3 py-4 border-b border-brand-neutral-2 last:border-0 px-2 -mx-4 rounded-lg transition-colors",
+            "flex items-start w-full gap-3 py-2 border-b border-brand-neutral-2 last:border-0 px-2 -mx-4 rounded-lg transition-colors",
         )}>
-            <div className={cn(isUnread ? "bg-brand-primary-1 px-2 hover:bg-brand-primary-2/50" : "hover:bg-brand-neutral-1")}>
+            <div className={cn(isUnread ? "bg-brand-primary-1 py-2 hover:bg-brand-primary-2/50" : "hover:bg-brand-neutral-1")}>
                 <div className="flex items-center pt-1">
                     {isUnread && (
                         <div className={cn("w-2 h-2 rounded-full", dotColor)} />

@@ -10,6 +10,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
     checked_in: { label: "Checked In", color: "text-green-600" },
     pending: { label: "Pending", color: "text-amber-500" },
     invalid: { label: "Invalid", color: "text-red-500" },
+    duplicate: { label: "Duplicate", color: "text-orange-600" },
 }
 
 interface Props {

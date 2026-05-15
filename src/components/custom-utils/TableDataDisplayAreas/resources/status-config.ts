@@ -22,7 +22,7 @@ export const payoutStatusConfig: Record<string, { label: string; color: string }
 }
 
 export const attendeeCheckInStatusConfig = {
-    'checked-in': { color: 'text-green-600' },
+    'checked_in': { color: 'text-green-600' },
     'pending': { color: 'text-orange-600' },
     'failed': { color: 'text-red-600' }
 }
@@ -41,8 +41,9 @@ export const draftStatusConfig = {
 }
 
 export const liveEventsStatusConfig = {
-    'low-sales': { label: 'Low Sales', color: 'text-red-600' },
-    'selling-fast': { label: 'Selling Fast', color: 'text-green-600' },
-    'starts-soon': { label: 'Starts Soon', color: 'text-orange-600' },
-    'sold-out': { label: 'Sold Out', color: 'text-gray-600' }
+    'low_sales': { label: 'Low Sales', color: 'text-red-600' },
+    'selling_fast': { label: 'Selling Fast', color: 'text-green-600' },
+    'starts_soon': { label: 'Starts Soon', color: 'text-orange-600' },
+    'started': { label: 'Started', color: 'text-brand-primary' },
+    'sold_out': { label: 'Sold Out', color: 'text-gray-600' }
 }

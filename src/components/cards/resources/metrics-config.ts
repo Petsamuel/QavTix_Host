@@ -381,8 +381,8 @@ export const myEventsMetricsConfig: Record<string, MetricConfig> = {
         icon: "fluent-mdl2:end-point-solid",
         iconColor: 'text-[#FF0000]'
     },
-    'sold-out': {
-        id: 'sold-out',
+    'sold_out': {
+        id: 'sold_out',
         label: 'Sold Out',
         description: 'Events fully booked',
         icon: "hugeicons:wallet-done-01",

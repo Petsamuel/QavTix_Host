@@ -254,7 +254,7 @@ export function mapEventsCards(cards: EventCards): MetricCardData[] {
             iconColor: "text-brand-accent-4",
         },
         {
-            id: "sold-out",
+            id: "sold_out",
             value: String(cards.sold_out),
             label: "Sold Out",
             description: "Fully booked events",
