@@ -19,7 +19,7 @@ interface EventImage {
     video_url: string | null
 }
 
-type EventStatus = "active" | "draft" | "ended" | "sold-out" | "cancelled" | "banned"
+type EventStatus = "active" | "draft" | "ended" | "sold_out" | "cancelled" | "banned" | "started" | "starts_soon" | "filling_fast" | "selling_fast" | "near_capacity"
 type EventPerformance = "fully_booked" | "almost_full" | "moderate_sales" | "low_sales" | "no_sales"
 
 interface OrganizerEvent {
@@ -172,10 +172,6 @@ interface UpcomingEventsData {
     cards: UpcomingEventCards
     results: UpcomingEvent[]
 }
-
-type EventPerformance = "fully_booked" | "almost_full" | "moderate_sales" | "low_sales" | "no_sales"
-type EventStatus = "active" | "draft" | "ended" | "sold-out" | "cancelled" | "banned"
-
 
 interface GetUpcomingEventsResult {
     success: boolean

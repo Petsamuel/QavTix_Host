@@ -248,6 +248,13 @@ const ticketTypeSchema = yup.object({
             }
             return true
         })
+        .test('per-person-less-than-total', function (value) {
+            const { quantity } = this.parent;
+            if (value && quantity && value > quantity) {
+                return this.createError({ message: `Per-person limit cannot exceed total ticket quantity (${quantity})` });
+            }
+            return true;
+        })
         .optional(),
     promoCode: promoCodeSchema,
 });
@@ -257,6 +264,14 @@ export type TicketType = yup.InferType<typeof ticketTypeSchema>;
 export const step3Schema = yup.object({
     ticketTypes: yup.array(ticketTypeSchema)
         .min(1, 'Please add at least one ticket type')
+        .test('total-quantity', function (value) {
+            const max = this.options.context?.maxTickets ?? 750
+            const total = (value ?? []).reduce((acc, t) => acc + (Number(t.quantity) || 0), 0)
+            if (total > max) {
+                return this.createError({ message: `Total ticket quantity (${total}) exceeds your plan limit of ${max}. Upgrade your plan to increase this limit.` })
+            }
+            return true
+        })
         .required(),
 
     salesPeriod: yup.object({

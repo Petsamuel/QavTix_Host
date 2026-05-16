@@ -32,7 +32,7 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
     active: { label: "Live", color: "text-green-600" },
     draft: { label: "Draft", color: "text-amber-500" },
     ended: { label: "Ended", color: "text-red-600" },
-    "sold-out": { label: "Sold Out", color: "text-purple-600" },
+    sold_out: { label: "Sold Out", color: "text-purple-600" },
     cancelled: { label: "Cancelled", color: "text-brand-secondary-7" },
     banned: { label: "Banned", color: "text-red-800" },
 }
@@ -128,7 +128,12 @@ export default function AllEventsTable({
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <EventInfo variant="desktop" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
+                                            <div className="flex items-center gap-2">
+                                                <EventInfo variant="desktop" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
+                                                {event.is_featured && (
+                                                    <Icon icon="mdi:feature-highlight" width="20" height="20" className="text-brand-accent-6" />
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="p-4">
                                             <p className="text-xs text-brand-secondary-9 whitespace-nowrap">{formatDateTime(event.start_datetime)}</p>
@@ -158,7 +163,7 @@ export default function AllEventsTable({
                                                         eventID={event.id}
                                                         eventName={event.title}
                                                         actions={
-                                                            event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                            event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold_out" ?
                                                                 buildLiveEventActions(event.id, event.is_featured, router)
                                                                 :
                                                                 buildEndedEventActions(event.id, router)
@@ -200,7 +205,7 @@ export default function AllEventsTable({
                                                 eventID={event.id}
                                                 eventName={event.title}
                                                 actions={
-                                                    event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold-out" ?
+                                                    event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold_out" ?
                                                         buildLiveEventActions(event.id, event.is_featured, router)
                                                         :
                                                         buildEndedEventActions(event.id, router)
@@ -209,7 +214,12 @@ export default function AllEventsTable({
                                     }
                                 </div>
                                 <div className="flex items-start justify-between gap-3">
-                                    <EventInfo variant="mobile" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
+                                    <div className="flex items-center gap-2">
+                                        <EventInfo variant="mobile" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
+                                        {event.is_featured && (
+                                            <Icon icon="mdi:feature-highlight" width="18" height="18" className="text-brand-accent-6" />
+                                        )}
+                                    </div>
                                     <div className="flex flex-col text-xs text-brand-secondary-9">
                                         <span className="font-bold">Date & Time</span>
                                         <span>{formatDateTime(event.start_datetime)}</span>
