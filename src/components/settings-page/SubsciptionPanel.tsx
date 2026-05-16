@@ -109,7 +109,7 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
         try {
             const result = await toggleAutoRenew(newValue)
             if (!result.success) throw new Error(result.message)
-            dispatch(showAlert({ variant: "default", title: "Auto-renewal updated", description: newValue ? "Enabled." : "Disabled." }))
+            dispatch(showAlert({ variant: "success", title: "Auto-renewal updated", description: newValue ? "Enabled." : "Disabled." }))
             router.refresh()
         } catch (error: any) {
             setData(prev => prev ? { ...prev, auto_renew: previousValue } : prev)
@@ -125,7 +125,7 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
         const result = await renewSubscription()
         setIsRenewing(false)
         dispatch(showAlert({
-            variant: result.success ? "default" : "destructive",
+            variant: result.success ? "success" : "destructive",
             title: result.success ? "Subscription renewed" : "Renewal failed",
             description: result.success ? "Your subscription has been renewed successfully." : (result.message ?? "Please try again."),
         }))
@@ -210,6 +210,12 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                                 You are currently subscribed to the{" "}
                                 <span className="font-bold">{currentPricingPlan.name}</span>
                             </p>
+                            {isActive && data.plan_slug !== "standard" && data.plan_slug !== "free" && data.expires_at && (
+                                <p className="text-xs text-brand-neutral-6 mt-1 flex items-center gap-1.5">
+                                    <Icon icon="hugeicons:calendar-03" className="w-3.5 h-3.5" />
+                                    <span>Plan {data.auto_renew ? "renews" : "expires"} on: <span className="font-semibold">{expiresLabel}</span></span>
+                                </p>
+                            )}
                         </header>
                         <div className="w-full border-t-[1.5px] border-dashed border-brand-secondary-2" />
 

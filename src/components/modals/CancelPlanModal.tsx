@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import { Dispatch, SetStateAction, useState } from "react";
 import {
 	DialogDescription,
@@ -37,7 +38,7 @@ const PRO_RIGHT_FEATURES = [
 	{ icon: "hugeicons:dashboard-browsing", label: "Integrated Marketing Dashboard" },
 	{ icon: "hugeicons:mail-account-01", label: "Priority Email Support" },
 	{ icon: "hugeicons:alert-02", label: "Fraud Detection" },
-	{ icon: "hugeicons:mail-open", label: "Built-in Email Campaigns (100 Sends/Month)" },
+	{ icon: "hugeicons:mail-open", label: "Built-in Email Campaigns (400 Sends/Month)" },
 ];
 
 const ENTERPRISE_LEFT_FEATURES = [
@@ -60,7 +61,7 @@ const ENTERPRISE_RIGHT_FEATURES = [
 	{ icon: "hugeicons:location-03", label: "Geographical Breakdown" },
 	{ icon: "hugeicons:chart-breakout-square", label: "Week-Based Analysis" },
 	{ icon: "hugeicons:dashboard-browsing", label: "Integrated Marketing Dashboard" },
-	{ icon: "hugeicons:mail-open", label: "Built-in Email Campaigns (100 Sends/Month)" },
+	{ icon: "hugeicons:mail-open", label: "Built-in Email Campaigns (400 Sends/Month)" },
 	{ icon: "hugeicons:mail-account-01", label: "Sponsored Email Campaign" },
 	{ icon: "hugeicons:contact-book", label: "Dedicated Account Manager" },
 	{ icon: "hugeicons:customer-support", label: "Priority Customer Support" },
@@ -117,7 +118,7 @@ export default function CancelSubscriptionModal({
 		const result = await cancelSubscription();
 		if (result?.success) {
 			dispatch(showAlert({
-				variant: "default",
+				variant: "success",
 				title: "Subscription cancelled successfully",
 				description: "Your subscription will remain active until the end of your billing period.",
 				duration: 5000,
@@ -149,8 +150,9 @@ export default function CancelSubscriptionModal({
 					<Image
 						src="/images/vectors/suitcase.svg"
 						alt="Sad luggage illustration"
-						fill
-						className="object-contain"
+						width={96}
+						height={112}
+						className="w-auto h-auto"
 						priority
 					/>
 				</div>
@@ -186,7 +188,7 @@ export default function CancelSubscriptionModal({
 			<p className="text-xs text-center text-brand-secondary-6 mb-6">
 				You can continue to use all of these features until the end of your
 				current billing period on{" "}
-				<span className="font-medium text-brand-secondary-7">{new Date(expiresAt).toLocaleDateString()}</span>
+				<span className="font-medium text-brand-secondary-7">{format(new Date(expiresAt), "dd/MM/yyyy")}</span>
 				.{" "}
 				<Link
 					href={FAQ_PAGE}
