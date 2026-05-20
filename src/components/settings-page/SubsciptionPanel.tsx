@@ -10,7 +10,7 @@ import { setUser } from "@/lib/redux/slices/authUserSlice"
 import { ToggleItem } from "@/components/custom-utils/inputs/CustomToggleItem"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
-import { renewSubscription, toggleAutoRenew } from "@/actions/settings/client"
+import { renewSubscription, toggleAutoRenew, getSubscriptionClient } from "@/actions/settings/client"
 import { hostPricingData } from "@/components-data/pricing-plans"
 import { usePricingCheckout } from "@/contexts/checkout/PricingCheckoutContext"
 import { useOnRevalidate } from "@/custom-hooks/UseRevalidate"
@@ -75,7 +75,11 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
         }
     }, [dispatch])
 
-    useOnRevalidate("subscription", () => {
+    useOnRevalidate("subscription", async () => {
+        const res = await getSubscriptionClient()
+        if (res.success && res.data) {
+            setData(res.data)
+        }
         router.refresh()
     })
 

@@ -45,7 +45,8 @@ export default function AllActivityNotificationsModal({
         setActivities(initialActivities)
         setNotifications(initialNotifications)
         setCurrentPage(initialPage)
-    }, [initialActivities, initialNotifications, initialPage])
+        setHasMore(initialHasMore)
+    }, [initialActivities, initialNotifications, initialPage, initialHasMore])
 
     const handleClose = () => {
         setOpen(false)

@@ -18,6 +18,7 @@ import { showAlert } from "@/lib/redux/slices/alertSlice";
 import { cn } from "@/lib/utils";
 import { space_grotesk } from "@/lib/fonts";
 import ActionButton1 from "../custom-utils/buttons/ActionBtn1";
+import { useRevalidate } from "@/custom-hooks/UseRevalidate";
 
 // ─── Feature definitions per plan ────────────────────────────────────────────
 
@@ -90,7 +91,7 @@ const FeatureItem = ({ icon, label }: { icon: string; label: string }) => (
 		/>
 		<span className="text-xs text-brand-secondary-7 leading-snug">{label}</span>
 	</li>
-);
+)
 
 
 interface CancelSubscriptionModalProps {
@@ -108,31 +109,33 @@ export default function CancelSubscriptionModal({
 	expiresAt
 }: CancelSubscriptionModalProps) {
 
-	const dispatch = useAppDispatch();
-	const [isCancelling, setIsCancelling] = useState(false);
+	const dispatch = useAppDispatch()
+	const [isCancelling, setIsCancelling] = useState(false)
+	const { trigger } = useRevalidate("subscription")
 
-	const handleClose = () => setIsOpen(false);
+	const handleClose = () => setIsOpen(false)
 
 	const handleConfirm = async () => {
-		setIsCancelling(true);
-		const result = await cancelSubscription();
+		setIsCancelling(true)
+		const result = await cancelSubscription()
 		if (result?.success) {
 			dispatch(showAlert({
 				variant: "success",
 				title: "Subscription cancelled successfully",
 				description: "Your subscription will remain active until the end of your billing period.",
 				duration: 5000,
-			}));
-			handleClose();
+			}))
+			trigger()
+			handleClose()
 		} else {
 			dispatch(showAlert({
 				variant: "destructive",
 				title: "Failed to cancel subscription",
 				description: "Something went wrong. Please try again.",
 				duration: 5000,
-			}));
+			}))
 		}
-		setIsCancelling(false);
+		setIsCancelling(false)
 	};
 
 	const features = PLAN_FEATURES[planSlug];
@@ -202,7 +205,7 @@ export default function CancelSubscriptionModal({
 			<div className="flex mt-10 flex-col sm:flex-row items-center gap-3">
 				<button
 					onClick={handleClose}
-					className="w-full flex-1 h-14 rounded-full border border-brand-neutral-7 bg-white px-5 py-2.5 text-sm font-medium text-brand-secondary-8 hover:bg-brand-neutral-8 transition-colors"
+					className="w-full flex-1 h-14 rounded-full border border-brand-neutral-7 bg-white px-5 py-2.5 text-sm font-medium text-brand-secondary-8 hover:bg-brand-neutral-8 hover:text-white transition-colors"
 				>
 					Nevermind, Let&apos;s keep it
 				</button>
@@ -219,5 +222,5 @@ export default function CancelSubscriptionModal({
 				/>
 			</div>
 		</AnimatedDialog>
-	);
+	)
 }

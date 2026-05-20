@@ -43,6 +43,10 @@ export const NAVIGATION_LINKS = {
 
 export const SETTINGS_SUB_LINKS = [
     {
+        href:  "/dashboard/settings/profile",
+        label: "Profile",
+    },
+    {
         href:  "/dashboard/settings/account",
         label: "Account",
     },

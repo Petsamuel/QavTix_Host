@@ -74,3 +74,4 @@ export const CANCEL_PLAN_ENDPOINT = "payments/host-plans/cancel/"
 
 export const LOGIN_ENDPOINT = "auth/login/"
 export const GET_PROFILE_ENDPOINT = "host/profile/"
+export const UPDATE_PROFILE_ENDPOINT = "host/profile/update/"
