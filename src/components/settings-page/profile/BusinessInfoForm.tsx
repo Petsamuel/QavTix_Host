@@ -262,7 +262,7 @@ export default function BusinessInfoForm({ user, categories }: Props) {
                     <label className="block text-sm font-medium text-brand-neutral-9 mb-2">
                         Relevant links <span className="text-brand-neutral-6">(Optional)</span>
                     </label>
-                    <div className="space-y-3">
+                    <div className="space-y-3 md:max-w-md">
                         {fields.map((field, index) => (
                             <div key={field.id} className="flex gap-2 items-start">
                                 <div className="flex-1">
