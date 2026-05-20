@@ -34,8 +34,8 @@ export default function RecentActivityTab({ activities, follower_count }: Recent
     const [isFiltering, startFiltering] = useTransition()
 
     const isCompletelyEmpty = activities.length === 0 && !filterValue
-
-    const preview = activities.slice(0, PREVIEW_COUNT)
+    const showAll = pathName.includes("/all-activities")
+    const preview = showAll ? activities : activities.slice(0, PREVIEW_COUNT)
 
     const handleFilterChange = (v: string) => {
         const newValue = v === filterValue ? "" : v;

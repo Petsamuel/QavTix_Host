@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import { Dispatch, SetStateAction, useState } from "react";
 import {
 	DialogDescription,
@@ -17,6 +18,7 @@ import { showAlert } from "@/lib/redux/slices/alertSlice";
 import { cn } from "@/lib/utils";
 import { space_grotesk } from "@/lib/fonts";
 import ActionButton1 from "../custom-utils/buttons/ActionBtn1";
+import { useRevalidate } from "@/custom-hooks/UseRevalidate";
 
 // ─── Feature definitions per plan ────────────────────────────────────────────
 
@@ -37,7 +39,7 @@ const PRO_RIGHT_FEATURES = [
 	{ icon: "hugeicons:dashboard-browsing", label: "Integrated Marketing Dashboard" },
 	{ icon: "hugeicons:mail-account-01", label: "Priority Email Support" },
 	{ icon: "hugeicons:alert-02", label: "Fraud Detection" },
-	{ icon: "hugeicons:mail-open", label: "Built-in Email Campaigns (100 Sends/Month)" },
+	{ icon: "hugeicons:mail-open", label: "Built-in Email Campaigns (400 Sends/Month)" },
 ];
 
 const ENTERPRISE_LEFT_FEATURES = [
@@ -60,7 +62,7 @@ const ENTERPRISE_RIGHT_FEATURES = [
 	{ icon: "hugeicons:location-03", label: "Geographical Breakdown" },
 	{ icon: "hugeicons:chart-breakout-square", label: "Week-Based Analysis" },
 	{ icon: "hugeicons:dashboard-browsing", label: "Integrated Marketing Dashboard" },
-	{ icon: "hugeicons:mail-open", label: "Built-in Email Campaigns (100 Sends/Month)" },
+	{ icon: "hugeicons:mail-open", label: "Built-in Email Campaigns (400 Sends/Month)" },
 	{ icon: "hugeicons:mail-account-01", label: "Sponsored Email Campaign" },
 	{ icon: "hugeicons:contact-book", label: "Dedicated Account Manager" },
 	{ icon: "hugeicons:customer-support", label: "Priority Customer Support" },
@@ -89,7 +91,7 @@ const FeatureItem = ({ icon, label }: { icon: string; label: string }) => (
 		/>
 		<span className="text-xs text-brand-secondary-7 leading-snug">{label}</span>
 	</li>
-);
+)
 
 
 interface CancelSubscriptionModalProps {
@@ -107,31 +109,33 @@ export default function CancelSubscriptionModal({
 	expiresAt
 }: CancelSubscriptionModalProps) {
 
-	const dispatch = useAppDispatch();
-	const [isCancelling, setIsCancelling] = useState(false);
+	const dispatch = useAppDispatch()
+	const [isCancelling, setIsCancelling] = useState(false)
+	const { trigger } = useRevalidate("subscription")
 
-	const handleClose = () => setIsOpen(false);
+	const handleClose = () => setIsOpen(false)
 
 	const handleConfirm = async () => {
-		setIsCancelling(true);
-		const result = await cancelSubscription();
+		setIsCancelling(true)
+		const result = await cancelSubscription()
 		if (result?.success) {
 			dispatch(showAlert({
-				variant: "default",
+				variant: "success",
 				title: "Subscription cancelled successfully",
 				description: "Your subscription will remain active until the end of your billing period.",
 				duration: 5000,
-			}));
-			handleClose();
+			}))
+			trigger()
+			handleClose()
 		} else {
 			dispatch(showAlert({
 				variant: "destructive",
 				title: "Failed to cancel subscription",
 				description: "Something went wrong. Please try again.",
 				duration: 5000,
-			}));
+			}))
 		}
-		setIsCancelling(false);
+		setIsCancelling(false)
 	};
 
 	const features = PLAN_FEATURES[planSlug];
@@ -149,8 +153,9 @@ export default function CancelSubscriptionModal({
 					<Image
 						src="/images/vectors/suitcase.svg"
 						alt="Sad luggage illustration"
-						fill
-						className="object-contain"
+						width={96}
+						height={112}
+						className="w-auto h-auto"
 						priority
 					/>
 				</div>
@@ -186,7 +191,7 @@ export default function CancelSubscriptionModal({
 			<p className="text-xs text-center text-brand-secondary-6 mb-6">
 				You can continue to use all of these features until the end of your
 				current billing period on{" "}
-				<span className="font-medium text-brand-secondary-7">{new Date(expiresAt).toLocaleDateString()}</span>
+				<span className="font-medium text-brand-secondary-7">{format(new Date(expiresAt), "dd/MM/yyyy")}</span>
 				.{" "}
 				<Link
 					href={FAQ_PAGE}
@@ -200,7 +205,7 @@ export default function CancelSubscriptionModal({
 			<div className="flex mt-10 flex-col sm:flex-row items-center gap-3">
 				<button
 					onClick={handleClose}
-					className="w-full flex-1 h-14 rounded-full border border-brand-neutral-7 bg-white px-5 py-2.5 text-sm font-medium text-brand-secondary-8 hover:bg-brand-neutral-8 transition-colors"
+					className="w-full flex-1 h-14 rounded-full border border-brand-neutral-7 bg-white px-5 py-2.5 text-sm font-medium text-brand-secondary-8 hover:bg-brand-neutral-8 hover:text-white transition-colors"
 				>
 					Nevermind, Let&apos;s keep it
 				</button>
@@ -217,5 +222,5 @@ export default function CancelSubscriptionModal({
 				/>
 			</div>
 		</AnimatedDialog>
-	);
+	)
 }

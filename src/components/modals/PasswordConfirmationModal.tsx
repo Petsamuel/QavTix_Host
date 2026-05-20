@@ -124,7 +124,7 @@ export default function PasswordModal() {
                 </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleConfirm}>
+            <form onSubmit={handleConfirm} autoComplete="off">
                 <div className="mt-6 px-1">
                     <label className="block text-sm font-semibold text-brand-neutral-9 mb-2">
                         Password
@@ -135,6 +135,8 @@ export default function PasswordModal() {
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             placeholder="Enter password"
+                            autoComplete="new-password"
+                            name="new-password"
                             className={cn(
                                 "w-full h-12 px-4 rounded-md border-[1.4px] transition-all outline-none",
                                 "border-brand-primary-4 bg-brand-secondary-1 focus:border-brand-primary-6 focus:bg-white",

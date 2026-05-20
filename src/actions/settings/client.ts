@@ -17,6 +17,14 @@ import { revalidateTag } from "next/cache"
 import { headers } from "next/headers"
 import { resolveCountryLabel } from "@/helper-fns/resolveCountryCode";
 import { CACHE_TAGS } from "@/cache-tags";
+import { getSubscription } from "./index";
+
+export async function getSubscriptionClient() {
+    const { cookies } = await import("next/headers")
+    const cookieStore = await cookies()
+    const token = cookieStore.get("host_access_token")?.value
+    return getSubscription(token)
+}
 
 export async function getUserLocationClient(): Promise<{ city: string; country: string }> {
     const headersList = await headers()
@@ -54,7 +62,7 @@ export async function downloadPrivacyData(): Promise<{ success: boolean; message
 export async function deleteAccount(): Promise<{ success: boolean; message?: string }> {
     try {
         const axiosInstance = await getServerAxios()
-        await axiosInstance.delete(DELETE_ACCOUNT_ENDPOINT)
+        await axiosInstance.post(DELETE_ACCOUNT_ENDPOINT)
 
         const { cookies } = await import("next/headers")
         const cookieStore = await cookies()

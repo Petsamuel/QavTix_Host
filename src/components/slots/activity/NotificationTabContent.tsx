@@ -27,8 +27,9 @@ const FILTER_OPTIONS: { label: string; value: ActivityType }[] = [
 
 export default function NotificationsTab({ notifications }: NotificationsTabProps) {
     const hasUnread = notifications.some(n => !n.is_read)
-    const preview = notifications.slice(0, PREVIEW_COUNT)
     const pathName = usePathname()
+    const showAll = pathName.includes("/all-activities")
+    const preview = showAll ? notifications : notifications.slice(0, PREVIEW_COUNT)
     const router = useRouter()
     const searchParams = useSearchParams()
     const [isPending, startTransition] = useTransition()

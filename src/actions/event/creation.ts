@@ -78,7 +78,7 @@ export async function saveEventAsDraft({
 }): Promise<{ success: boolean; message?: string; eventId?: string }> {
     try {
         const token = await getToken()
-        const payload = buildEventPayload(eventData, scheduledAt ? "active" : "draft", media)
+        const payload = buildEventPayload(eventData, "draft", media)
         const body = {
             ...payload,
             is_scheduled: !!scheduledAt,
