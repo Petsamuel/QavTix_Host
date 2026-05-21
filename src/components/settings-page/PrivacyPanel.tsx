@@ -136,7 +136,7 @@ export default function PrivacyPanel({ initialSettings }: Props) {
                     </header>
                     <div className="w-full border-t-[1.5px] border-dashed border-brand-secondary-2" />
                     <ActionButton1
-                        action={() => dispatch(openPasswordModal("delete_account"))}
+                        action={() => dispatch(openPasswordModal({ actionType: "delete_account", skipVerification: true }))}
                         buttonText="Delete Account"
                         buttonType="button"
                         icon="formkit:trash"
