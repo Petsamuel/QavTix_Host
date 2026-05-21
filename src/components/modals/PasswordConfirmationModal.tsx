@@ -25,7 +25,7 @@ export default function PasswordModal() {
     const [isProcessing,  setIsProcessing]  = useState(false)
     const [errorMessage,  setErrorMessage]  = useState("")
 
-    const { isOpen, status, actionType } = useAppSelector(state => state.passwordModal)
+    const { isOpen, status, actionType, skipVerification } = useAppSelector(state => state.passwordModal)
     const { user } = useAppSelector(state => state.authUser)
 
     const closeAndReset = () => {
@@ -48,17 +48,19 @@ export default function PasswordModal() {
         setErrorMessage("")
         dispatch(setPasswordStatus("submitting"))
 
-        const verifyResult = await verifyPassword(user.email, password)
+        if (!skipVerification) {
+            const verifyResult = await verifyPassword(user.email, password)
 
-        if (!verifyResult.success) {
-            dispatch(setPasswordStatus("error"))
-            setErrorMessage(verifyResult.message ?? "Incorrect password. Please try again.")
-            setIsProcessing(false)
-            return
+            if (!verifyResult.success) {
+                dispatch(setPasswordStatus("error"))
+                setErrorMessage(verifyResult.message ?? "Incorrect password. Please try again.")
+                setIsProcessing(false)
+                return
+            }
         }
 
         if (actionType === "delete_account") {
-            const deleteResult = await deleteAccount()
+            const deleteResult = await deleteAccount(password)
 
             if (deleteResult.success) {
                 closeAndReset()
@@ -70,13 +72,12 @@ export default function PasswordModal() {
                 setTimeout(async () => {
                     await logOut()
                 }, 3200)
+                return
             } else {
-                dispatch(showAlert({
-                    title:       "Deletion Failed",
-                    description: deleteResult.message ?? "An error occurred while deleting your account. Please try again.",
-                    variant:     "destructive",
-                }))
+                dispatch(setPasswordStatus("error"))
+                setErrorMessage(deleteResult.message ?? "An error occurred while deleting your account. Please try again.")
                 setIsProcessing(false)
+                return
             }
         }
 
@@ -90,6 +91,10 @@ export default function PasswordModal() {
                     description: "Your subscription has been cancelled. You'll retain access until the end of your billing period.",
                     variant:     "success",
                 }))
+                setTimeout(() => {
+                    window.location.reload()
+                }, 3000)
+                return
             } else {
                 dispatch(showAlert({
                     title:       "Cancellation Failed",
@@ -97,6 +102,7 @@ export default function PasswordModal() {
                     variant:     "destructive",
                 }))
                 setIsProcessing(false)
+                return
             }
         }
 
