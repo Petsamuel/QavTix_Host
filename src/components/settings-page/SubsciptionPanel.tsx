@@ -182,7 +182,7 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                         </header>
                         <div className="w-full border-t-[1.5px] border-dashed border-brand-secondary-2" />
                         {(() => {
-                            const isFreePlan = data.plan_slug === 'free' || data.plan_slug === 'standard' || data.plan.slug === 'free' || data.plan.slug === 'standard'
+                            const isFreePlan = data.plan_slug === 'free' || data.plan_slug === 'standard' || data.plan?.slug === 'free' || data.plan?.slug === 'standard'
                             return (
                                 <div className={cn("w-full max-w-sm space-y-2", isFreePlan && "hidden")}>
                                     <ToggleItem
