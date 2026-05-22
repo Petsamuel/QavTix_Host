@@ -60,7 +60,7 @@ export default function UpcomingEventsTable({
                         <tr>
                             <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize">Performance</th>
                             <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize">Event Name</th>
-                            <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize">Date & Time</th>
+                            <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 whitespace-nowrap capitalize">Date & Time</th>
                             <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize">Location</th>
                             <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize">Tickets Sold</th>
                             <th className="text-left py-4 px-5 text-sm font-semibold text-brand-secondary-8 capitalize">Revenue</th>

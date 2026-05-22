@@ -124,7 +124,7 @@ export default function NotificationsTab({ notifications }: NotificationsTabProp
                 )}
             </div>
 
-            {!isCompletelyEmpty && notifications.length > PREVIEW_COUNT && !pathName.includes("/all-activities") && (
+            {!isCompletelyEmpty && notifications.length >= 10 && !pathName.includes("/all-activities") && (
                 <Link
                     href="/dashboard/all-activities"
                     className="text-xs flex items-center gap-1 text-brand-primary-6 hover:text-brand-primary-7 font-bold transition-colors"

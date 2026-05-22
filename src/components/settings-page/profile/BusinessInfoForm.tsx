@@ -39,7 +39,9 @@ const businessSchema = z.object({
     nin: z.string().min(1, "NIN is required"),
     postalCode: z.string().optional(),
     description: z.string().max(280, "Maximum 280 characters").optional(),
-    relevantLinks: z.array(z.object({ link: z.string().url("Must be a valid URL").or(z.literal('')) })).optional(),
+    relevantLinks: z.array(z.object({
+        link: z.string().url("Must be a valid URL").or(z.literal(''))
+    })).optional(),
     categories: z.array(z.number()).min(1, "Select at least one category"),
 })
 
@@ -55,9 +57,9 @@ export default function BusinessInfoForm({ user, categories }: Props) {
     const [isEditing, setIsEditing] = useState(false)
     const isOrg = user.account_type === "organization"
 
-    const defaultLinks = user.social_links?.length
-        ? user.social_links.map(l => ({ link: l }))
-        : [{ link: "" }]
+    const defaultLinks = user.relevant_links?.length
+        ? user.relevant_links.map(l => ({ link: l.url }))
+        : [{ link: '' }]
 
     const {
         register,
@@ -98,14 +100,16 @@ export default function BusinessInfoForm({ user, categories }: Props) {
     }
 
     const onSubmit: SubmitHandler<BusinessFormValues> = async (values) => {
-        const links = values.relevantLinks?.map(r => r.link).filter(Boolean) || []
+        const links = (values.relevantLinks ?? [])
+            .filter(r => r.link)
+            .map((r) => ({ url: r.link }))
 
         const payload = {
             business_name: isOrg ? values.businessName : values.brandName,
             nin: values.nin,
             postal_code: values.postalCode,
             description: values.description,
-            social_links: links,
+            relevant_links: links,
             categories: values.categories,
             ...(isOrg && {
                 business_type: values.businessType,
@@ -347,18 +351,18 @@ export default function BusinessInfoForm({ user, categories }: Props) {
                 </div>
 
                 {isEditing && (
-                    <div className="md:col-span-2 flex gap-6 mt-6 animate-in slide-in-from-bottom-2 duration-300">
+                    <div className="md:col-span-2 flex gap-6 mt-14 animate-in slide-in-from-bottom-2 duration-300">
                         <button
                             type="button"
                             onClick={handleCancel}
                             disabled={isSubmitting}
-                            className="w-1/2 rounded-lg border border-brand-neutral-6 bg-brand-neutral-4 text-sm font-medium text-brand-secondary-6 hover:bg-brand-neutral-3 transition-colors disabled:opacity-50"
+                            className="w-full md:min-w-[12em] md:w-fit rounded-[8em] border border-brand-neutral-6 bg-brand-neutral-4 text-sm font-medium text-brand-secondary-6 hover:bg-brand-neutral-3 transition-colors disabled:opacity-50"
                         >
                             Cancel
                         </button>
                         <ActionButton1
                             buttonText={isSubmitting ? "Saving..." : "Save Changes"}
-                            className="w-1/2 rounded-lg text-sm! px-2!"
+                            className="w-full md:w-57.5 text-sm! px-2!"
                             iconPosition="right"
                             buttonType="submit"
                             icon={isSubmitting ? "eos-icons:three-dots-loading" : "gravity-ui:arrow-right"}

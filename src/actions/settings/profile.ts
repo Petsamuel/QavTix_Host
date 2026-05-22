@@ -20,7 +20,7 @@ export interface UpdateHostProfilePayload {
     tax_id?: string
     nin?: string
     description?: string
-    social_links?: string[]
+    relevant_links?: { url: string }[]
     categories?: number[]
     // Images
     profile_picture?: string | null
