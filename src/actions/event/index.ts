@@ -41,7 +41,8 @@ async function apiFetch(token: string, endpoint: string, params: Record<string, 
 
 export async function getEvents(token: string, params: GetEventsParams = {}): Promise<GetEventsResult> {
     try {
-        const data = await apiFetch(token, EVENTS_ENDPOINT, params, [CACHE_TAGS.EVENTS])
+        // Demanded to remove cache
+        const data = await apiFetch(token, EVENTS_ENDPOINT, params)
         return { success: true, data }
     } catch {
         return { success: false, message: "Failed to load events." }

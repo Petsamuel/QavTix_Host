@@ -163,7 +163,14 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
         )
     }
 
-    const expiresLabel = data.expires_at ? format(new Date(data.expires_at), "dd/MM/yyyy") : "—"
+    const getExpiresLabel = (expiresAt: string | null | undefined) => {
+        if (!expiresAt) return "—"
+        const d = new Date(expiresAt)
+        if (isNaN(d.getTime())) return "—"
+        return format(d, "dd/MM/yyyy")
+    }
+
+    const expiresLabel = getExpiresLabel(data.expires_at)
     const renewsLabel = data.auto_renew && data.expires_at
         ? `Your subscription will automatically renew on ${expiresLabel}`
         : `Your subscription expires on ${expiresLabel}`

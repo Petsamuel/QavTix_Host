@@ -226,7 +226,7 @@ export default function CreateEventStep2() {
                                     <div className="flex-1">
                                         <CustomInput2
                                             label=""
-                                            placeholder="https://instagram.com/..."
+                                            placeholder="https://example.com"
                                             {...register(`socialMediaLinks.${index}.url`)}
                                             error={errors.socialMediaLinks?.[index]?.url?.message}
                                             data-testid={`input-social-link-${index}`}
