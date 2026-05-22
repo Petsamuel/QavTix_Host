@@ -44,14 +44,14 @@ function DesktopSideNav() {
                                 >
                                     <Icon icon={v.icon} width="20" height="20" />
                                     <span>{v.label}</span>
-                                    {(isActive || (isSettingsLink && isSettingsActive)) && (
+                                    {(isActive || (isSettingsLink)) && (
                                         <Icon
                                             icon="basil:caret-right-outline"
                                             width="26"
                                             height="26"
                                             className={cn(
                                                 "absolute top-0 bottom-0 my-auto -right-1 transition-transform duration-200",
-                                                isSettingsLink && isSettingsActive && "rotate-90"
+                                                isSettingsLink && isSettingsActive ? "-rotate-90" : isSettingsLink && !isSettingsActive ? "rotate-90" : null
                                             )}
                                         />
                                     )}
