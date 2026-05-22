@@ -150,7 +150,7 @@ export const step1Schema = yup.object({
 const socialMediaLinkSchema = yup.object({
     id: yup.string().required(),
     platform: yup.string().required(),
-    url: yup.string().url(VALIDATION_MESSAGES.invalidUrl).required(),
+    url: yup.string().url(VALIDATION_MESSAGES.invalidUrl).required('A valid URL is required for this social media link'),
 });
 
 export const step2Schema = yup.object({
