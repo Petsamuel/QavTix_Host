@@ -103,7 +103,8 @@ export default function MobileNavMenu({ isOpen, onClose }: MobileNavMenuProps) {
                                                     icon="basil:caret-right-outline" 
                                                     className={cn(
                                                         "absolute right-3 size-5 transition-transform duration-300",
-                                                        (isSettingsLink && isSettingsActive) && "rotate-90",
+                                                        (isSettingsLink && isSettingsActive) && "-rotate-90",
+                                                        (isSettingsLink && !isSettingsActive) && "rotate-90",
                                                         (!isSettingsLink && !isActive) && "hidden"
                                                     )} 
                                                 />
