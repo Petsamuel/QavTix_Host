@@ -45,7 +45,7 @@ export default function MyLiveEventsTable({
 }: MyLiveEventsTableProps) {
 
     const router = useRouter()
-
+    
     const isAllSelected =
         items.length > 0 && items.every(e => selectedEvents.includes(e.id))
 

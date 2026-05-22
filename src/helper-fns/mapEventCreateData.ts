@@ -172,8 +172,8 @@ export function buildEventPayload(
     }
     const refundPolicy = refundPolicyMap[tickets?.refundPolicy ?? "no"] ?? "no"
 
-    //  Tickets
     const ticketsPayload = (tickets?.ticketTypes ?? []).map((t) => ({
+        id: t.id && !t.id.startsWith('tmp-') ? t.id : undefined,
         ticket_type: t.ticketType,
         description: t.description ?? "",
         price: String(t.price ?? 0),

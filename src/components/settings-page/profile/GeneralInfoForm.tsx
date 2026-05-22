@@ -54,12 +54,19 @@ export default function GeneralInfoForm({ user }: Props) {
     let initialStateCode = user.state ?? ""
     if (initialCountryCode && initialStateCode) {
         const stateList = getStates(initialCountryCode)
-        const match = stateList.find(s =>
-            s.label.toLowerCase() === initialStateCode.toLowerCase() ||
-            s.value.toLowerCase() === initialStateCode.toLowerCase()
-        )
-        if (match) {
-            initialStateCode = match.value
+        // Normalise common FCT aliases so the dropdown resolves correctly
+        const normalised = initialStateCode.toUpperCase()
+        const fctAliases = ["FCT", "ABUJA", "FEDERAL CAPITAL TERRITORY"]
+        if (initialCountryCode === "NG" && fctAliases.includes(normalised)) {
+            initialStateCode = "FC"
+        } else {
+            const match = stateList.find(s =>
+                s.label.toLowerCase() === initialStateCode.toLowerCase() ||
+                s.value.toLowerCase() === initialStateCode.toLowerCase()
+            )
+            if (match) {
+                initialStateCode = match.value
+            }
         }
     }
 
@@ -254,25 +261,25 @@ export default function GeneralInfoForm({ user }: Props) {
                     />
 
                     {isEditing && (
-                        <div className="md:col-span-2 flex gap-6 mt-2 animate-in slide-in-from-bottom-2 duration-300">
-                            <button
-                                type="button"
-                                onClick={handleCancel}
-                                disabled={isSubmitting}
-                                className="w-1/2 rounded-lg border border-brand-neutral-6 bg-brand-neutral-4 text-sm font-medium text-brand-secondary-6 hover:bg-brand-neutral-3 transition-colors disabled:opacity-50"
-                            >
-                                Cancel
-                            </button>
-                            <ActionButton1
-                                buttonText={isSubmitting ? "Saving..." : "Save Changes"}
-                                className="w-1/2 rounded-lg text-sm! px-2!"
-                                iconPosition="right"
-                                buttonType="submit"
-                                icon={isSubmitting ? "eos-icons:three-dots-loading" : "gravity-ui:arrow-right"}
-                                isDisabled={isSubmitting || !isDirty}
-                                isLoading={isSubmitting}
-                            />
-                        </div>
+                     <div className="md:col-span-2 flex gap-6 mt-14 animate-in slide-in-from-bottom-2 duration-300">
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={isSubmitting}
+                            className="w-full md:min-w-[12em] md:w-fit rounded-[8em] border border-brand-neutral-6 bg-brand-neutral-4 text-sm font-medium text-brand-secondary-6 hover:bg-brand-neutral-3 transition-colors disabled:opacity-50"
+                        >
+                            Cancel
+                        </button>
+                        <ActionButton1
+                            buttonText={isSubmitting ? "Saving..." : "Save Changes"}
+                            className="w-full md:w-57.5 text-sm! px-2!"
+                            iconPosition="right"
+                            buttonType="submit"
+                            icon={isSubmitting ? "eos-icons:three-dots-loading" : "gravity-ui:arrow-right"}
+                            isDisabled={isSubmitting || !isDirty}
+                            isLoading={isSubmitting}
+                        />
+                    </div>
                     )}
                 </div>
             </form>

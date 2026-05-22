@@ -181,19 +181,25 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                             <p className="text-sm text-brand-secondary-9 font-medium">Control how your subscription is renewed</p>
                         </header>
                         <div className="w-full border-t-[1.5px] border-dashed border-brand-secondary-2" />
-                        {
-                            data.plan_slug !== "standard" && data.plan_slug !== "free" &&
-                            <div className="w-full max-w-sm space-y-2">
-                                <ToggleItem
-                                    control={control}
-                                    name="autoRenew"
-                                    label="Allow auto-renewal"
-                                    disabled={isTogglingAR}
-                                    onChange={handleAutoRenewToggle}
-                                />
-                                <p className="text-xs text-brand-neutral-6 pl-1">{renewsLabel}</p>
-                            </div>
-                        }
+                        {(() => {
+                            const isFreePlan = data.plan_slug === 'free' || data.plan_slug === 'standard'
+                            return (
+                                <div className="w-full max-w-sm space-y-2">
+                                    <ToggleItem
+                                        control={control}
+                                        name="autoRenew"
+                                        label="Allow auto-renewal"
+                                        disabled={isTogglingAR || isFreePlan}
+                                        onChange={isFreePlan ? undefined : handleAutoRenewToggle}
+                                    />
+                                    <p className="text-xs text-brand-neutral-6 pl-1">
+                                        {isFreePlan
+                                            ? "Upgrade to a paid plan to enable auto-renewal"
+                                            : renewsLabel}
+                                    </p>
+                                </div>
+                            )
+                        })()}
 
                     </section>
 

@@ -33,6 +33,8 @@ export async function publishEvent({
         const token = await getToken()
         const body = buildEventPayload(eventData, "active", media)
 
+        console.log("[publishEvent] Payload:", JSON.stringify(body, null, 2))
+
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_CREATE}`,
             {
@@ -53,6 +55,8 @@ export async function publishEvent({
         }
 
         revalidateTag(CACHE_TAGS.EVENTS, 'max')
+        revalidateTag(CACHE_TAGS.DASHBOARD_FEED, 'max')
+        revalidateTag(CACHE_TAGS.DASHBOARD_OVERVIEW, 'max')
 
         return {
             success: true,
@@ -85,8 +89,6 @@ export async function saveEventAsDraft({
             schedule_time: scheduledAt || null,
         }
 
-        console.log("[saveEventAsDraft] Payload:", JSON.stringify(body, null, 2))
-
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/${EVENT_CREATE}`,
             {
@@ -110,6 +112,8 @@ export async function saveEventAsDraft({
         }
 
         revalidateTag(CACHE_TAGS.EVENTS, 'max')
+        revalidateTag(CACHE_TAGS.DASHBOARD_FEED, 'max')
+        revalidateTag(CACHE_TAGS.DASHBOARD_OVERVIEW, 'max')
 
         return {
             success: true,
@@ -160,6 +164,8 @@ export async function updateAndPublishEvent({
         }
 
         revalidateTag(CACHE_TAGS.EVENTS, 'max')
+        revalidateTag(CACHE_TAGS.DASHBOARD_FEED, 'max')
+        revalidateTag(CACHE_TAGS.DASHBOARD_OVERVIEW, 'max')
 
         return {
             success: true,
@@ -218,6 +224,8 @@ export async function updateEventAsDraft({
         }
 
         revalidateTag(CACHE_TAGS.EVENTS, 'max')
+        revalidateTag(CACHE_TAGS.DASHBOARD_FEED, 'max')
+        revalidateTag(CACHE_TAGS.DASHBOARD_OVERVIEW, 'max')
 
         return {
             success: true,

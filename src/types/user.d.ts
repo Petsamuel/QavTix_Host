@@ -10,7 +10,7 @@ type AuthUser = {
     business_name: string
     business_type: string
     registration_number: string
-    social_links: string[]
+    relevant_links: { id: number; url: string }[]
     tax_id: string
     nin: string | null
     phone_number: string

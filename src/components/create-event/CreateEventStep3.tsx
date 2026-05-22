@@ -57,7 +57,7 @@ export default function CreateEventStep3() {
         context: { maxTickets: plan.ticketSalesLimit ?? 750 },
         mode: 'onTouched',
         defaultValues: {
-            ticketTypes: eventData.ticketsPricing?.ticketTypes ?? [{ id: crypto.randomUUID(), ticketType: '', price: 0, currency: 'NGN', quantity: 1, promoCode: { discountAmount: 0, codeWord: '', maximumUsers: undefined, validTill: '' } }],
+            ticketTypes: eventData.ticketsPricing?.ticketTypes ?? [{ id: 'tmp-' + crypto.randomUUID(), ticketType: '', price: 0, currency: 'NGN', quantity: 1, promoCode: { discountAmount: 0, codeWord: '', maximumUsers: undefined, validTill: '' } }],
             refundPolicy: eventData.ticketsPricing?.refundPolicy ?? 'no',
             customRefundPercentage: eventData.ticketsPricing?.customRefundPercentage ?? 10,
             salesPeriod: eventData.ticketsPricing?.salesPeriod ?? {
@@ -88,7 +88,7 @@ export default function CreateEventStep3() {
     }, 0)
 
     const isLiveEdit = isEditMode && (eventStatus === 'active' || eventStatus === 'completed')
-    const canAddAnotherTicketType = plan.canAddTicketType(fields.length) && !isLiveEdit
+    const canAddAnotherTicketType = plan.canAddTicketType(fields.length)
 
     const handleStep3Submit: SubmitHandler<Step3FormData> = (data) => {
         updateStep("ticketsPricing", data)
@@ -142,11 +142,15 @@ export default function CreateEventStep3() {
 
                         {fields.map((field, index) => {
                             const existingCode = allTickets[index]?.promoCode?.codeWord?.trim()
-                            // This ticket can have a code if: plan allows it AND (it already has one OR limit not reached)
+                            const isExistingTicket = !!allTickets[index]?.id && !allTickets[index].id.startsWith('tmp-')
+                            const isLiveEditExisting = isLiveEdit && isExistingTicket
+
+                            // This ticket can have a code if: plan allows it AND (it already has one OR limit not reached) AND not editing existing active ticket
                             const promoEditable =
                                 plan.canUsePromoCodes &&
                                 plan.promoCodeLimit > 0 &&
-                                (!!(existingCode) || totalPromoCodes < plan.promoCodeLimit)
+                                (!!(existingCode) || totalPromoCodes < plan.promoCodeLimit) &&
+                                !isLiveEditExisting
 
                             return (
                                 <div
@@ -154,7 +158,7 @@ export default function CreateEventStep3() {
                                     className="space-y-6 relative border-b last-of-type:border-b-0 border-brand-neutral-5 pb-12 mb-12 last-of-type:pb-0 last-of-type:mb-6"
                                     data-testid={`ticket-type-row-${index}`}
                                 >
-                                    {fields.length > 1 && !isLiveEdit && (
+                                    {fields.length > 1 && !isLiveEditExisting && (
                                         <button
                                             title="Remove Ticket Type"
                                             type="button"
@@ -162,7 +166,7 @@ export default function CreateEventStep3() {
                                             className="absolute -top-4 right-4 text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
                                             aria-label={`Remove ticket type ${index + 1}`}
                                             data-testid={`btn-remove-ticket-type-${index}`}
-                                            disabled={isLiveEdit}
+                                            disabled={isLiveEditExisting}
                                         >
                                             <Trash2 className="size-4 md:size-5" />
                                         </button>
@@ -180,7 +184,7 @@ export default function CreateEventStep3() {
                                                     onValueChange={selectField.onChange}
                                                     error={errors.ticketTypes?.[index]?.ticketType?.message}
                                                     data-testid={`select-ticket-type-${index}`}
-                                                    disabled={isLiveEdit}
+                                                    disabled={isLiveEditExisting}
                                                 />
                                             )}
                                         />
@@ -188,6 +192,7 @@ export default function CreateEventStep3() {
                                             label="Ticket Description (Optional)"
                                             placeholder="Enter Ticket description"
                                             error={errors.ticketTypes?.[index]?.description?.message}
+                                            disabled={isLiveEditExisting}
                                             {...register(`ticketTypes.${index}.description`)}
                                             data-testid={`input-ticket-description-${index}`}
                                         />
@@ -203,7 +208,7 @@ export default function CreateEventStep3() {
                                             error={errors.ticketTypes?.[index]?.price?.message}
                                             data-testid={`input-ticket-price-${index}`}
                                             disableCurrencySelect
-                                            disabled={isLiveEdit}
+                                            disabled={isLiveEditExisting}
                                         />
                                         <CustomInput2
                                             label={<LabelWithTooltip label="Quantity" tooltipText="The total number of available tickets for this category." />}
@@ -345,7 +350,7 @@ export default function CreateEventStep3() {
                                     type="button"
                                     onClick={() => {
                                         if (!canAddAnotherTicketType) return
-                                        append({ id: crypto.randomUUID(), ticketType: '', price: 0, currency: 'NGN', quantity: 1 })
+                                        append({ id: 'tmp-' + crypto.randomUUID(), ticketType: '', price: 0, currency: 'NGN', quantity: 1 })
                                     }}
                                     disabled={!canAddAnotherTicketType}
                                     className={cn(
@@ -357,7 +362,7 @@ export default function CreateEventStep3() {
                                 >
                                     <span className="flex items-center text-sm justify-center gap-2">
                                         <Icon icon="lucide:plus" className="w-4 h-4" />
-                                        {isLiveEdit ? "Ticket management disabled for live events" : "Add Another Ticket Type"}
+                                        Add Another Ticket Type
                                     </span>
                                 </button>
                             )}
