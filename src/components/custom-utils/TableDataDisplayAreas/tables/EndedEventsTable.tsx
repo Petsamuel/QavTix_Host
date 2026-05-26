@@ -157,7 +157,7 @@ function EndedCancelledTable({
                                                             event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold_out" ?
                                                                 buildLiveEventActions(event.id, event.is_featured, router)
                                                                 :
-                                                                buildEndedEventActions(event.id, router)
+                                                                buildEndedEventActions(event.id, router, event.status)
                                                         }
                                                     />
                                             }
@@ -204,7 +204,7 @@ function EndedCancelledTable({
                                                     event.status !== "cancelled" && event.status !== "ended" && event.status !== "banned" && event.status !== "sold_out" ?
                                                         buildLiveEventActions(event.id, event.is_featured, router)
                                                         :
-                                                        buildEndedEventActions(event.id, router)
+                                                        buildEndedEventActions(event.id, router, event.status)
                                                 }
                                             />
                                     }

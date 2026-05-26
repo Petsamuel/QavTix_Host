@@ -317,3 +317,45 @@ iframe[id^="inline-checkout-"] {
 [data-radix-portal] {
   z-index: 9999 !important;
 }
+
+/* Premium thin light gray scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #e5e7eb transparent;
+}
+
+/* Explicit thin scrollbar utility class */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 4px !important;
+  height: 4px !important;
+}
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: #e5e7eb !important;
+  border-radius: 9999px !important;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db !important;
+}
+.thin-scrollbar {
+  scrollbar-width: thin !important;
+  scrollbar-color: #e5e7eb transparent !important;
+}

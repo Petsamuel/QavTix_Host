@@ -3,6 +3,7 @@
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import { closeConfirmation, confirmAction, resetConfirmationStatus } from '@/lib/redux/slices/confirmationSlice';
 import { DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 import { AnimatedDialog } from '../custom-utils/dialogs/AnimatedDialog';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
@@ -60,7 +61,12 @@ export default function ConfirmationModal() {
                 <button
                     onClick={handleConfirm}
                     disabled={isPerforming}
-                    className="w-full px-6 py-4 text-sm font-medium text-white bg-brand-primary-6 rounded-full hover:bg-brand-primary-7 hover:shadow-md transition-all disabled:opacity-80 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className={cn(
+                        "w-full px-6 py-4 text-sm font-medium text-white rounded-full hover:shadow-md transition-all disabled:opacity-80 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer",
+                        actionType?.includes("DELETE")
+                            ? "bg-red-600 hover:bg-red-700"
+                            : "bg-brand-primary-6 hover:bg-brand-primary-7"
+                    )}
                 >
                     {isPerforming
                         ? <><Icon icon="lucide:loader-2" className="size-4 animate-spin" /> Processing...</>

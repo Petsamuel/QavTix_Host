@@ -4,6 +4,7 @@ import DesktopSideNav from "@/components/layout/DesktopSideNav"
 import MobileHeaderSection from "@/components/layout/MobileHeaderSection"
 import { inter } from "@/lib/fonts"
 import ReduxStoreProvider from "@/lib/redux/ReduxStoreProvider"
+import QueryProvider from "@/contexts/QueryProvider"
 import { ReactNode } from "react"
 import PopUpsRenderer from "@/components/modals/"
 import { cookies } from "next/headers"
@@ -49,22 +50,24 @@ export default async function Layout({ children }: LayoutProps) {
             <body className={`${inter.className} min-h-screen`}>
                 <Suspense fallback={null}>
                     <ReduxStoreProvider>
-                        <div className="flex justify-end min-h-screen bg-gray-100/70">
-                            <DesktopSideNav />
-                            <div className="w-full lg:w-[calc(100%-240px)]">
-                                <div className="w-full">
-                                    <MobileHeaderSection />
-                                    <div id="step-top" className="relative w-full lg:pt-28 px-4 md:px-6">
-                                        <DesktopHeaderSection />
-                                        {children}
+                        <QueryProvider>
+                            <div className="flex justify-end min-h-screen bg-gray-100/70">
+                                <DesktopSideNav />
+                                <div className="w-full lg:w-[calc(100%-240px)]">
+                                    <div className="w-full">
+                                        <MobileHeaderSection />
+                                        <div id="step-top" className="relative w-full lg:pt-28 px-4 md:px-6">
+                                            <DesktopHeaderSection />
+                                            {children}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <Suspense fallback={null}>
-                            <AuthPersistorLoader />
-                        </Suspense>
-                        <PopUpsRenderer />
+                            <Suspense fallback={null}>
+                                <AuthPersistorLoader />
+                            </Suspense>
+                            <PopUpsRenderer />
+                        </QueryProvider>
                     </ReduxStoreProvider>
                 </Suspense>
             </body>

@@ -16,6 +16,8 @@ import { useAppDispatch } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { cancelEvent, deleteEvent, updateEventStatus } from "@/actions/event/client"
 import { useRevalidate } from "@/custom-hooks/UseRevalidate"
+import { AnimatedDialog } from "@/components/custom-utils/dialogs/AnimatedDialog"
+import { DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 export type ItemAction = {
     id: LiveEventActionID | EndedEventActionID | "view-profile"
@@ -51,6 +53,7 @@ function ItemActionDropdownInner({
     const [openEmail, setOpenEmail] = useState(false)
     const [openDownloadModal, setOpenDownloadModal] = useState(false)
     const [openAddToFeaturedModal, setOpenAddToFeaturedModal] = useState(false)
+    const [showCancelModal, setShowCancelModal] = useState(false)
 
     const handleAction = async (action: ItemAction) => {
         if (loadingAction) return
@@ -79,14 +82,7 @@ function ItemActionDropdownInner({
             }
 
             if (action.id === "cancel" && eventID) {
-                const result = await cancelEvent({ eventId: eventID })
-                if (result.success) {
-                    dispatch(showAlert({ title: "Event Cancelled", description: result.message, variant: "success" }))
-                    onRefresh?.()
-                    triggerRevalidation()
-                } else {
-                    dispatch(showAlert({ title: "Cancel Failed", description: result.message, variant: "destructive" }))
-                }
+                setShowCancelModal(true)
                 return
             }
 
@@ -216,6 +212,55 @@ function ItemActionDropdownInner({
                 eventSlug={eventID}
                 onClose={() => setOpenAddToFeaturedModal(false)}
             />
+
+            <AnimatedDialog
+                open={showCancelModal}
+                onOpenChange={setShowCancelModal}
+                showCloseButton={false}
+                className='md:max-w-sm! py-2'
+            >
+                <DialogHeader className="text-center flex justify-center items-center">
+                    <DialogTitle className="text-lg font-bold text-brand-secondary-9">
+                        Cancel Event
+                    </DialogTitle>
+                    <DialogDescription className="text-sm text-center text-brand-secondary-9">
+                        Are you sure you want to cancel &ldquo;{eventName}&rdquo;? This action cannot be undone and attendees will be notified.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <DialogFooter className="mt-6 justify-center flex-row gap-3 sm:gap-3">
+                    <button
+                        onClick={() => setShowCancelModal(false)}
+                        className="w-full px-6 py-4 text-sm font-medium text-brand-secondary-9 bg-white border-2 border-gray-300 rounded-full hover:bg-neutral-100 transition-all cursor-pointer"
+                    >
+                        Go back
+                    </button>
+
+                    <button
+                        onClick={async () => {
+                            setShowCancelModal(false)
+                            setLoadingAction("cancel")
+                            try {
+                                const result = await cancelEvent({ eventId: eventID || "" })
+                                if (result.success) {
+                                    dispatch(showAlert({ title: "Event Cancelled", description: result.message, variant: "success" }))
+                                    onRefresh?.()
+                                    triggerRevalidation()
+                                } else {
+                                    dispatch(showAlert({ title: "Cancel Failed", description: result.message, variant: "destructive" }))
+                                }
+                            } catch (err) {
+                                dispatch(showAlert({ title: "Something went wrong", description: "Please try again.", variant: "destructive" }))
+                            } finally {
+                                setLoadingAction(null)
+                            }
+                        }}
+                        className="w-full px-6 py-4 text-sm font-medium text-white bg-red-600 rounded-full hover:bg-red-700 hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                        Yes, cancel it
+                    </button>
+                </DialogFooter>
+            </AnimatedDialog>
         </>
     )
 }

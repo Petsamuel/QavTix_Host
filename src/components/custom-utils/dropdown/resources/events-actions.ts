@@ -84,9 +84,10 @@ export function buildLiveEventActions(
 
 export function buildEndedEventActions(
     eventID: string,
-    router: ReturnType<typeof import("next/navigation").useRouter>
+    router: ReturnType<typeof import("next/navigation").useRouter>,
+    status?: string
 ): ItemAction[] {
-    return [
+    const baseActions = [
         {
             id: "download" as const,
             label: "Download Attendee List",
@@ -97,6 +98,14 @@ export function buildEndedEventActions(
             label: "Send Update to Buyers",
             icon: "lucide:mail",
         },
+    ]
+
+    if (status === "cancelled") {
+        return baseActions
+    }
+
+    return [
+        ...baseActions,
         {
             id: "delete" as const,
             label: "Delete Event",
