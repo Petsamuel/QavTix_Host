@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { format } from "date-fns"
 import { fetchPaginatedData } from "@/actions/paginated-data/index"
-import { useOnRevalidate } from "./UseRevalidate"
-import { useQuery } from "@tanstack/react-query"
+import { useOnRevalidate, useRevalidate } from "./UseRevalidate"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { TabSlice, TabConfig, TabState, UseDataDisplayConfig } from "./UseDataDisplay"
+import { updateEventStatus } from "@/actions/event/client"
+import { EVENTS_ENDPOINT } from "@/endpoints"
 
 type FetchStatus = "idle" | "loading" | "loadingMore" | "error" | "empty"
 
@@ -62,7 +64,7 @@ const useEventsTabState = <T>(
     config: TabConfig<T>,
     filters: Partial<FilterValues>,
     endpoint: string,
-    refetchInterval?: number
+    activeTab: string
 ): TabState<T> => {
     const [items, setItems] = useState<T[]>(config.initialData.results)
     const [cachedItems, setCachedItems] = useState<T[]>(config.initialData.results)
@@ -76,6 +78,7 @@ const useEventsTabState = <T>(
 
     const isAppending = useRef(false)
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const publishingIdsRef = useRef<Set<string>>(new Set())
 
     // Caching objects to stable references to fully resolve any React Maximum render loops
     const configRef = useRef(config)
@@ -84,6 +87,29 @@ const useEventsTabState = <T>(
     filtersRef.current = filters
 
     const filterKey = serializeFilters(filters)
+
+    const queryClient = useQueryClient()
+    const { trigger: triggerRevalidation } = useRevalidate("events")
+
+    const getDynamicRefetchInterval = (query: any) => {
+        if (config.key !== activeTab) return false
+
+        const results = query?.state?.data?.results as any[]
+        if (!results || !results.length) return false
+
+        // Find future scheduled events
+        const futureEvents = results
+            .filter((ev: any) => ev.is_scheduled && ev.status === "draft" && ev.schedule_time)
+            .map((ev: any) => new Date(ev.schedule_time).getTime())
+
+        if (futureEvents.length === 0) return false
+
+        const nextTime = Math.min(...futureEvents)
+        const delay = nextTime - Date.now()
+
+        // Return delay with 500ms safety buffer, or false if already due/past
+        return delay > 0 ? delay + 500 : false
+    }
 
     const { data: queryResult, isFetching: isQueryFetching, error: queryError, refetch } = useQuery({
         queryKey: [endpoint, config.key, filterKey, currentPage, debouncedSearch],
@@ -98,7 +124,7 @@ const useEventsTabState = <T>(
             })
             return result
         },
-        refetchInterval,
+        refetchInterval: (query) => getDynamicRefetchInterval(query),
         initialData: currentPage === 1 && !debouncedSearch && !hasActiveFilters(filters) ? {
             success: true,
             results: config.initialData.results,
@@ -108,6 +134,32 @@ const useEventsTabState = <T>(
             cards: undefined,
         } : undefined,
     })
+
+    // Auto-Publish Trigger Effect for due scheduled events
+    useEffect(() => {
+        if (!queryResult || !queryResult.success || config.key !== activeTab) return
+
+        const itemsList = queryResult.results as any[]
+        const dueEvents = itemsList.filter((ev: any) => 
+            ev.is_scheduled && 
+            ev.status === "draft" && 
+            ev.schedule_time && 
+            new Date(ev.schedule_time) <= new Date() &&
+            !publishingIdsRef.current.has(ev.id)
+        )
+
+        if (dueEvents.length > 0) {
+            dueEvents.forEach((ev: any) => publishingIdsRef.current.add(ev.id))
+            console.log(`[useEventsTabState] Found ${dueEvents.length} due scheduled events. Publishing...`)
+            Promise.allSettled(
+                dueEvents.map((ev: any) => updateEventStatus({ eventId: ev.id, status: "active" }))
+            ).then(() => {
+                queryClient.invalidateQueries({ queryKey: [endpoint] })
+                queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                triggerRevalidation()
+            })
+        }
+    }, [queryResult, activeTab, endpoint, queryClient, triggerRevalidation, config.key])
 
     useEffect(() => {
         if (!queryResult) return
@@ -250,6 +302,7 @@ export function useEventsDataDisplay<T>(
     activeTabState: TabState<T>
 } {
     const activeTab = config.activeTab ?? config.tabs[0].key
+    const queryClient = useQueryClient()
 
     const prevFiltersRef = useRef(filters)
     if (prevFiltersRef.current !== filters) {
@@ -266,7 +319,7 @@ export function useEventsDataDisplay<T>(
 
     const stateEntries = config.tabs.map(tab =>
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        [tab.key, useEventsTabState(tab, filters, config.endpoint, config.refetchInterval)] as const
+        [tab.key, useEventsTabState(tab, filters, config.endpoint, activeTab)] as const
     )
 
     const tabStates = Object.fromEntries(stateEntries) as Record<string, TabState<T>>
@@ -275,6 +328,24 @@ export function useEventsDataDisplay<T>(
         if (!config.revalidateTarget) return
         Object.values(tabStates).forEach(state => state.refresh())
     })
+
+    // Re-evaluate and revalidate when tab focus / visibility changes
+    useEffect(() => {
+        if (typeof window === "undefined") return
+        const handleVisibilityFocus = () => {
+            if (document.visibilityState === "visible") {
+                console.log("[useEventsDataDisplay] Page visible/focused. Refreshing data...")
+                queryClient.invalidateQueries({ queryKey: [config.endpoint] })
+                queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+            }
+        }
+        window.addEventListener("visibilitychange", handleVisibilityFocus)
+        window.addEventListener("focus", handleVisibilityFocus)
+        return () => {
+            window.removeEventListener("visibilitychange", handleVisibilityFocus)
+            window.removeEventListener("focus", handleVisibilityFocus)
+        }
+    }, [queryClient, config.endpoint])
 
     return {
         tabStates,

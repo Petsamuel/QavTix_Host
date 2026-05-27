@@ -17,17 +17,15 @@ export async function uploadToCloudinary(
 	const formData = new FormData()
 	formData.append("file", file)
 	formData.append("folder", folder)
-	formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!)
-	formData.append("resource_type", "auto")
 
-	const res = await fetch(
-		`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/auto/upload`,
-		{ method: "POST", body: formData }
-	)
+	const res = await fetch("/api/upload", {
+		method: "POST",
+		body: formData,
+	})
 
 	if (!res.ok) {
 		const err = await res.json()
-		throw new Error(err.error?.message ?? "Upload failed")
+		throw new Error(err.error ?? "Upload failed")
 	}
 
 	const data = await res.json()

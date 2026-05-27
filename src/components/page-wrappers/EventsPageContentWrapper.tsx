@@ -103,7 +103,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
             ],
             activeTab,
             revalidateTarget: "events",
-            refetchInterval: 10 * 1000,
+            // refetchInterval: 10 * 1000,
         },
         filters,
     )

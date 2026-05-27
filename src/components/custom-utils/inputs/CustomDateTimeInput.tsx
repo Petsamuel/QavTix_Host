@@ -39,13 +39,242 @@ const TIMEZONES = [
 ]
 
 const HOURS_12 = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"))
-const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"))
+const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"))
 const VISIBLE_YEARS = 12
 
 const B1 = "#e6eefa"  // brand-primary-1
 const B2 = "#c2d5f3"  // brand-primary-2
 const B6 = "#0052cc"  // brand-primary-6
 const B7 = "#0046ba"  // brand-primary-7
+
+interface TimeInputDropdownProps {
+    val: string
+    set: (v: string) => void
+    items: string[]
+    maxVal: number
+    minVal: number
+}
+
+const TimeInputDropdown: React.FC<TimeInputDropdownProps> = ({ val, set, items, maxVal, minVal }) => {
+    const [open, setOpen] = useState(false)
+    const [tempVal, setTempVal] = useState(val)
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        setTempVal(val)
+    }, [val])
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setOpen(false)
+                commitValue(tempVal)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [tempVal, val])
+
+    const commitValue = (input: string) => {
+        let num = parseInt(input, 10)
+        if (isNaN(num)) {
+            setTempVal(val)
+            return
+        }
+        if (num < minVal) num = minVal
+        if (num > maxVal) num = maxVal
+        const formatted = String(num).padStart(2, "0")
+        set(formatted)
+        setTempVal(formatted)
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            commitValue(tempVal)
+            setOpen(false)
+        } else if (e.key === "Escape") {
+            setTempVal(val)
+            setOpen(false)
+        }
+    }
+
+    const filteredItems = items.filter(it => it.includes(tempVal))
+    const displayItems = filteredItems.length > 0 ? filteredItems : items
+
+    return (
+        <div ref={containerRef} style={{ position: "relative", width: 56 }}>
+            <input
+                type="text"
+                value={tempVal}
+                onFocus={() => setOpen(true)}
+                onChange={e => {
+                    const cleanVal = e.target.value.replace(/\D/g, "").slice(0, 2)
+                    setTempVal(cleanVal)
+                }}
+                onKeyDown={handleKeyDown}
+                style={{
+                    width: "100%",
+                    padding: "6px 16px 6px 8px",
+                    borderRadius: 8,
+                    border: open ? `1.5px solid ${B6}` : "1px solid #d1d5db",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    background: "#fff",
+                    color: "#111827",
+                    textAlign: "center",
+                    outline: "none",
+                    transition: "border-color 0.15s ease-in-out",
+                }}
+            />
+            <span 
+                onClick={() => setOpen(!open)}
+                style={{
+                    position: "absolute",
+                    right: 6,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    fontSize: 9,
+                    color: "#9ca3af",
+                    userSelect: "none"
+                }}
+            >
+                ▾
+            </span>
+
+            {open && (
+                <div style={{
+                    position: "absolute",
+                    bottom: "calc(100% + 4px)",
+                    left: 0,
+                    width: "100%",
+                    zIndex: 100,
+                    background: "#fff",
+                    borderRadius: 8,
+                    border: "1px solid #e5e7eb",
+                    maxHeight: 150,
+                    overflowY: "auto",
+                    boxShadow: "0 -4px 12px rgba(0,0,0,0.08)",
+                }} className="tz-scroll-c">
+                    {displayItems.map(it => (
+                        <div
+                            key={it}
+                            onClick={() => {
+                                set(it)
+                                setTempVal(it)
+                                setOpen(false)
+                            }}
+                            style={{
+                                padding: "6px 8px",
+                                fontSize: 12,
+                                textAlign: "center",
+                                cursor: "pointer",
+                                fontWeight: it === val ? 600 : 400,
+                                color: it === val ? B6 : "#111827",
+                                background: it === val ? B1 : "transparent",
+                            }}
+                            className="dtp-cal-day"
+                        >
+                            {it}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
+
+const AmPmSelector: React.FC<{ val: string; set: (v: string) => void }> = ({ val, set }) => {
+    const [open, setOpen] = useState(false)
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setOpen(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [])
+
+    return (
+        <div ref={containerRef} style={{ position: "relative", width: 56 }}>
+            <button
+                type="button"
+                onClick={() => setOpen(!open)}
+                style={{
+                    width: "100%",
+                    padding: "6px 16px 6px 8px",
+                    borderRadius: 8,
+                    border: open ? `1.5px solid ${B6}` : "1px solid #d1d5db",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    background: "#fff",
+                    color: "#111827",
+                    textAlign: "center",
+                    outline: "none",
+                    cursor: "pointer",
+                    transition: "border-color 0.15s ease-in-out",
+                }}
+            >
+                {val}
+            </button>
+            <span 
+                onClick={() => setOpen(!open)}
+                style={{
+                    position: "absolute",
+                    right: 6,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    fontSize: 9,
+                    color: "#9ca3af",
+                    userSelect: "none",
+                    pointerEvents: "none"
+                }}
+            >
+                ▾
+            </span>
+
+            {open && (
+                <div style={{
+                    position: "absolute",
+                    bottom: "calc(100% + 4px)",
+                    left: 0,
+                    width: "100%",
+                    zIndex: 100,
+                    background: "#fff",
+                    borderRadius: 8,
+                    border: "1px solid #e5e7eb",
+                    boxShadow: "0 -4px 12px rgba(0,0,0,0.08)",
+                }}>
+                    {["AM", "PM"].map(it => (
+                        <div
+                            key={it}
+                            onClick={() => {
+                                set(it)
+                                setOpen(false)
+                            }}
+                            style={{
+                                padding: "6px 8px",
+                                fontSize: 12,
+                                textAlign: "center",
+                                cursor: "pointer",
+                                fontWeight: it === val ? 600 : 400,
+                                color: it === val ? B6 : "#111827",
+                                background: it === val ? B1 : "transparent",
+                            }}
+                            className="dtp-cal-day"
+                        >
+                            {it}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
 
 function getDaysInMonth(y: number, m: number) { return new Date(y, m + 1, 0).getDate() }
 function getFirstDayOfWeek(y: number, m: number) { const d = new Date(y, m, 1).getDay(); return d === 0 ? 6 : d - 1 }
@@ -102,8 +331,17 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
         const [ampm, setAmpm] = useState("AM")
         const [timezone, setTimezone] = useState("UTC+1")
         const [showTzDropdown, setShowTzDropdown] = useState(false)
+        const [inputValue, setInputValue] = useState("")
 
         const tzRef = useRef<HTMLDivElement>(null)
+
+        useEffect(() => {
+            if (committedDate && committedTime) {
+                setInputValue(formatDisplay(committedDate, committedTime.hour, committedTime.minute, committedTime.ampm, committedTime.timezone))
+            } else {
+                setInputValue("")
+            }
+        }, [committedDate, committedTime])
 
         useEffect(() => {
             if (!value || typeof value !== 'string') return
@@ -120,7 +358,7 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                 if (h > 12) h -= 12
                 if (h === 0) h = 12
                 const hourStr = String(h).padStart(2, "0")
-                const minuteStr = String(Math.round(min / 5) * 5).padStart(2, "0")
+                const minuteStr = String(min).padStart(2, "0")
                 setSelectedDate({ day, month, year })
                 setCommittedDate({ day, month, year })
                 setCalMonth(month)
@@ -205,10 +443,96 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
             cursor: "pointer", transition: "all 0.12s", outline: "none", whiteSpace: "nowrap" as const,
         })
 
-        const selectStyle: React.CSSProperties = {
-            padding: "6px 24px 6px 10px", borderRadius: 8, border: "1px solid #d1d5db",
-            fontSize: 13, fontWeight: 500, background: "#fff", color: "#111827",
-            appearance: "none" as const, cursor: "pointer", outline: "none",
+        const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            const val = e.target.value
+            setInputValue(val)
+
+            try {
+                const timezoneRegex = /\s*UTC[+-]\d+(:\d+)?(\s*\(.*\))?$/i
+                const cleanVal = val.replace("·", "").replace(timezoneRegex, "").replace(/\s+/g, " ").trim()
+                const hasTime = cleanVal.includes(":") || /am|pm/i.test(cleanVal)
+                const parsed = new Date(cleanVal)
+                if (!isNaN(parsed.getTime())) {
+                    const day = parsed.getDate()
+                    const month = parsed.getMonth()
+                    const year = parsed.getFullYear()
+                    
+                    setSelectedDate({ day, month, year })
+                    setCalMonth(month)
+                    setCalYear(year)
+
+                    if (hasTime) {
+                        let h = parsed.getHours()
+                        const min = parsed.getMinutes()
+                        const ap = h >= 12 ? "PM" : "AM"
+                        if (h > 12) h -= 12
+                        if (h === 0) h = 12
+                        
+                        setHour(String(h).padStart(2, "0"))
+                        setMinute(String(min).padStart(2, "0"))
+                        setAmpm(ap)
+                    }
+                }
+            } catch (err) {}
+        }
+
+        const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+            try {
+                const timezoneRegex = /\s*UTC[+-]\d+(:\d+)?(\s*\(.*\))?$/i
+                const cleanVal = inputValue.replace("·", "").replace(timezoneRegex, "").replace(/\s+/g, " ").trim()
+                const hasTime = cleanVal.includes(":") || /am|pm/i.test(cleanVal)
+                const parsed = new Date(cleanVal)
+                if (!isNaN(parsed.getTime())) {
+                    const day = parsed.getDate()
+                    const month = parsed.getMonth()
+                    const year = parsed.getFullYear()
+                    
+                    const newDate = { day, month, year }
+                    setSelectedDate(newDate)
+                    setCommittedDate(newDate)
+
+                    let hStr = hour
+                    let mStr = minute
+                    let apStr = ampm
+
+                    if (hasTime) {
+                        let h = parsed.getHours()
+                        const min = parsed.getMinutes()
+                        const ap = h >= 12 ? "PM" : "AM"
+                        if (h > 12) h -= 12
+                        if (h === 0) h = 12
+                        hStr = String(h).padStart(2, "0")
+                        mStr = String(min).padStart(2, "0")
+                        apStr = ap
+                        
+                        setHour(hStr)
+                        setMinute(mStr)
+                        setAmpm(apStr)
+                    }
+
+                    const iso = buildISO(newDate, hStr, mStr, apStr, timezone)
+                    setCommittedTime({ hour: hStr, minute: mStr, ampm: apStr, timezone })
+                    fireChange(iso)
+                } else if (!inputValue) {
+                    setSelectedDate(null)
+                    setCommittedDate(null)
+                    setCommittedTime(null)
+                    fireChange("")
+                } else {
+                    if (committedDate && committedTime) {
+                        setInputValue(formatDisplay(committedDate, committedTime.hour, committedTime.minute, committedTime.ampm, committedTime.timezone))
+                    } else {
+                        setInputValue("")
+                    }
+                }
+            } catch (err) {
+                if (committedDate && committedTime) {
+                    setInputValue(formatDisplay(committedDate, committedTime.hour, committedTime.minute, committedTime.ampm, committedTime.timezone))
+                } else {
+                    setInputValue("")
+                }
+            }
+            onBlur?.(e as any)
         }
 
         return (
@@ -226,19 +550,20 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
 
                 <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
-                        <button
-                            type="button"
-                            onBlur={onBlur as any}
+                        <input
+                            type="text"
+                            value={inputValue}
+                            placeholder="Select date & time"
+                            onChange={handleInputChange}
+                            onBlur={handleInputBlur}
                             className={cn(
                                 "w-full h-14 px-4 py-3 text-xs rounded-lg bg-white outline-none transition-all text-left",
                                 "border border-brand-secondary-2 focus:border-brand-accent-4 hover:border-brand-secondary-6",
                                 error && "border-red-400 focus:border-red-500 ring-1 ring-red-400/20",
-                                !displayValue && "text-brand-secondary-4",
+                                !inputValue && "text-brand-secondary-4",
                                 className
                             )}
-                        >
-                            {displayValue || "Select date & time"}
-                        </button>
+                        />
                     </PopoverTrigger>
 
                     <input
@@ -253,6 +578,7 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                     <PopoverContent
                         align="start"
                         sideOffset={6}
+                        onOpenAutoFocus={(e) => e.preventDefault()}
                         className="p-0 w-[340px] max-w-[calc(100vw-16px)] rounded-2xl border border-[#e5e7eb] shadow-xl"
                         style={{ fontFamily: "Inter, system-ui, sans-serif" }}
                     >
@@ -337,21 +663,12 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
 
                         {/* Time bar */}
                         <div style={{ borderTop: "1px solid #e5e7eb", padding: "10px 18px", display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                            {([
-                                { val: hour, set: setHour, items: HOURS_12 },
-                                { val: minute, set: setMinute, items: MINUTES },
-                                { val: ampm, set: setAmpm, items: ["AM", "PM"] }
-                            ] as const).map(({ val, set, items }, idx) => (
-                                <div key={idx} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                    {idx > 0 && <span style={{ fontSize: 16, fontWeight: 300, color: "#d1d5db" }}>:</span>}
-                                    <div style={{ position: "relative" }}>
-                                        <select value={val} onChange={e => (set as any)(e.target.value)} style={selectStyle}>
-                                            {items.map(it => <option key={it} value={it}>{it}</option>)}
-                                        </select>
-                                        <span style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", fontSize: 9, color: "#9ca3af" }}>▾</span>
-                                    </div>
-                                </div>
-                            ))}
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                <TimeInputDropdown val={hour} set={setHour} items={HOURS_12} minVal={1} maxVal={12} />
+                                <span style={{ fontSize: 16, fontWeight: 300, color: "#d1d5db" }}>:</span>
+                                <TimeInputDropdown val={minute} set={setMinute} items={MINUTES} minVal={0} maxVal={59} />
+                                <AmPmSelector val={ampm} set={setAmpm} />
+                            </div>
 
                             {/* Timezone dropdown */}
                             <div style={{ position: "relative", marginLeft: 2 }} ref={tzRef}>
