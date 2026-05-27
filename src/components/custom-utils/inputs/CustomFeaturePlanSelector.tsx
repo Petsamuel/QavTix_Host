@@ -5,11 +5,12 @@ import { cn } from "@/lib/utils"
 import { space_grotesk } from "@/lib/fonts"
 
 interface Plan {
-    id:       string
-    name:     string
-    price:    number
-    duration: string
-    features: string[]
+    id:            string
+    name:          string
+    price:         number
+    originalPrice?: number
+    duration:      string
+    features:      string[]
 }
 
 interface PlanSelectorProps {
@@ -65,13 +66,20 @@ export default function CustomFeaturePlanSelector({
                                                 {plan.duration}
                                             </p>
                                         </div>
-                                        <span className={cn(
-                                            space_grotesk.className,
-                                            "text-sm font-black",
-                                            isSelected ? "text-brand-primary-6" : "text-brand-secondary-8"
-                                        )}>
-                                            {convertedPrice(plan.price)}
-                                        </span>
+                                        <div className="text-right">
+                                            {plan.originalPrice && (
+                                                <p className="text-[11px] line-through text-brand-neutral-5 leading-none">
+                                                    {convertedPrice(plan.originalPrice)}
+                                                </p>
+                                            )}
+                                            <span className={cn(
+                                                space_grotesk.className,
+                                                "text-sm font-black",
+                                                isSelected ? "text-brand-primary-6" : "text-brand-secondary-8"
+                                            )}>
+                                                {convertedPrice(plan.price)}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <ul className="mt-3 pt-3 border-t border-brand-neutral-2 space-y-1.5">

@@ -248,6 +248,7 @@ interface FeaturedPlan {
     name: string
     duration: string
     price: number
+    originalPrice?: number
     features: string[]
 }
 
@@ -272,5 +273,20 @@ export const FEATURED_PLANS: FeaturedPlan[] = [
         duration: "7-Day Feature",
         price: 165000,
         features: ["Featured for 7 days", "Maximum visibility & sustained reach", "Featured badge + boosted impressions", "Weekly main social media post + story promotion"]
+    },
+    {
+        id: "premium",
+        name: "Premium",
+        duration: "30-Day Feature",
+        price: 600000,
+        originalPrice: 1300000,
+        features: [
+            "Featured for 30 days",
+            "Dominant visibility across homepage, event feed & search",
+            "Featured badge + continuous boosted impressions",
+            "Monthly main social media post + story promotion",
+            "Email / newsletter feature",
+            "Advanced performance insights & engagement analytics"
+        ]
     }
 ]
