@@ -19,6 +19,8 @@ import ShareEventModal from '../modals/ShareEventModal'
 import { useEventCreation } from '@/contexts/create-event/CreateEventProvider'
 import { publishEvent, saveEventAsDraft, updateAndPublishEvent, updateEventAsDraft } from '@/actions/event/creation'
 import { useRouter } from 'next/navigation'
+import { useQueryClient } from "@tanstack/react-query"
+import { EVENTS_ENDPOINT } from "@/endpoints"
 import { uploadEventMedia } from '@/helper-fns/uploadEventMedia'
 import { sanitizeEventDataForServer } from '@/lib/cloudinary'
 import { clearEventDraft } from '@/custom-hooks/UseEventDraftPersist'
@@ -29,6 +31,7 @@ import { clearEventDraft } from '@/custom-hooks/UseEventDraftPersist'
 export default function CreateEventReviewStep() {
 
     const dispatch = useAppDispatch()
+    const queryClient = useQueryClient()
     const { eventData, resetForm, categories, isEditMode, eventID } = useEventCreation()
     const { goToPreviousStep } = useStepper()
 
@@ -109,6 +112,8 @@ export default function CreateEventReviewStep() {
 
                 if (result.success) {
                     setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: result.eventId ?? eventID })
+                    queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                    queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                     dispatch(finishConfirmAction())
                     dispatch(resetConfirmationStatus())
                     clearEventDraft()
@@ -135,8 +140,7 @@ export default function CreateEventReviewStep() {
             }
         }
         run()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isConfirmed, lastConfirmedAction])
+    }, [isConfirmed, lastConfirmedAction, queryClient])
 
     // Schedule for later
 
@@ -163,6 +167,8 @@ export default function CreateEventReviewStep() {
                     navigateTo: NAVIGATION_LINKS.MY_EVENTS.href,
                 }))
 
+                queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                 clearEventDraft()
                 resetForm()
                 router.push(NAVIGATION_LINKS.MY_EVENTS.href)

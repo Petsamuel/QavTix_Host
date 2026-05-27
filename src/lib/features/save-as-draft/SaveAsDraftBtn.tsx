@@ -14,12 +14,15 @@ import { sanitizeEventDataForServer } from "@/lib/cloudinary"
 import { saveEventAsDraft, updateEventAsDraft, updateAndPublishEvent } from "@/actions/event/creation"
 import { clearEventDraft } from "@/custom-hooks/UseEventDraftPersist"
 import { EVENT_DETAILS_LINK } from "@/enums/navigation"
+import { useQueryClient } from "@tanstack/react-query"
+import { EVENTS_ENDPOINT } from "@/endpoints"
 
 
 export default function SaveAsDraftBtn() {
 
     const { eventData, isEditMode, eventID, eventStatus, discardDraft, resetForm } = useEventCreation()
     const dispatch = useAppDispatch()
+    const queryClient = useQueryClient()
     const router = useRouter()
     const { trigger } = useRevalidate("events")
     const [saving, setSaving] = useState(false)
@@ -90,6 +93,8 @@ export default function SaveAsDraftBtn() {
                     description: isEditMode ? "Your event changes have been saved." : "Your event progress has been saved.",
                     variant: "success",
                 }))
+                queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                 clearEventDraft()
                 resetForm()
                 trigger()

@@ -9,6 +9,7 @@ import {
     useRef,
     useState,
 } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { space_grotesk } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 
@@ -16,7 +17,8 @@ import CreateEventBtn from "@/lib/features/create-event/CreateEventBtn"
 import MetricCardsContainer1 from "../cards/MetricCardsContainer1"
 import DataDisplayTableWrapper from "../custom-utils/TableDataDisplayAreas/DataDisplayTableWrapper"
 import { MyEventsPageFilters } from "../custom-utils/TableDataDisplayAreas/resources/avaliable-filters"
-import { TabSlice, useDataDisplay } from "@/custom-hooks/UseDataDisplay"
+import { TabSlice } from "@/custom-hooks/UseDataDisplay"
+import { useEventsDataDisplay } from "@/custom-hooks/UseEventsDataDisplay"
 import { EVENTS_ENDPOINT } from "@/endpoints"
 
 import {
@@ -67,6 +69,7 @@ interface Props {
 export default function EventsPageContentWrapper({ initialEvents, categories }: Props) {
 
     const dispatch = useAppDispatch()
+    const queryClient = useQueryClient()
     const { trigger: triggerRevalidation } = useRevalidate("events")
 
     const { filterOptions, tabList } = MyEventsPageFilters
@@ -88,7 +91,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
 
     // Data display hook
 
-    const { tabStates } = useDataDisplay<OrganizerEvent>(
+    const { tabStates } = useEventsDataDisplay<OrganizerEvent>(
         {
             endpoint: EVENTS_ENDPOINT,
             tabs: [
@@ -100,6 +103,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
             ],
             activeTab,
             revalidateTarget: "events",
+            refetchInterval: 10 * 1000,
         },
         filters,
     )
@@ -170,6 +174,8 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                     const result = await deleteEvent({ eventId })
                     if (result.success) {
                         dispatch(showAlert({ title: "Deleted", description: result.message, variant: "success" }))
+                        queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                        queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                         tabStates["draft"].refresh()
                         tabStates["all"].refresh()
                         triggerRevalidation()
@@ -181,7 +187,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 }
             }
         )
-    }, [askConfirmation, dispatch, tabStates, triggerRevalidation])
+    }, [askConfirmation, dispatch, tabStates, triggerRevalidation, queryClient])
 
     // Publish / Unpublish (single)
 
@@ -198,6 +204,8 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 const result = await updateEventStatus({ eventId, status: "active" })
                 if (result.success) {
                     dispatch(showAlert({ title: "Published", description: result.message, variant: "success" }))
+                    queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                    queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                     tabStates["draft"].refresh()
                     tabStates["live"].refresh()
                     tabStates["all"].refresh()
@@ -207,7 +215,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 }
             }
         )
-    }, [askConfirmation, dispatch, tabStates, triggerRevalidation])
+    }, [askConfirmation, dispatch, tabStates, triggerRevalidation, queryClient])
 
     const handleUnpublish = useCallback((eventId: string, eventName?: string) => {
         askConfirmation(
@@ -222,6 +230,8 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 const result = await updateEventStatus({ eventId, status: "draft" })
                 if (result.success) {
                     dispatch(showAlert({ title: "Unpublished", description: result.message, variant: "success" }))
+                    queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                    queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                     tabStates["live"].refresh()
                     tabStates["draft"].refresh()
                     tabStates["all"].refresh()
@@ -231,7 +241,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 }
             }
         )
-    }, [askConfirmation, dispatch, tabStates, triggerRevalidation])
+    }, [askConfirmation, dispatch, tabStates, triggerRevalidation, queryClient])
 
     // Bulk action
 
@@ -281,6 +291,8 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                         const result = await bulkCancelEvents({ eventIds: eligibleIds })
                         if (result.success) {
                             dispatch(showAlert({ title: "Events Cancelled", description: result.message, variant: "success" }))
+                            queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                            queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                             setSelectedEvents([])
                             state.refresh()
                             tabStates["cancelled"].refresh()
@@ -320,6 +332,8 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                         const result = await bulkUnpublishEvents({ eventIds: eligibleIds })
                         if (result.success) {
                             dispatch(showAlert({ title: "Events Unpublished", description: result.message, variant: "success" }))
+                            queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                            queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                             setSelectedEvents([])
                             state.refresh()
                             tabStates["draft"].refresh()
@@ -359,6 +373,8 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                         const result = await bulkDeleteEvents({ eventIds: eligibleIds })
                         if (result.success) {
                             dispatch(showAlert({ title: "Events Deleted", description: result.message, variant: "success" }))
+                            queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                            queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                             setSelectedEvents([])
                             state.refresh()
                             triggerRevalidation()
@@ -393,7 +409,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 break
             }
         }
-    }, [selectedEvents, getEventById, state, tabStates, askConfirmation, dispatch, triggerRevalidation])
+    }, [selectedEvents, getEventById, state, tabStates, askConfirmation, dispatch, triggerRevalidation, queryClient])
 
     // Derived / shared
 
@@ -437,7 +453,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                 <h2 className={cn(space_grotesk.className, "capitalize text-lg text-brand-secondary-8 font-bold")}>
                     Overview
                 </h2>
-                <CreateEventBtn />
+                <CreateEventBtn activeEventsCount={(cards?.live ?? 0) + (cards?.sold_out ?? 0)} />
             </div>
 
             {/* KPI cards */}

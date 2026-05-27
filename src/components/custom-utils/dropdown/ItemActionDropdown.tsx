@@ -17,6 +17,8 @@ import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { cancelEvent, deleteEvent, updateEventStatus } from "@/actions/event/client"
 import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 import { AnimatedDialog } from "@/components/custom-utils/dialogs/AnimatedDialog"
+import { useQueryClient } from "@tanstack/react-query"
+import { EVENTS_ENDPOINT } from "@/endpoints"
 import { DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 export type ItemAction = {
@@ -43,6 +45,7 @@ function ItemActionDropdownInner({
     onRefresh,
 }: ItemActionDropdownProps) {
     const dispatch = useAppDispatch()
+    const queryClient = useQueryClient()
     const { trigger: triggerRevalidation } = useRevalidate("events")
     const { promoteToFeatured } = useFeatureCheckout()
 
@@ -90,6 +93,8 @@ function ItemActionDropdownInner({
                 const result = await updateEventStatus({ eventId: eventID, status: "draft" })
                 if (result.success) {
                     dispatch(showAlert({ title: "Event Unpublished", description: result.message, variant: "success" }))
+                    queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                    queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                     onRefresh?.()
                     triggerRevalidation()
                 } else {
@@ -102,6 +107,8 @@ function ItemActionDropdownInner({
                 const result = await deleteEvent({ eventId: eventID })
                 if (result.success) {
                     dispatch(showAlert({ title: "Event Deleted", description: result.message, variant: "success" }))
+                    queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                    queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                     onRefresh?.()
                     triggerRevalidation()
                 } else {
@@ -244,6 +251,8 @@ function ItemActionDropdownInner({
                                 const result = await cancelEvent({ eventId: eventID || "" })
                                 if (result.success) {
                                     dispatch(showAlert({ title: "Event Cancelled", description: result.message, variant: "success" }))
+                                    queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                                    queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
                                     onRefresh?.()
                                     triggerRevalidation()
                                 } else {

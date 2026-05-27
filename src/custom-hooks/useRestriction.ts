@@ -178,11 +178,8 @@ export interface PlanRestrictions {
 
 
 export function usePlanRestrictions(): PlanRestrictions {
-    const planSlug: string = useAppSelector(
-        (state) =>
-            state.authUser?.user?.plan_type ??
-            "free"
-    )
+    const user = useAppSelector((state) => state.authUser?.user)
+    const planSlug: string = user?.subscription === false ? "free" : (user?.plan_type ?? "free")
 
     // Try to get dynamic plans from context
     let context: any = null
