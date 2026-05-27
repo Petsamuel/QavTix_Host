@@ -145,7 +145,7 @@ export default function CustomersTable({
                                             </p>
                                         </td>
                                         <td className="py-4 px-4">
-                                            <ItemActionDropdown actions={buildCustomerActions(customer.user_id || "", router)} />
+                                            <ItemActionDropdown actions={buildCustomerActions(customer, router)} />
                                         </td>
                                     </tr>
                                 )
@@ -190,7 +190,7 @@ export default function CustomersTable({
                                 </div>
 
                                 <div className="shrink-0">
-                                    <ItemActionDropdown actions={buildCustomerActions(customer.user_id || "", router)} />
+                                    <ItemActionDropdown actions={buildCustomerActions(customer, router)} />
                                 </div>
                             </div>
 

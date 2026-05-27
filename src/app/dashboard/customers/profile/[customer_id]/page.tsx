@@ -1,17 +1,35 @@
 import CustomersProfilePagContentWrapper from "@/components/page-wrappers/CustomerProfilePageContentWrapper"
+import GuestProfilePage from "@/components/page-wrappers/GuestProfilePageContent"
 import { notFound } from "next/navigation"
 import { cookies } from "next/headers";
 import { getCustomerProfile } from "@/actions/customers";
 
 interface Props {
     params: Promise<{ customer_id: string }>
+    searchParams: Promise<{ name?: string; email?: string; address?: string; avatar?: string }>
 }
 
-export default async function CustomerProfilePage({ params }: Props) {
+export default async function CustomerProfilePage({ params, searchParams }: Props) {
+    const { customer_id } = await params
+
+    // Guest buyer — no registered account, render from search params
+    if (customer_id === "guest") {
+        const sp = await searchParams
+        return (
+            <GuestProfilePage
+                name={sp.name || "Guest"}
+                email={sp.email || ""}
+                address={sp.address || ""}
+                avatar={sp.avatar || null}
+            />
+        )
+    }
+
     const cookieStore = await cookies();
     const token = cookieStore.get("host_access_token")?.value;
 
-    const userID = parseInt((await params).customer_id)
+    const userID = parseInt(customer_id)
+    if (isNaN(userID)) return notFound()
 
     const result = await getCustomerProfile(token!, { user_id: userID })
 

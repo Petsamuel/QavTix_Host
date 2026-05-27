@@ -38,6 +38,7 @@ export default function AllActivityNotificationsModal({
     const [currentPage, setCurrentPage] = useState(initialPage)
     const [hasMore, setHasMore] = useState(initialHasMore)
     const [isPending, startTransition] = useTransition()
+    const [visibleNotifCount, setVisibleNotifCount] = useState(4)
 
     const searchParams = useSearchParams()
 
@@ -46,6 +47,7 @@ export default function AllActivityNotificationsModal({
         setNotifications(initialNotifications)
         setCurrentPage(initialPage)
         setHasMore(initialHasMore)
+        setVisibleNotifCount(4) // reset cap when data refreshes
     }, [initialActivities, initialNotifications, initialPage, initialHasMore])
 
     const handleClose = () => {
@@ -58,16 +60,32 @@ export default function AllActivityNotificationsModal({
             const params: any = { page: currentPage + 1 }
             if (searchParams.get('activity_type')) params.activity_type = searchParams.get('activity_type')
             if (searchParams.get('notification_type')) params.notification_type = searchParams.get('notification_type')
-            
+
             const res = await getDashboardFeed(params)
             if (res.success && res.data) {
-                if (res.data.activities?.length === 0 && res.data.notifications?.length === 0) {
+                const newActivities = res.data.activities || []
+                const newNotifications = res.data.notifications || []
+
+                if (newActivities.length === 0 && newNotifications.length === 0) {
                     setHasMore(false)
-                } else {
-                    setActivities(prev => [...prev, ...(res.data!.activities || [])])
-                    setNotifications(prev => [...prev, ...(res.data!.notifications || [])])
-                    setCurrentPage(currentPage + 1)
+                    return
                 }
+
+                setActivities(prev => {
+                    const existingIds = new Set(prev.map(a => a.id))
+                    const fresh = newActivities.filter((a: DashboardActivity) => !existingIds.has(a.id))
+                    if (fresh.length === 0 && newNotifications.length === 0) setHasMore(false)
+                    return [...prev, ...fresh]
+                })
+                setNotifications(prev => {
+                    const existingIds = new Set(prev.map(n => n.id))
+                    const fresh = newNotifications.filter((n: DashboardNotification) => !existingIds.has(n.id))
+                    if (fresh.length === 0 && newActivities.length === 0) setHasMore(false)
+                    return [...prev, ...fresh]
+                })
+                setCurrentPage(p => p + 1)
+            } else {
+                setHasMore(false)
             }
         })
     }
@@ -110,34 +128,44 @@ export default function AllActivityNotificationsModal({
                 {isActivityTab ? (
                     <RecentActivityTab activities={activities} follower_count={follower_count} />
                 ) : (
-                    <NotificationsTab notifications={notifications} />
+                    <NotificationsTab notifications={notifications.slice(0, visibleNotifCount)} />
                 )}
             </div>
 
-            {/* Load more skeleton */}
-            {isPending && (
-                <div className="space-y-2 px-6 pb-2">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="h-16 w-full rounded-lg bg-brand-neutral-5 animate-pulse" />
-                    ))}
-                </div>
-            )}
-
-            {/* Load more button — shared across both tabs since data comes from one endpoint */}
-            {hasMore && !isPending && (isActivityTab ? activities.length > 0 : notifications.length > 0) && (
+            {/* Load more button */}
+            {(isActivityTab
+                ? hasMore && activities.length > 0
+                : notifications.length > visibleNotifCount || (hasMore && visibleNotifCount >= notifications.length && notifications.length > 0)
+            ) && (
                 <div className="px-6 pb-4 pt-1">
                     <button
-                        onClick={handleLoadMore}
+                        onClick={() => {
+                            if (!isActivityTab && visibleNotifCount < notifications.length) {
+                                // Reveal more already-loaded notifications first
+                                setVisibleNotifCount(prev => Math.min(prev + 4, notifications.length))
+                            } else {
+                                handleLoadMore()
+                            }
+                        }}
                         disabled={isPending}
                         className={cn(
                             "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold",
                             "border border-brand-neutral-3 text-brand-primary-6",
                             "hover:bg-brand-neutral-1 transition-colors",
-                            "disabled:opacity-50 disabled:cursor-not-allowed"
+                            "disabled:opacity-60 disabled:cursor-not-allowed"
                         )}
                     >
-                        <span>Load More</span>
-                        <Icon icon="hugeicons:arrow-down-01" className="w-4 h-4" />
+                        {isPending ? (
+                            <>
+                                <Icon icon="svg-spinners:ring-resize" className="w-4 h-4" />
+                                <span>Loading...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span>Load More</span>
+                                <Icon icon="hugeicons:arrow-down-01" className="w-4 h-4" />
+                            </>
+                        )}
                     </button>
                 </div>
             )}

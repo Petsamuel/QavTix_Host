@@ -37,9 +37,10 @@ interface UserRevenueChartProps {
     userID:      number
     initialData: CustomerProfileChartPoint[]
     className?:  string
+    isGuest?:    boolean
 }
 
-export function UserRevenueChart({ userID, initialData, className }: UserRevenueChartProps) {
+export function UserRevenueChart({ userID, initialData, className, isGuest }: UserRevenueChartProps) {
 
     const { user }    = useAppSelector(store => store.authUser)
     const currency    = user?.currency || ""
@@ -59,6 +60,8 @@ export function UserRevenueChart({ userID, initialData, className }: UserRevenue
             isFirstRender.current = false
             return
         }
+
+        if (isGuest) return // Don't fetch for guests
 
         startTransition(async () => {
             const result = await getCustomerProfile({

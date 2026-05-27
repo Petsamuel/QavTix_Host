@@ -13,11 +13,13 @@ import { showAlert } from "@/lib/redux/slices/alertSlice"
 interface CustomerProfileDetailsCardProps {
     customer:     CustomerProfile
     className?:   string
+    isGuest?:     boolean
 }
 
 export function CustomerProfileDetailsCard({
     customer,
     className,
+    isGuest,
 }: CustomerProfileDetailsCardProps) {
 
     const dispatch = useAppDispatch()
@@ -32,6 +34,14 @@ export function CustomerProfileDetailsCard({
     const [showSmsEditor,   setShowSmsEditor]   = useState(false)
 
     const handleEmail = () => {
+        if (isGuest) {
+            dispatch(showAlert({
+                title: "Action Not Allowed",
+                description: "Cannot send emails to guest buyers.",
+                variant: "destructive"
+            }))
+            return
+        }
         if (isFreePlan) {
             dispatch(showAlert({
                 title:   "Upgrade Required",
@@ -44,6 +54,14 @@ export function CustomerProfileDetailsCard({
     }
 
     const handleSMS   = () => {
+        if (isGuest) {
+            dispatch(showAlert({
+                title: "Action Not Allowed",
+                description: "Cannot send SMS to guest buyers.",
+                variant: "destructive"
+            }))
+            return
+        }
         if (isFreePlan) {
             dispatch(showAlert({
                 title:   "Upgrade Required",
@@ -129,7 +147,7 @@ export function CustomerProfileDetailsCard({
                         <div className="flex-1">
                             <p className="text-[13px] font-semibold text-brand-secondary-9 mb-1">First Purchase</p>
                             <p className="text-xs text-brand-neutral-7">
-                                {formatDateTime(customer.first_purchase_date)}
+                                {isGuest || !customer.first_purchase_date ? "—" : formatDateTime(customer.first_purchase_date)}
                             </p>
                         </div>
                     </div>
@@ -142,7 +160,7 @@ export function CustomerProfileDetailsCard({
                         <div className="flex-1">
                             <p className="text-[13px] font-semibold text-brand-secondary-9 mb-1">Latest Purchase</p>
                             <p className="text-xs text-brand-neutral-6">
-                                {formatDateTime(customer.last_purchase_date)}
+                                {isGuest || !customer.last_purchase_date ? "—" : formatDateTime(customer.last_purchase_date)}
                             </p>
                         </div>
                     </div>
@@ -155,7 +173,7 @@ export function CustomerProfileDetailsCard({
                         <div className="flex-1">
                             <p className="text-[13px] font-semibold text-brand-secondary-9 mb-1">Member Since</p>
                             <p className="text-xs text-brand-neutral-6">
-                                {formatDateTime(customer.registration_date)}
+                                {isGuest ? "Guest Checkout" : (customer.registration_date ? formatDateTime(customer.registration_date) : "—")}
                             </p>
                         </div>
                     </div>

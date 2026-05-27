@@ -3,6 +3,8 @@
 import { Icon } from '@iconify/react'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
+import { useState, useTransition } from 'react'
+import { markSingleNotificationAsRead } from '@/actions/dashboard/client'
 
 const NOTIFICATION_DOT_COLOR: Record<string, string> = {
     sale: 'bg-blue-600',
@@ -19,14 +21,26 @@ interface NotificationItemProps {
 
 export default function NotificationItem({ notification }: NotificationItemProps) {
     const dotColor = NOTIFICATION_DOT_COLOR[notification.notification_type] ?? 'bg-blue-500'
-    const isUnread = !notification.is_read
+    const [isRead, setIsRead] = useState(notification.is_read)
+    const [isPending, startTransition] = useTransition()
     const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })
 
+    const handleClick = () => {
+        if (isRead || isPending) return
+        setIsRead(true) // Optimistic update
+        startTransition(async () => {
+            await markSingleNotificationAsRead(notification.id)
+        })
+    }
+
     return (
-        <div className={cn(
-            "rounded-[16px] shadow-[0px_4px_16px_rgba(0,0,0,0.04)] border p-4 mb-3 flex flex-col gap-2 transition-colors",
-            isUnread ? "bg-brand-primary-1 border-brand-primary-2/50 hover:bg-brand-primary-2/50" : "bg-white border-brand-neutral-2 hover:border-brand-neutral-3 hover:bg-brand-neutral-50"
-        )}>
+        <div
+            onClick={handleClick}
+            className={cn(
+                "rounded-[16px] shadow-[0px_4px_16px_rgba(0,0,0,0.04)] border p-4 mb-3 flex flex-col gap-2 transition-colors",
+                !isRead ? "bg-brand-primary-1 border-brand-primary-2/50 hover:bg-brand-primary-2/50 cursor-pointer" : "bg-white border-brand-neutral-2 hover:border-brand-neutral-3 hover:bg-brand-neutral-50"
+            )}
+        >
             <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                     <div className={cn("w-2 h-2 rounded-full", dotColor)} />

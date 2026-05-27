@@ -6,6 +6,7 @@ import {
     DASHBOARD_OVERVIEW_ENDPOINT,
     HOST_UPCOMING_EVENTS_ENDPOINT,
     MARK_NOTIFICATIONS_READ_ENDPOINT,
+    MARK_SINGLE_NOTIFICATION_READ_ENDPOINT,
 } from "@/endpoints"
 import { revalidateTag } from "next/cache"
 import { CACHE_TAGS } from "@/cache-tags/index"
@@ -48,5 +49,17 @@ export async function markNotificationsAsRead(): Promise<{ success: boolean; mes
         return { success: true }
     } catch (err) {
         return { success: false, message: "Failed to mark notifications as read." }
+    }
+}
+
+export async function markSingleNotificationAsRead(notificationId: string): Promise<{ success: boolean; message?: string }> {
+    try {
+        const axios = await getServerAxios()
+        const url = MARK_SINGLE_NOTIFICATION_READ_ENDPOINT.replace("[notification_id]", notificationId)
+        await axios.post(`/${url}`)
+        revalidateTag(CACHE_TAGS.DASHBOARD_FEED, "max")
+        return { success: true }
+    } catch (err) {
+        return { success: false, message: "Failed to mark notification as read." }
     }
 }
