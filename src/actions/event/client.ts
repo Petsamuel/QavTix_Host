@@ -25,6 +25,7 @@ export async function deleteEvent(
         await axios.delete(`/${endpoint}`)
 
         revalidateTag(CACHE_TAGS.EVENTS, "max")
+        revalidateTag(CACHE_TAGS.DASHBOARD_OVERVIEW, "max")
         revalidateTag(`event-${eventId}`, "max")
         revalidateTag(`event-edit-${eventId}`, "max")
 
@@ -44,6 +45,7 @@ export async function updateEventStatus(
         await axios.patch(`/${endpoint}`, { event_status: status })
 
         revalidateTag(CACHE_TAGS.EVENTS, "max")
+        revalidateTag(CACHE_TAGS.DASHBOARD_OVERVIEW, "max")
         revalidateTag(`event-${eventId}`, "max")
         revalidateTag(`event-edit-${eventId}`, "max")
 
@@ -64,6 +66,7 @@ export async function cancelEvent(
         await axios.patch(`/${endpoint}`, { event_status: "cancelled" })
 
         revalidateTag(CACHE_TAGS.EVENTS, "max")
+        revalidateTag(CACHE_TAGS.DASHBOARD_OVERVIEW, "max")
         revalidateTag(`event-${eventId}`, "max")
         revalidateTag(`event-edit-${eventId}`, "max")
 
@@ -86,6 +89,7 @@ export async function bulkDeleteEvents(
             })
         )
         revalidateTag(CACHE_TAGS.EVENTS, "max")
+        revalidateTag(CACHE_TAGS.DASHBOARD_OVERVIEW, "max")
         return { success: true, message: `${eventIds.length} event(s) processed.` }
     } catch (err) {
         return { success: false, message: "A network error occurred." }
@@ -104,6 +108,7 @@ export async function bulkCancelEvents(
             })
         )
         revalidateTag(CACHE_TAGS.EVENTS, "max")
+        revalidateTag(CACHE_TAGS.DASHBOARD_OVERVIEW, "max")
         return { success: true, message: `${eventIds.length} event(s) processed.` }
     } catch (err) {
         return { success: false, message: "Failed to cancel events." }
@@ -122,6 +127,7 @@ export async function bulkPublishEvents(
             })
         )
         revalidateTag(CACHE_TAGS.EVENTS, "max")
+        revalidateTag(CACHE_TAGS.DASHBOARD_OVERVIEW, "max")
         return { success: true, message: `${eventIds.length} event(s) processed.` }
     } catch (err) {
         return { success: false, message: "Failed to publish events." }
@@ -140,6 +146,7 @@ export async function bulkUnpublishEvents(
             })
         )
         revalidateTag(CACHE_TAGS.EVENTS, "max")
+        revalidateTag(CACHE_TAGS.DASHBOARD_OVERVIEW, "max")
         return { success: true, message: `${eventIds.length} event(s) processed.` }
     } catch (err) {
         return { success: false, message: "Failed to unpublish events." }

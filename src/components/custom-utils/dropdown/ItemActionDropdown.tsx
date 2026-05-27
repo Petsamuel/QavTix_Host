@@ -18,7 +18,7 @@ import { cancelEvent, deleteEvent, updateEventStatus } from "@/actions/event/cli
 import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 import { AnimatedDialog } from "@/components/custom-utils/dialogs/AnimatedDialog"
 import { useQueryClient } from "@tanstack/react-query"
-import { EVENTS_ENDPOINT } from "@/endpoints"
+import { EVENTS_ENDPOINT, DASHBOARD_OVERVIEW_ENDPOINT } from "@/endpoints"
 import { DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 export type ItemAction = {
@@ -95,6 +95,7 @@ function ItemActionDropdownInner({
                     dispatch(showAlert({ title: "Event Unpublished", description: result.message, variant: "success" }))
                     queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                     queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                    queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                     onRefresh?.()
                     triggerRevalidation()
                 } else {
@@ -109,6 +110,7 @@ function ItemActionDropdownInner({
                     dispatch(showAlert({ title: "Event Deleted", description: result.message, variant: "success" }))
                     queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                     queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                    queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                     onRefresh?.()
                     triggerRevalidation()
                 } else {
@@ -253,6 +255,7 @@ function ItemActionDropdownInner({
                                     dispatch(showAlert({ title: "Event Cancelled", description: result.message, variant: "success" }))
                                     queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                                     queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                                    queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                                     onRefresh?.()
                                     triggerRevalidation()
                                 } else {

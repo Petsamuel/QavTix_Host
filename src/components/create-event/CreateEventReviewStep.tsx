@@ -19,11 +19,11 @@ import ShareEventModal from '../modals/ShareEventModal'
 import { useEventCreation } from '@/contexts/create-event/CreateEventProvider'
 import { publishEvent, saveEventAsDraft, updateAndPublishEvent, updateEventAsDraft } from '@/actions/event/creation'
 import { useRouter } from 'next/navigation'
-import { useQueryClient } from "@tanstack/react-query"
-import { EVENTS_ENDPOINT } from "@/endpoints"
+import { EVENTS_ENDPOINT, DASHBOARD_OVERVIEW_ENDPOINT } from "@/endpoints"
 import { uploadEventMedia } from '@/helper-fns/uploadEventMedia'
 import { sanitizeEventDataForServer } from '@/lib/cloudinary'
 import { clearEventDraft } from '@/custom-hooks/UseEventDraftPersist'
+import { useQueryClient } from '@tanstack/react-query'
 
 
 
@@ -114,6 +114,7 @@ export default function CreateEventReviewStep() {
                     setStatusModal({ isOpen: true, type: 'SUCCESS', eventId: result.eventId ?? eventID })
                     queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                     queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                    queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                     dispatch(finishConfirmAction())
                     dispatch(resetConfirmationStatus())
                     clearEventDraft()
@@ -169,6 +170,7 @@ export default function CreateEventReviewStep() {
 
                 queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                 queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                 clearEventDraft()
                 resetForm()
                 router.push(NAVIGATION_LINKS.MY_EVENTS.href)
@@ -384,8 +386,6 @@ export default function CreateEventReviewStep() {
                 onShare={() => {
                     setStatusModal(prev => ({ ...prev, isOpen: false }))
                     setIsShareModalOpen(true)
-                    resetForm()
-                    clearEventDraft()
                 }}
                 onCreateAnother={() => {
                     setStatusModal(prev => ({ ...prev, isOpen: false }))
@@ -400,6 +400,8 @@ export default function CreateEventReviewStep() {
                 isOpen={isShareModalOpen}
                 onClose={() => {
                     setIsShareModalOpen(false)
+                    resetForm()
+                    clearEventDraft()
                     router.push(NAVIGATION_LINKS.MY_EVENTS.href)
                 }}
                 shareUrl={`${EVENT_DETAILS_LINK.replace("[event_id]", statusModal.eventId?.toString() || "")}`}

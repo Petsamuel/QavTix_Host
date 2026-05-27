@@ -69,40 +69,38 @@ export default function NotificationsTab({ notifications }: NotificationsTabProp
 
     return (
         <div className="space-y-4 px-4">
-            {!isCompletelyEmpty && (
-                <div className="flex items-center justify-between">
-                    <Select
-                        value={optimisticFilter}
-                        onValueChange={handleFilterChange}
+            <div className="flex items-center justify-between mb-2">
+                {hasUnread ? (
+                    <button
+                        onClick={handleMarkAllRead}
+                        disabled={isPending}
+                        className="text-sm text-brand-primary-6 hover:text-brand-primary-7 font-bold transition-colors disabled:opacity-50"
                     >
-                        <SelectTrigger
-                            className={cn(
-                                "border-brand-neutral-8 font-medium disabled:cursor-not-allowed disabled:opacity-65 text-xs w-fit bg-white rounded-lg border-neutral-4 hover:border-brand-neutral-5 focus:border-brand-primary-6",
-                            )}
-                        >
-                            <Icon icon="hugeicons:sliders-horizontal" width="24" height="24" className="shrink-0" />
-                            <SelectValue placeholder="Filter" />
-                        </SelectTrigger>
-                        <SelectContent className='z-999'>
-                            {FILTER_OPTIONS.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                                    {opt.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                        {isPending ? "Marking..." : "Mark all as read"}
+                    </button>
+                ) : <div />}
 
-                    {hasUnread && (
-                        <button
-                            onClick={handleMarkAllRead}
-                            disabled={isPending}
-                            className="text-xs text-brand-primary-6 hover:text-brand-primary-7 font-bold transition-colors disabled:opacity-50"
-                        >
-                            {isPending ? "Marking..." : "Mark all as read"}
-                        </button>
-                    )}
-                </div>
-            )}
+                <Select
+                    value={optimisticFilter}
+                    onValueChange={handleFilterChange}
+                >
+                    <SelectTrigger
+                        className={cn(
+                            "border-brand-neutral-3 font-medium disabled:cursor-not-allowed disabled:opacity-65 text-xs w-fit bg-white rounded-lg hover:border-brand-neutral-4 focus:border-brand-primary-6",
+                        )}
+                    >
+                        <Icon icon="hugeicons:sliders-horizontal" width="16" height="16" className="shrink-0 mr-1.5" />
+                        <SelectValue placeholder="Filter" />
+                    </SelectTrigger>
+                    <SelectContent className='z-[999]'>
+                        {FILTER_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                                {opt.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
 
             <div className="space-y-3">
                 {isFiltering ? (

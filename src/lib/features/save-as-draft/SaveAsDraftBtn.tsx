@@ -8,14 +8,13 @@ import { useAppDispatch } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
 import { useRevalidate } from "@/custom-hooks/UseRevalidate"
 import { useRouter } from "next/navigation"
-import { NAVIGATION_LINKS } from "@/enums/navigation"
+import { NAVIGATION_LINKS, EVENT_DETAILS_LINK } from "@/enums/navigation"
 import { uploadEventMedia } from "@/helper-fns/uploadEventMedia"
 import { sanitizeEventDataForServer } from "@/lib/cloudinary"
 import { saveEventAsDraft, updateEventAsDraft, updateAndPublishEvent } from "@/actions/event/creation"
 import { clearEventDraft } from "@/custom-hooks/UseEventDraftPersist"
-import { EVENT_DETAILS_LINK } from "@/enums/navigation"
 import { useQueryClient } from "@tanstack/react-query"
-import { EVENTS_ENDPOINT } from "@/endpoints"
+import { EVENTS_ENDPOINT, DASHBOARD_OVERVIEW_ENDPOINT } from "@/endpoints"
 
 
 export default function SaveAsDraftBtn() {
@@ -95,6 +94,7 @@ export default function SaveAsDraftBtn() {
                 }))
                 queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                 queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                 clearEventDraft()
                 resetForm()
                 trigger()

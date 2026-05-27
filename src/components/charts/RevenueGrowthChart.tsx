@@ -80,6 +80,10 @@ export default function RevenueGrowthChart({
     const [chartData, setChartData] = useState<ChartDataPoint[]>(() => toChartPoints(initialChartData))
     const [isPending, startTransition] = useTransition()
 
+    useEffect(() => {
+        setChartData(toChartPoints(initialChartData))
+    }, [initialChartData])
+
     const hasMountedRef = useRef(false)
     const renderCount = useRef(0)
     renderCount.current += 1

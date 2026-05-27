@@ -19,7 +19,7 @@ import DataDisplayTableWrapper from "../custom-utils/TableDataDisplayAreas/DataD
 import { MyEventsPageFilters } from "../custom-utils/TableDataDisplayAreas/resources/avaliable-filters"
 import { TabSlice } from "@/custom-hooks/UseDataDisplay"
 import { useEventsDataDisplay } from "@/custom-hooks/UseEventsDataDisplay"
-import { EVENTS_ENDPOINT } from "@/endpoints"
+import { EVENTS_ENDPOINT, DASHBOARD_OVERVIEW_ENDPOINT } from "@/endpoints"
 
 import {
     bulkCancelEvents,
@@ -176,6 +176,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                         dispatch(showAlert({ title: "Deleted", description: result.message, variant: "success" }))
                         queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                         queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                        queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                         tabStates["draft"].refresh()
                         tabStates["all"].refresh()
                         triggerRevalidation()
@@ -206,6 +207,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                     dispatch(showAlert({ title: "Published", description: result.message, variant: "success" }))
                     queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                     queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                    queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                     tabStates["draft"].refresh()
                     tabStates["live"].refresh()
                     tabStates["all"].refresh()
@@ -232,6 +234,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                     dispatch(showAlert({ title: "Unpublished", description: result.message, variant: "success" }))
                     queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                     queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                    queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                     tabStates["live"].refresh()
                     tabStates["draft"].refresh()
                     tabStates["all"].refresh()
@@ -293,6 +296,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                             dispatch(showAlert({ title: "Events Cancelled", description: result.message, variant: "success" }))
                             queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                             queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                            queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                             setSelectedEvents([])
                             state.refresh()
                             tabStates["cancelled"].refresh()
@@ -334,6 +338,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                             dispatch(showAlert({ title: "Events Unpublished", description: result.message, variant: "success" }))
                             queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                             queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                            queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                             setSelectedEvents([])
                             state.refresh()
                             tabStates["draft"].refresh()
@@ -375,6 +380,7 @@ export default function EventsPageContentWrapper({ initialEvents, categories }: 
                             dispatch(showAlert({ title: "Events Deleted", description: result.message, variant: "success" }))
                             queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
                             queryClient.invalidateQueries({ queryKey: [EVENTS_ENDPOINT] })
+                            queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                             setSelectedEvents([])
                             state.refresh()
                             triggerRevalidation()

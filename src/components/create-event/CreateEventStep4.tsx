@@ -227,7 +227,7 @@ export default function CreateEventStep4() {
                                 const isRestricted = isCustomSender && !plan.features.customize_sender_name
 
                                 return (
-                                    <div key={key} className="flex items-center justify-between">
+                                    <div key={key} className={cn("flex justify-between", isRestricted ? "flex-col items-start gap-2" : "items-center")}>
                                         <label className="text-sm text-brand-secondary-9">{label}</label>
                                         {!isRestricted ? (
                                             <Controller
@@ -245,7 +245,6 @@ export default function CreateEventStep4() {
                                             <PlanGateBanner
                                                 message={plan.upgradePromptFor("customize_sender_name") ?? ""}
                                                 data-testid="sender-name-plan-gate"
-                                                variant='inline'
                                             />
                                         )}
                                     </div>

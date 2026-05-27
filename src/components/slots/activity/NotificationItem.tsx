@@ -5,11 +5,12 @@ import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 
 const NOTIFICATION_DOT_COLOR: Record<string, string> = {
-    sale: 'bg-blue-500',
+    sale: 'bg-blue-600',
     refund: 'bg-red-500',
     checkin: 'bg-green-500',
     withdrawal: 'bg-emerald-500',
     ticket_transfer: 'bg-purple-500',
+    system: 'bg-blue-500',
 }
 
 interface NotificationItemProps {
@@ -23,32 +24,22 @@ export default function NotificationItem({ notification }: NotificationItemProps
 
     return (
         <div className={cn(
-            "flex items-start w-full gap-3 py-2 border-b border-brand-neutral-2 last:border-0 px-2 -mx-4 rounded-lg transition-colors",
+            "rounded-[16px] shadow-[0px_4px_16px_rgba(0,0,0,0.04)] border p-4 mb-3 flex flex-col gap-2 transition-colors",
+            isUnread ? "bg-brand-primary-1 border-brand-primary-2/50 hover:bg-brand-primary-2/50" : "bg-white border-brand-neutral-2 hover:border-brand-neutral-3 hover:bg-brand-neutral-50"
         )}>
-            <div className={cn(isUnread ? "bg-brand-primary-1 py-2 hover:bg-brand-primary-2/50" : "hover:bg-brand-neutral-1")}>
-                <div className="flex items-center pt-1">
-                    {isUnread && (
-                        <div className={cn("w-2 h-2 rounded-full", dotColor)} />
-                    )}
+            <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                    <div className={cn("w-2 h-2 rounded-full", dotColor)} />
+                    <span className="text-xs font-medium text-brand-neutral-7">{notification.title}</span>
                 </div>
-
-                <div className="flex-1 min-w-0">
-                    <p className="text-[11px] text-brand-neutral-7 mb-1">
-                        {notification.title}
-                    </p>
-                    <p className={cn(
-                        "text-xs mb-0.5",
-                        isUnread ? "text-brand-secondary-8 font-medium" : "text-brand-neutral-8 font-normal"
-                    )}>
-                        {notification.message}
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-1 text-xs text-brand-neutral-7 shrink-0">
+                <div className="flex items-center gap-1 text-[11px] text-brand-neutral-6">
                     <Icon icon="hugeicons:clock-01" className="w-3.5 h-3.5 text-orange-400" />
                     <span>{timeAgo}</span>
                 </div>
             </div>
+            <p className="text-[13px] font-semibold text-brand-secondary-9">
+                {notification.message}
+            </p>
         </div>
     )
 }

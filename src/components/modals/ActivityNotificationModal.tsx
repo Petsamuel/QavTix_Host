@@ -82,29 +82,6 @@ export default function AllActivityNotificationsModal({
             className="md:max-w-md"
             childrenContainerStyles="px-0"
         >
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 pb-4 border-b border-brand-neutral-2">
-                <DialogHeader>
-                    <DialogTitle className={cn(space_grotesk.className, "text-lg font-bold text-brand-secondary-9")}>
-                        {isActivityTab ? "All Activity" : "All Notifications"}
-                    </DialogTitle>
-                    <DialogDescription className="text-xs text-brand-neutral-7">
-                        {isActivityTab
-                            ? "Full log of recent activity across your account"
-                            : "All your recent notifications"
-                        }
-                    </DialogDescription>
-                </DialogHeader>
-
-                <button
-                    onClick={handleClose}
-                    className="text-brand-neutral-7/80 hover:text-brand-neutral-6"
-                    aria-label="Close modal"
-                >
-                    <Icon icon="line-md:close-circle-filled" className="size-6" />
-                </button>
-            </div>
-
             {/* Tabs */}
             <div className="border-b border-brand-neutral-3">
                 <div className="flex">
@@ -131,13 +108,9 @@ export default function AllActivityNotificationsModal({
             {/* Content */}
             <div className="space-y-2 px-6 pb-2 pt-3">
                 {isActivityTab ? (
-                    activities.length > 0
-                        ? <RecentActivityTab activities={activities} follower_count={follower_count} />
-                        : <EmptyState icon="hugeicons:clock-01" message="No activity found" />
+                    <RecentActivityTab activities={activities} follower_count={follower_count} />
                 ) : (
-                    notifications.length > 0
-                        ? <NotificationsTab notifications={notifications} />
-                        : <EmptyState icon="hugeicons:notification-02" message="No notifications yet" />
+                    <NotificationsTab notifications={notifications} />
                 )}
             </div>
 

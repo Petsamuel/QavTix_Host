@@ -52,31 +52,27 @@ export default function RecentActivityTab({ activities, follower_count }: Recent
 
     return (
         <div className="space-y-2 w-full">
-            <div className={cn("flex items-center px-4", isCompletelyEmpty ? "justify-end" : "justify-between")}>
-                {!isCompletelyEmpty && (
-                    <Select
-                        value={filterValue}
-                        onValueChange={handleFilterChange}
+            <div className="flex items-center px-4 justify-between">
+                <Select
+                    value={filterValue}
+                    onValueChange={handleFilterChange}
+                >
+                    <SelectTrigger
+                        className={cn(
+                            "border-brand-neutral-8 font-medium disabled:cursor-not-allowed disabled:opacity-65 text-xs w-fit bg-white rounded-lg border-neutral-4 hover:border-brand-neutral-5 focus:border-brand-primary-6",
+                        )}
                     >
-                        <SelectTrigger
-                            className={cn(
-                                "border-brand-neutral-8 font-medium disabled:cursor-not-allowed disabled:opacity-65 text-xs w-fit bg-white rounded-lg border-neutral-4 hover:border-brand-neutral-5 focus:border-brand-primary-6",
-                            )}
-                        >
-                            <Icon icon="hugeicons:sliders-horizontal" width="24" height="24" className="shrink-0" />
-                            <SelectValue placeholder="Filter" />
-                        </SelectTrigger>
-                        <SelectContent className='z-999'>
-                            {FILTER_OPTIONS.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                                    {opt.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                )}
-
-
+                        <Icon icon="hugeicons:sliders-horizontal" width="24" height="24" className="shrink-0" />
+                        <SelectValue placeholder="Filter" />
+                    </SelectTrigger>
+                    <SelectContent className='z-999'>
+                        {FILTER_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                                {opt.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
                 <Badge className='bg-brand-accent-1 text-brand-accent-7'>
                     {follower_count} Followers
                 </Badge>

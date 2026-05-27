@@ -7,7 +7,7 @@ import { useOnRevalidate, useRevalidate } from "./UseRevalidate"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { TabSlice, TabConfig, TabState, UseDataDisplayConfig } from "./UseDataDisplay"
 import { updateEventStatus } from "@/actions/event/client"
-import { EVENTS_ENDPOINT } from "@/endpoints"
+import { EVENTS_ENDPOINT, DASHBOARD_OVERVIEW_ENDPOINT } from "@/endpoints"
 
 type FetchStatus = "idle" | "loading" | "loadingMore" | "error" | "empty"
 
@@ -156,6 +156,7 @@ const useEventsTabState = <T>(
             ).then(() => {
                 queryClient.invalidateQueries({ queryKey: [endpoint] })
                 queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
                 triggerRevalidation()
             })
         }
@@ -337,6 +338,7 @@ export function useEventsDataDisplay<T>(
                 console.log("[useEventsDataDisplay] Page visible/focused. Refreshing data...")
                 queryClient.invalidateQueries({ queryKey: [config.endpoint] })
                 queryClient.invalidateQueries({ queryKey: ["organizer-events"] })
+                queryClient.invalidateQueries({ queryKey: [DASHBOARD_OVERVIEW_ENDPOINT] })
             }
         }
         window.addEventListener("visibilitychange", handleVisibilityFocus)
