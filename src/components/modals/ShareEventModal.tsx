@@ -91,30 +91,6 @@ export default function ShareEventModal({ isOpen, onClose, shareUrl, title }: Sh
             </DialogHeader>
 
             <div className="space-y-8">
-                {/* Social Share Grid */}
-                <div className="space-y-4">
-                    <label className="text-sm font-bold text-brand-secondary-9 block">Share to</label>
-                    <div className="grid grid-cols-4 gap-2">
-                        {SOCIAL_PLATFORMS.map((platform) => (
-                            <div key={platform.name} className="flex flex-col items-center gap-2">
-                                <button
-                                    onClick={() => handlePlatformClick(platform)}
-                                    title={platform.tooltip}
-                                    className={cn(
-                                        "size-12 rounded-md flex items-center justify-center transition-all hover:-translate-y-1 hover:shadow-lg active:scale-95",
-                                        platform.bgColor
-                                    )}
-                                >
-                                    <Icon icon={platform.icon} className="size-7" />
-                                </button>
-                                <span className="text-[10px] text-brand-secondary-6 text-center leading-tight">
-                                    {platform.name}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
                 {/* Copy Link */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-brand-secondary-9 block">Copy link</label>
@@ -139,6 +115,30 @@ export default function ShareEventModal({ isOpen, onClose, shareUrl, title }: Sh
                             <Icon icon={copied ? "lucide:check-check" : "solar:copy-bold-duotone"} className="size-4" />
                             <span>{copied ? "Copied!" : "Copy"}</span>
                         </button>
+                    </div>
+                </div>
+
+                {/* Social Share Grid */}
+                <div className="space-y-4">
+                    <label className="text-sm font-bold text-brand-secondary-9 block">Share to</label>
+                    <div className="grid grid-cols-4 gap-2">
+                        {SOCIAL_PLATFORMS.map((platform) => (
+                            <div key={platform.name} className="flex flex-col items-center gap-2">
+                                <button
+                                    onClick={() => handlePlatformClick(platform)}
+                                    title={platform.tooltip}
+                                    className={cn(
+                                        "size-12 rounded-md flex items-center justify-center transition-all hover:-translate-y-1 hover:shadow-lg active:scale-95",
+                                        platform.bgColor
+                                    )}
+                                >
+                                    <Icon icon={platform.icon} className="size-7" />
+                                </button>
+                                <span className="text-[10px] text-brand-secondary-6 text-center leading-tight">
+                                    {platform.name}
+                                </span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

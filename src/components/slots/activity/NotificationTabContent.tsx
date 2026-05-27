@@ -21,7 +21,7 @@ const FILTER_OPTIONS: { label: string; value: ActivityType }[] = [
     { label: "Sales", value: "sale" },
     { label: "Check-ins", value: "checkin" },
     { label: "Refunds", value: "refund" },
-    { label: "Withdrawals", value: "withdrawal" },
+    { label: "Payouts", value: "withdrawal" },
     { label: "System", value: "system" },
 ]
 
