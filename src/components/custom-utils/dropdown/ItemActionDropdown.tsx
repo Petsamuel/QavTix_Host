@@ -26,6 +26,7 @@ export type ItemAction = {
     label: string
     icon: string
     variant?: 'default' | 'danger'
+    badge?: string
     onClick?: () => void | Promise<void>
 }
 
@@ -182,6 +183,11 @@ function ItemActionDropdownInner({
                                         : <Icon icon={action.icon} className="size-4.5" />
                                     }
                                     {action.label}
+                                    {action.badge && (
+                                        <span className="ml-auto animate-pulse inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-brand-primary-1 text-brand-primary-6 uppercase tracking-wider shadow-[0_0_6px_rgba(59,130,246,0.5)]">
+                                            BOOST
+                                        </span>
+                                    )}
                                 </button>
                             </DropdownMenuItem>
                         )

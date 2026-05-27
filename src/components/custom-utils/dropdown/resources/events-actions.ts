@@ -75,6 +75,7 @@ export function buildLiveEventActions(
             id: "feature" as "feature",
             label: "Add to Featured",
             icon: "flowbite:rectangle-list-outline",
+            badge: "blink"
         },
         ...riskActions
         ]
