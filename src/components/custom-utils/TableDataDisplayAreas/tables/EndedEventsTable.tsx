@@ -124,7 +124,7 @@ function EndedCancelledTable({
                                             </div>
                                         </td>
                                         <td className="py-4 px-5">
-                                            <EventInfo variant="desktop" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
+                                            <EventInfo variant="desktop" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} isFeatured={event.is_featured} />
                                         </td>
                                         <td className="py-4 px-5">
                                             <p className="text-xs text-brand-secondary-9 whitespace-nowrap">{formatDateTime(event.start_datetime)}</p>
@@ -210,7 +210,7 @@ function EndedCancelledTable({
                                     }
                                 </div>
                                 <div className="flex items-start justify-between gap-3">
-                                    <EventInfo variant="mobile" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
+                                    <EventInfo variant="mobile" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} isFeatured={event.is_featured} />
                                     <div className="flex flex-col text-xs text-brand-secondary-9">
                                         <span className="font-bold">Date & Time</span>
                                         <span>{formatDateTime(event.start_datetime)}</span>

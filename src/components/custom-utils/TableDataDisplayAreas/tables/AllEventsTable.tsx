@@ -129,10 +129,7 @@ export default function AllEventsTable({
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center gap-2">
-                                                <EventInfo variant="desktop" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
-                                                {event.is_featured && (
-                                                    <Icon icon="mdi:feature-highlight" width="20" height="20" className="text-brand-accent-6" />
-                                                )}
+                                                <EventInfo variant="desktop" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} isFeatured={event.is_featured} />
                                             </div>
                                         </td>
                                         <td className="p-4">
@@ -215,10 +212,7 @@ export default function AllEventsTable({
                                 </div>
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex items-center gap-2">
-                                        <EventInfo variant="mobile" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} />
-                                        {event.is_featured && (
-                                            <Icon icon="mdi:feature-highlight" width="18" height="18" className="text-brand-accent-6" />
-                                        )}
+                                        <EventInfo variant="mobile" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} isFeatured={event.is_featured} />
                                     </div>
                                     <div className="flex flex-col text-xs text-brand-secondary-9">
                                         <span className="font-bold">Date & Time</span>

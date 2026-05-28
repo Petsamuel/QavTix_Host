@@ -147,10 +147,8 @@ export default function MyLiveEventsTable({
                                                     category={event.category}
                                                     image={event.event_image?.image_url ?? ""}
                                                     title={event.title}
+                                                    isFeatured={event.is_featured}
                                                 />
-                                                {event.is_featured && (
-                                                    <Icon icon="mdi:feature-highlight" width="20" height="20" className="text-brand-accent-6" />
-                                                )}
                                             </div>
                                         </td>
                                         <td className="py-4 px-5">
@@ -238,9 +236,6 @@ export default function MyLiveEventsTable({
                                         <span className="font-bold">Views:</span>
                                         <span>{event.views_count}</span>
                                     </div>
-                                    {event.is_featured && (
-                                        <Icon icon="mdi:feature-highlight" width="18" height="18" className="text-brand-accent-6" />
-                                    )}
                                     {
                                         event.status === "draft" ?
                                             null
@@ -263,6 +258,7 @@ export default function MyLiveEventsTable({
                                         category={event.category}
                                         image={event.event_image?.image_url ?? ""}
                                         title={event.title}
+                                        isFeatured={event.is_featured}
                                     />
                                     <div className="flex flex-col text-xs text-brand-secondary-9">
                                         <span className="font-bold">Date & Time</span>
