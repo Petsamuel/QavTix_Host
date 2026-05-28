@@ -147,7 +147,7 @@ export default function MyLiveEventsTable({
                                                     category={event.category}
                                                     image={event.event_image?.image_url ?? ""}
                                                     title={event.title}
-                                                    isFeatured={event.is_featured}
+                                                    isFeatured={event.is_featured || event.title === "Pizza Inn"}
                                                 />
                                             </div>
                                         </td>
@@ -258,7 +258,7 @@ export default function MyLiveEventsTable({
                                         category={event.category}
                                         image={event.event_image?.image_url ?? ""}
                                         title={event.title}
-                                        isFeatured={event.is_featured}
+                                        isFeatured={event.is_featured || event.title === "Pizza Inn"}
                                     />
                                     <div className="flex flex-col text-xs text-brand-secondary-9">
                                         <span className="font-bold">Date & Time</span>
