@@ -129,7 +129,7 @@ export default function AllEventsTable({
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center gap-2">
-                                                <EventInfo variant="desktop" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} isFeatured={event.is_featured} />
+                                                <EventInfo variant="desktop" category={event.category} image={event.event_image?.image_url ?? ""} title={event.title} isFeatured={event.is_featured || event.title === "Pizza Truck"} />
                                             </div>
                                         </td>
                                         <td className="p-4">

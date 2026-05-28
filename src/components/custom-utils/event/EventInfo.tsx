@@ -45,7 +45,7 @@ export default function EventInfo({
                     }
                 </div>
                 {isFeatured && (
-                    <span className="absolute -top-1.5 -right-1.5 z-10 flex items-center justify-center size-5 rounded-full bg-white shadow-sm border border-brand-neutral-2">
+                    <span className="absolute -top-1.5 -right-1.5 z-10 flex items-center justify-center size-5 rounded-full bg-white shadow-sm border border-brand-neutral-2 ">
                         <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" className="iconify iconify--mdi text-brand-accent-6 w-3.5 h-3.5" viewBox="0 0 24 24">
                             <path fill="currentColor" d="m8.58 17.25l.92-3.89l-3-2.58l3.95-.37L12 6.8l1.55 3.65l3.95.33l-3 2.58l.92 3.89L12 15.19zM12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2m0 2a8 8 0 0 0-8 8a8 8 0 0 0 8 8a8 8 0 0 0 8-8a8 8 0 0 0-8-8"></path>
                         </svg>
