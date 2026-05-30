@@ -57,7 +57,7 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
 
     useEffect(() => { setMounted(true) }, [])
 
-    const { control } = useForm({
+    const { control, reset } = useForm({
         defaultValues: { autoRenew: initialData?.auto_renew ?? false },
     })
 
@@ -84,14 +84,23 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
     })
 
     useEffect(() => {
-        if (initialData) {
+        if (initialData && Object.keys(initialData).length > 0) {
             setData(initialData)
             refreshProfile()
+            reset({ autoRenew: initialData.auto_renew ?? false })
         }
-    }, [initialData, refreshProfile])
+    }, [initialData, refreshProfile, reset])
 
     // Derived state
-    const currentPlanSlug = (data?.plan_slug === "free" ? "standard" : (data?.plan_slug ?? "standard")) as PlanSlug
+    // Treat missing/empty data or free/standard plan_slug as free plan
+    const hasValidSubscription = !!data && Object.keys(data).length > 0 && !!data.plan_slug
+    const isFreePlan = !hasValidSubscription
+        || data!.plan_slug === 'free'
+        || data!.plan_slug === 'standard'
+        || data!.plan?.slug === 'free'
+        || data!.plan?.slug === 'standard'
+
+    const currentPlanSlug = (isFreePlan ? "standard" : (data?.plan_slug ?? "standard")) as PlanSlug
     const currentPlanIndex = PLAN_ORDER.indexOf(currentPlanSlug)
     const isHighestPlan = currentPlanIndex === PLAN_ORDER.length - 1
     const isExpired = data?.is_expired ?? false
@@ -188,25 +197,20 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                             <p className="text-sm text-brand-secondary-9 font-medium">Control how your subscription is renewed</p>
                         </header>
                         <div className="w-full border-t-[1.5px] border-dashed border-brand-secondary-2" />
-                        {(() => {
-                            const isFreePlan = data.plan_slug === 'free' || data.plan_slug === 'standard' || data.plan?.slug === 'free' || data.plan?.slug === 'standard'
-                            return (
-                                <div className={cn("w-full max-w-sm space-y-2", isFreePlan && "hidden")}>
-                                    <ToggleItem
-                                        control={control}
-                                        name="autoRenew"
-                                        label="Allow auto-renewal"
-                                        disabled={isTogglingAR || isFreePlan}
-                                        onChange={isFreePlan ? undefined : handleAutoRenewToggle}
-                                    />
-                                    <p className="text-xs text-brand-neutral-6 pl-1">
-                                        {isFreePlan
-                                            ? "Upgrade to a paid plan to enable auto-renewal"
-                                            : renewsLabel}
-                                    </p>
-                                </div>
-                            )
-                        })()}
+                        <div className={cn("w-full max-w-sm space-y-2", isFreePlan && "hidden")}>
+                            <ToggleItem
+                                control={control}
+                                name="autoRenew"
+                                label="Allow auto-renewal"
+                                disabled={isTogglingAR || isFreePlan}
+                                onChange={isFreePlan ? undefined : handleAutoRenewToggle}
+                            />
+                            <p className="text-xs text-brand-neutral-6 pl-1">
+                                {isFreePlan
+                                    ? "Upgrade to a paid plan to enable auto-renewal"
+                                    : renewsLabel}
+                            </p>
+                        </div>
 
                     </section>
 

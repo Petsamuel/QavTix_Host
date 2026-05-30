@@ -20,7 +20,8 @@ export default async function AllActivityModalPage(props: { searchParams: Promis
             initialActivities={activities}
             initialNotifications={notifications}
             initialPage={1}
-            initialHasMore={true} follower_count={res.data?.follower_count ?? 0}
+            initialHasMore={!!res.data?.next} 
+            follower_count={res.data?.follower_count ?? 0}
         />
     )
 }

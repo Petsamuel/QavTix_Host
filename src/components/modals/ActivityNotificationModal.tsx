@@ -74,16 +74,15 @@ export default function AllActivityNotificationsModal({
                 setActivities(prev => {
                     const existingIds = new Set(prev.map(a => a.id))
                     const fresh = newActivities.filter((a: DashboardActivity) => !existingIds.has(a.id))
-                    if (fresh.length === 0 && newNotifications.length === 0) setHasMore(false)
                     return [...prev, ...fresh]
                 })
                 setNotifications(prev => {
                     const existingIds = new Set(prev.map(n => n.id))
                     const fresh = newNotifications.filter((n: DashboardNotification) => !existingIds.has(n.id))
-                    if (fresh.length === 0 && newActivities.length === 0) setHasMore(false)
                     return [...prev, ...fresh]
                 })
                 setCurrentPage(p => p + 1)
+                setHasMore(!!res.data.next)
             } else {
                 setHasMore(false)
             }

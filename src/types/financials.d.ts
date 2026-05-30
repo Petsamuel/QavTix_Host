@@ -61,6 +61,7 @@ interface PayoutAccountItem {
 interface WithdrawPayload {
     amount: string
     payout_account_id: string
+    password?: string
 }
 
 interface WithdrawResult {

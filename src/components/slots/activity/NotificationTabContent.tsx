@@ -17,7 +17,8 @@ interface NotificationsTabProps {
 
 const PREVIEW_COUNT = 4
 
-const FILTER_OPTIONS: { label: string; value: ActivityType }[] = [
+const FILTER_OPTIONS: { label: string; value: string }[] = [
+    { label: "All Notifications", value: "all" },
     { label: "Sales", value: "sale" },
     { label: "Check-ins", value: "checkin" },
     { label: "Refunds", value: "refund" },
@@ -47,7 +48,7 @@ export default function NotificationsTab({ notifications }: NotificationsTabProp
     }, [filterValue, isFiltering])
 
     const handleFilterChange = (v: string) => {
-        const newValue = v === filterValue ? "" : v;
+        const newValue = v === filterValue || v === "all" ? "" : v;
         setOptimisticFilter(newValue); // Update UI immediately
 
         const params = new URLSearchParams(searchParams.toString());
