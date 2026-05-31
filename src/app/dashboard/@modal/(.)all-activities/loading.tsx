@@ -5,14 +5,7 @@ export default function Loading() {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
             <div className="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
-                {/* Header Skeleton */}
-                <div className="flex items-center justify-between px-6 py-5 border-b border-brand-neutral-2">
-                    <div className="space-y-2">
-                        <Skeleton className="h-6 w-32 bg-brand-neutral-3" />
-                        <Skeleton className="h-3 w-48 bg-brand-neutral-2" />
-                    </div>
-                    <Icon icon="line-md:close-circle-filled" className="size-6 text-brand-neutral-4" />
-                </div>
+
 
                 {/* Tabs Skeleton */}
                 <div className="flex border-b border-brand-neutral-3">

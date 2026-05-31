@@ -18,6 +18,7 @@ import PricingCard from "../cards/PricingCard"
 import ActionButton1 from "../custom-utils/buttons/ActionBtn1"
 import PlanUpgradeSuccessMessage from "../modals/PlanUpgradeSuccessMessage"
 import CancelSubscriptionModal from "../modals/CancelPlanModal"
+import UpgradePlanModal from "../modals/UpgradePlanModal"
 
 const PLAN_ORDER: PlanSlug[] = ["standard", "pro", "enterprise"]
 
@@ -47,13 +48,14 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
 
     const dispatch = useAppDispatch()
     const router = useRouter()
-    const { subscribe, status } = usePricingCheckout()
+    const { status } = usePricingCheckout()
 
     const [data, setData] = useState<SubscriptionData | null>(initialData)
     const [isRenewing, setIsRenewing] = useState(false)
     const [isTogglingAR, setIsTogglingAR] = useState(false)
     const [mounted, setMounted] = useState(false)
     const [openCancelSubModal, setCancelOpenSubModal] = useState(false)
+    const [openUpgradeModal, setOpenUpgradeModal] = useState(false)
 
     useEffect(() => { setMounted(true) }, [])
 
@@ -80,6 +82,7 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
         if (res.success && res.data) {
             setData(res.data)
         }
+        await refreshProfile()
         router.refresh()
     })
 
@@ -146,11 +149,9 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
     }, [isRenewing, dispatch, router])
 
     const handleUpgrade = useCallback(() => {
-        const nextPlan = hostPricingData.plans[currentPlanIndex + 1]
-        if (!nextPlan) return
-
-        subscribe(nextPlan)
-    }, [currentPlanIndex, currentPlanSlug, subscribe])
+        if (!canUpgrade) return
+        setOpenUpgradeModal(true)
+    }, [canUpgrade])
 
     const handleCancel = () => setCancelOpenSubModal(true)
 
@@ -296,6 +297,14 @@ export default function SubscriptionPanel({ initialData, fetchError }: Subscript
                     setIsOpen={setCancelOpenSubModal}
                     planSlug={currentPlanSlug as "pro" | "enterprise"}
                     expiresAt={data.expires_at}
+                />
+            )}
+
+            {canUpgrade && (
+                <UpgradePlanModal
+                    isOpen={openUpgradeModal}
+                    setIsOpen={setOpenUpgradeModal}
+                    currentPlanSlug={currentPlanSlug}
                 />
             )}
         </>

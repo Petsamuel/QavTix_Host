@@ -21,6 +21,14 @@
 //   - Feature table Customer Profile Insights: Standard & Pro corrected false → true (✓ all plans)
 //   - Feature table Built-in Email Campaigns: corrected Pro 100 → 400/month, Enterprise 100 → 4,600/month
 //
+// SYNCED MAY 31 2026: copied from qavtix-website (source of truth)
+//   - Standard plan renamed: 'Standard Plan' → 'Free Plan'
+//   - Pro plan renamed: 'Pro Plan' → 'Professional Plan'
+//   - Standard features condensed to 6 core items
+//   - Pro features reordered and de-duplicated
+//   - Enterprise features updated: Discount Codes cap corrected to 500, SMS Send added
+//   - Feature table simplified and column labels updated
+//
 
 // Host Plans
 
@@ -28,48 +36,44 @@ export const hostPricingData: PricingData = {
     plans: [
         {
             id: 'standard',
-            name: 'Standard Plan',
+            name: 'Free Plan',
             price: 0,
             currency: '₦',
             perTicketFee: 0,
             description: 'Start hosting with no monthly fee. Perfect for testing the waters with up to 2 active events at a time.',
             features: [
-                '2 active events at a time',
-                'Single ticket type per event',
-                'Basic event setup',
-                'Max ticket sales (750 tickets)',
-                'Real-time sales insights',
-                'Downloadable attendee list (up to 250)',
-                'QR code check-in system',
-                'Fraud detection',
-                'Email support',
-                'Group sharing',
+                '2 Active Events at a Time',
+                'Single Ticket Type',
+                'Max Ticket Sales (750 tickets)',
+                'Customer Profile Insights',
+                'Downloadable Attendees List (Up to 250)',
+                'Fraud Detection',
             ],
             buttonText: 'Get started free',
             buttonVariant: 'secondary',
         },
         {
             id: 'pro',
-            name: 'Pro Plan',
+            name: 'Professional Plan',
             price: 25000,
             currency: '₦',
             perTicketFee: 0,
             description: 'Everything you need to grow. Unlock advanced analytics, marketing tools, and team access. First 30 days FREE.',
             features: [
-                'Everything in Standard Plan',
-                'Unlimited event creation',
-                'Unlimited ticket categories',
-                'Advanced event setup',
-                'Max ticket sales (2,500 tickets)',
-                'Revenue performance chart',
-                'Week-based sales analysis',
-                'Integrated marketing dashboard',
-                'Built-in email campaigns (400 sends/month)',
-                'Exclusive discount codes (up to 100)',
-                'Referral sales program',
-                'Team permissions (1 team member)',
-                'Downloadable attendee list (up to 1,000)',
-                'Priority email support',
+                'Unlimited Event Creation',
+                'Unlimited Ticket Categories',
+                'Max Ticket Sales (2,500 tickets)',
+                'Exclusive Discount Codes (Up to 100)',
+                'Referral Sales Program',
+                'Customer Profile Insights',
+                'Downloadable Attendee List (Up to 1,000)',
+                'QR Code Check-In System',
+                'Real-Time Sales Insights',
+                'Revenue Performance Chart',
+                'Integrated Marketing Dashboard',
+                'Built-in Email Campaigns (400 Sends/Month)',
+                'Priority Email Support',
+                'Fraud Detection',
             ],
             buttonText: 'Start free trial',
             buttonVariant: 'primary',
@@ -84,22 +88,26 @@ export const hostPricingData: PricingData = {
             perTicketFee: 0,
             description: 'Maximum power for large-scale organisations. Full analytics, resale controls, dedicated support, and custom pricing.',
             features: [
-                'Everything in Pro Plan',
-                'Unlimited team members (3 included)',
-                'Max ticket sales (10,000 tickets)',
-                'Geographical breakdown analytics',
-                'Customer profile insights',
-                'Exclusive discount codes (up to 300)',
-                'Sponsored email campaigns',
-                'Built-in email campaigns (4,600 sends/month)',
-                'Featured event listing (2 weeks included)',
-                'Bulk refunds (where applicable)',
-                'Dedicated account manager',
-                'Ticket resale controls (up to +20%)',
-                'Fraud detection & resale controls',
-                'Advanced security options',
-                'Priority customer support',
-                'Custom integrations & workflows',
+                'Unlimited Event Creation',
+                'Unlimited Ticket Categories',
+                'Unlimited Resale Volume',
+                'Exclusive Discount Codes (Up to 500)',
+                'Referral Sales Program',
+                'Customer Profile Insights',
+                'Unlimited downloadable Attendee List',
+                'QR Code Check-In System',
+                'Included Featured Event Listing (2 Weeks)',
+                'Real-Time Sales Insights',
+                'Revenue Performance Chart',
+                'Geographical Breakdown',
+                'Week-Based Analysis',
+                'Integrated Marketing Dashboard',
+                'Built-in Email Campaigns (4,600 Sends/Month)',
+                'SMS Send (100 Sends)',
+                'Sponsored Email Campaign',
+                'Dedicated Account Manager',
+                'Priority Customer Support',
+                'Fraud Detection',
             ],
             buttonText: 'Contact sales',
             buttonVariant: 'secondary',
@@ -112,39 +120,33 @@ export const hostPricingData: PricingData = {
     // string = specific value shown as text
     features: [
         //  Event Management
-        { category: 'Event Management', name: 'Active Events', standard: '2 max', pro: 'Unlimited', enterprise: 'Unlimited' },
-        { category: 'Event Management', name: 'Event Setup', standard: 'Basic', pro: 'Advanced', enterprise: 'Advanced' },
-        { category: 'Event Management', name: 'Ticket Categories', standard: 'Single type', pro: 'Unlimited', enterprise: 'Unlimited' },
-        { category: 'Event Management', name: 'Max Ticket Sales', standard: '750', pro: '2,500', enterprise: '10,000' },
-        { category: 'Event Management', name: 'Discount & Promo Codes', standard: false, pro: 'Up to 100', enterprise: 'Up to 300' }, // ← corrected: was 500
-        { category: 'Event Management', name: 'Referral / Affiliate Program', standard: false, pro: true, enterprise: true },
-        { category: 'Event Management', name: 'QR Code Check-In', standard: false, pro: true, enterprise: true },
-        { category: 'Event Management', name: 'Bulk Refunds', standard: false, pro: false, enterprise: 'Where applicable' },
-        { category: 'Event Management', name: 'Ticket Resale Controls', standard: false, pro: false, enterprise: 'Up to +20%' },
-        { category: 'Event Management', name: 'Group Sharing', standard: true, pro: true, enterprise: true },
-
-        //  Team & Access
-        { category: 'Team & Access', name: 'Team Permissions', standard: false, pro: '1 member', enterprise: '3 members' },
+        { category: 'Event Management', name: 'Active Events Limit', standard: '2 Active Events', pro: 'Unlimited', enterprise: 'Unlimited' },
+        { category: 'Event Management', name: 'Ticket Types', standard: 'Single Ticket Type', pro: 'Unlimited Categories', enterprise: 'Unlimited Categories' },
+        { category: 'Event Management', name: 'Max Ticket Sales', standard: '750 Tickets', pro: '2,500 Tickets', enterprise: 'Unlimited' },
+        { category: 'Event Management', name: 'Unlimited Resale Volume', standard: false, pro: false, enterprise: true },
+        { category: 'Event Management', name: 'Exclusive Discount Codes', standard: false, pro: 'Up to 100', enterprise: 'Up to 500' },
+        { category: 'Event Management', name: 'Referral Sales Program', standard: false, pro: true, enterprise: true },
+        { category: 'Event Management', name: 'QR Code Check-In System', standard: false, pro: true, enterprise: true },
 
         //  Analytics & Reports
+        { category: 'Analytics', name: 'Downloadable Attendee List', standard: 'Up to 250', pro: 'Up to 1,000', enterprise: 'Unlimited' },
+        { category: 'Analytics', name: 'Customer Profile Insights', standard: true, pro: true, enterprise: true },
         { category: 'Analytics', name: 'Real-Time Sales Insights', standard: false, pro: true, enterprise: true },
         { category: 'Analytics', name: 'Revenue Performance Chart', standard: false, pro: true, enterprise: true },
-        { category: 'Analytics', name: 'Week-Based Sales Analysis', standard: false, pro: true, enterprise: true },
         { category: 'Analytics', name: 'Geographical Breakdown', standard: false, pro: false, enterprise: true },
-        { category: 'Analytics', name: 'Customer Profile Insights', standard: true, pro: true, enterprise: true },
-        { category: 'Analytics', name: 'Attendee List Export', standard: 'Up to 250', pro: 'Up to 1,000', enterprise: 'Unlimited' },
+        { category: 'Analytics', name: 'Week-Based Analysis', standard: false, pro: false, enterprise: true },
 
         //  Marketing
         { category: 'Marketing', name: 'Integrated Marketing Dashboard', standard: false, pro: true, enterprise: true },
-        { category: 'Marketing', name: 'Built-in Email Campaigns', standard: false, pro: '400/month', enterprise: '4,600/month' },
+        { category: 'Marketing', name: 'Built-in Email Campaigns', standard: false, pro: '400/Monthly Send', enterprise: '4,600/Monthly Send' },
+        { category: 'Marketing', name: 'SMS Send', standard: false, pro: false, enterprise: 'SMS Send (100 Send)' },
         { category: 'Marketing', name: 'Sponsored Email Campaign', standard: false, pro: false, enterprise: true },
-        { category: 'Marketing', name: 'Featured Event Listing', standard: false, pro: false, enterprise: '2 weeks free' },
+        { category: 'Marketing', name: 'Featured Event Listing', standard: false, pro: false, enterprise: '2 Weeks' },
 
         //  Support & Security
-        { category: 'Support', name: 'Email Support', standard: 'Standard', pro: 'Priority', enterprise: 'Priority' },
+        { category: 'Support', name: 'Priority Support', standard: false, pro: 'Email', enterprise: 'Priority Support Email + Call' },
         { category: 'Support', name: 'Dedicated Account Manager', standard: false, pro: false, enterprise: true },
         { category: 'Support', name: 'Fraud Detection', standard: true, pro: true, enterprise: true },
-        { category: 'Support', name: 'Advanced Security Options', standard: false, pro: false, enterprise: true },
     ],
 }
 
