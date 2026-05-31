@@ -15,7 +15,8 @@ interface RecentActivityTabProps {
     follower_count?: number
 }
 
-const FILTER_OPTIONS: { label: string; value: ActivityType }[] = [
+const FILTER_OPTIONS: { label: string; value: string }[] = [
+    { label: "All Activities", value: "all" },
     { label: "Sales", value: "sale" },
     { label: "Check-ins", value: "checkin" },
     { label: "Refunds", value: "refund" },
@@ -38,7 +39,7 @@ export default function RecentActivityTab({ activities, follower_count }: Recent
     const preview = showAll ? activities : activities.slice(0, PREVIEW_COUNT)
 
     const handleFilterChange = (v: string) => {
-        const newValue = v === filterValue ? "" : v;
+        const newValue = v === filterValue || v === "all" ? "" : v;
         const params = new URLSearchParams(searchParams.toString());
         if (newValue) {
             params.set('activity_type', newValue);

@@ -7,10 +7,10 @@ import { quickAmounts } from "./resources/quickAmounts"
 import { space_grotesk } from "@/lib/fonts"
 import AddAccountBtn from "@/lib/features/finance/AddAccountBtn"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { removePayoutAccount, submitWithdrawal } from "@/actions/financials/client"
+import { removePayoutAccount } from "@/actions/financials/client"
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
 import { showAlert } from "@/lib/redux/slices/alertSlice"
-import { openSuccessModal } from "@/lib/redux/slices/successModalSlice"
+import { openPasswordModal } from "@/lib/redux/slices/passwordModalConfirmationSlice"
 import ActionButton1 from "../buttons/ActionBtn1"
 import { useFormatPrice } from "@/custom-hooks/UseFormatPrice"
 import BankLogo from "@/components/financials/BankLogo"
@@ -91,33 +91,14 @@ export default function MainWithdrawalComponent({
             return
         }
 
-        setIsSubmitting(true)
-
-        const result = await submitWithdrawal({
-            amount: amount,
-            payout_account_id: selectedAccount,
-        })
-
-        setIsSubmitting(false)
-
-        if (result.success) {
-            setAmount("")
-            setSelectedAccount("")
-
-            dispatch(openSuccessModal({
-                title: "Withdrawal Submitted!",
-                description: "Your Payment Withdrawal was successful. Thank you for choosing QavTix.",
-                variant: "success",
-            }))
-
-            trigger()
-        } else {
-            dispatch(showAlert({
-                variant: "destructive",
-                title: "Withdrawal failed",
-                description: result.message ?? "Something went wrong. Please try again.",
-            }))
-        }
+        dispatch(openPasswordModal({
+            actionType: "withdrawal",
+            skipVerification: true,
+            actionData: {
+                amount: amount,
+                payout_account_id: selectedAccount
+            }
+        }))
     }
 
     const isDisabled = !amount || !selectedAccount || isSubmitting

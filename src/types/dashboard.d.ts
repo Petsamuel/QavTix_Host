@@ -86,6 +86,8 @@ interface DashboardNotification {
 // Feed
 
 interface DashboardFeedData {
+    next?:          string | null | number
+    previous?:      string | null | number
     activities:     DashboardActivity[]
     notifications:  DashboardNotification[]
     trending:       TrendingTicket[]

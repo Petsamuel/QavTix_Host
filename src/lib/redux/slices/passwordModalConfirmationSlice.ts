@@ -1,10 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export type PasswordModalStateActionType = "delete_account" | "change_email" | "update_security" | "cancel_plan";
+export type PasswordModalStateActionType = "delete_account" | "change_email" | "update_security" | "cancel_plan" | "withdrawal";
 
 export interface OpenPasswordModalPayload {
     actionType: PasswordModalStateActionType;
     skipVerification?: boolean;
+    actionData?: any;
 }
 
 interface PasswordModalState {
@@ -14,6 +15,7 @@ interface PasswordModalState {
     isVerified: boolean;
     lastVerifiedAction: PasswordModalStateActionType | null;
     skipVerification?: boolean;
+    actionData?: any;
 }
 
 const initialState: PasswordModalState = {
@@ -23,6 +25,7 @@ const initialState: PasswordModalState = {
     isVerified: false,
     lastVerifiedAction: null,
     skipVerification: false,
+    actionData: null,
 }
 
 const passwordModalSlice = createSlice({
@@ -37,9 +40,11 @@ const passwordModalSlice = createSlice({
             if (typeof action.payload === 'string') {
                 state.actionType = action.payload;
                 state.skipVerification = false;
+                state.actionData = null;
             } else {
                 state.actionType = action.payload.actionType;
                 state.skipVerification = !!action.payload.skipVerification;
+                state.actionData = action.payload.actionData || null;
             }
         },
         verifyPasswordSuccess: (state) => {
@@ -54,6 +59,7 @@ const passwordModalSlice = createSlice({
             state.status = 'idle';
             state.actionType = null;
             state.skipVerification = false;
+            state.actionData = null;
             // isVerified stays true temporarily so the calling component can react
         },
         resetPasswordStatus: (state) => {
@@ -62,6 +68,7 @@ const passwordModalSlice = createSlice({
             state.status = 'idle';
             state.actionType = null;
             state.skipVerification = false;
+            state.actionData = null;
         },
         setPasswordStatus: (state, action: PayloadAction<PasswordModalState['status']>) => {
             state.status = action.payload;
