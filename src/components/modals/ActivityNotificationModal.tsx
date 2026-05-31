@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Icon } from '@iconify/react'
 import { AnimatedDialog } from '@/components/custom-utils/dialogs/AnimatedDialog'
-import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import { space_grotesk } from '@/lib/fonts'
 import RecentActivityTab from '../slots/activity/ActivityTabContent'
@@ -100,8 +100,9 @@ export default function AllActivityNotificationsModal({
             childrenContainerStyles="px-0"
         >
             {/* Tabs */}
-            <div className="border-b border-brand-neutral-3">
-                <div className="flex">
+            <DialogTitle className="sr-only">Activity & Notifications</DialogTitle>
+            <div className="border-b border-brand-neutral-3 relative flex items-center">
+                <div className="flex flex-1">
                     {(['activity', 'notifications'] as const).map((tab) => (
                         <button
                             key={tab}
@@ -120,6 +121,13 @@ export default function AllActivityNotificationsModal({
                         </button>
                     ))}
                 </div>
+                <button
+                    onClick={handleClose}
+                    className="text-brand-secondary-6 hover:text-brand-secondary-9 bg-brand-neutral-2 hover:bg-brand-neutral-3 rounded-full transition-colors absolute right-4 p-1.5"
+                    aria-label="Close modal"
+                >
+                    <Icon icon="lucide:x" className="size-5" />
+                </button>
             </div>
 
             {/* Content */}

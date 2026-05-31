@@ -35,7 +35,7 @@ export function PlanGateBanner({
             <p className="text-xs pt-1 leading-snug text-brand-neutral-7">
                 {message}{" "}
                 <Link
-                    href={SETTINGS_SUB_LINKS[2].href}
+                    href={SETTINGS_SUB_LINKS[3].href}
                     className="font-semibold text-sm text-brand-primary-6 hover:text-brand-primary-7 hover:underline underline-offset-2 transition-colors"
                 >
                     Upgrade
