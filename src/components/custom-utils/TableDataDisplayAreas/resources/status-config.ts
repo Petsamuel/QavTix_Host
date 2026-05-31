@@ -43,6 +43,9 @@ export const draftStatusConfig = {
 export const liveEventsStatusConfig = {
     'low_sales': { label: 'Low Sales', color: 'text-red-600' },
     'selling_fast': { label: 'Selling Fast', color: 'text-green-600' },
+    'fast_selling': { label: 'Fast Selling', color: 'text-green-600' },
+    'filling_fast': { label: 'Filling Fast', color: 'text-green-600' },
+    'fast_filling': { label: 'Fast Filling', color: 'text-green-600' },
     'starts_soon': { label: 'Starts Soon', color: 'text-orange-600' },
     'started': { label: 'Started', color: 'text-brand-primary' },
     'sold_out': { label: 'Sold Out', color: 'text-gray-600' }
