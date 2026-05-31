@@ -53,7 +53,7 @@ export const PricingBreakdown = ({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Icon icon="hugeicons:note-done" className="text-brand-primary-4 size-5" />
-                        <span className="text-brand-neutral-7 text-xs">Platform Fee (3%)</span>
+                        <span className="text-brand-neutral-7 text-xs">Platform Fee (7.5%)</span>
                     </div>
                     <span className="text-brand-secondary-8 font-medium text-xs">
                         {formatCurrency(platformFee)}

@@ -19,7 +19,7 @@ interface EventImage {
     video_url: string | null
 }
 
-type EventStatus = "active" | "draft" | "ended" | "sold_out" | "cancelled" | "banned" | "started" | "starts_soon" | "filling_fast" | "selling_fast" | "near_capacity"
+type EventStatus = "active" | "draft" | "ended" | "sold_out" | "cancelled" | "banned" | "started" | "starts_soon" | "filling_fast" | "fast_filling" | "selling_fast" | "Fast-Selling" | "fast-selling" | "near_capacity"
 type EventPerformance = "fully_booked" | "almost_full" | "moderate_sales" | "low_sales" | "no_sales"
 
 interface OrganizerEvent {

@@ -45,7 +45,7 @@ export default function MyLiveEventsTable({
 }: MyLiveEventsTableProps) {
 
     const router = useRouter()
-    
+
     const isAllSelected =
         items.length > 0 && items.every(e => selectedEvents.includes(e.id))
 
@@ -130,7 +130,7 @@ export default function MyLiveEventsTable({
                                         </td>
                                         <td className="py-4 px-5">
                                             {(() => {
-                                                const statusCfg = liveEventsStatusConfig[event.status as keyof typeof liveEventsStatusConfig] 
+                                                const statusCfg = liveEventsStatusConfig[event.status as keyof typeof liveEventsStatusConfig]
                                                     ?? { label: "Live", color: "text-green-600" };
                                                 return (
                                                     <div className="flex items-center gap-1 whitespace-nowrap">
@@ -217,7 +217,7 @@ export default function MyLiveEventsTable({
                                         <Checkbox checked={isSelected} onCheckedChange={() => handleSelectEvent(event.id)} />
                                         <div className="flex items-center gap-1">
                                             {(() => {
-                                                const statusCfg = liveEventsStatusConfig[event.status as keyof typeof liveEventsStatusConfig] 
+                                                const statusCfg = liveEventsStatusConfig[event.status as keyof typeof liveEventsStatusConfig]
                                                     ?? { label: "Live", color: "text-green-600" };
                                                 return (
                                                     <>

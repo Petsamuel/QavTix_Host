@@ -4,12 +4,19 @@ import { useFormContext } from 'react-hook-form'
 import { Step3FormData } from '@/schemas/create-event.schema'
 import { PricingBreakdown } from './PricingBreakdown'
 import { useAppSelector } from '@/lib/redux/hooks'
+import { useCurrencyConversion } from '@/custom-hooks/useCurrencyConversion'
+import { formatPrice } from '@/helper-fns/formatPrice'
 
 export default function CreateEventPricingSummary() {
     const { watch } = useFormContext<Step3FormData>()
     const ticketTypes = watch('ticketTypes') || []
 
     const currency = useAppSelector(store => store.authUser.user?.currency) || 'NGN'
+    const { convert } = useCurrencyConversion(currency)
+
+    const totalTickets = ticketTypes.reduce((acc, ticket) => {
+        return acc + (Number(ticket.quantity) || 0)
+    }, 0)
 
     const totalPotentialRevenue = ticketTypes.reduce((acc, ticket) => {
         const price = Number(ticket.price) || 0
@@ -17,15 +24,12 @@ export default function CreateEventPricingSummary() {
         return acc + (price * qty)
     }, 0)
 
-    const platformFee = totalPotentialRevenue * 0.03
+    const fixedFeePerTicket = convert(100).amount
+    const platformFee = (totalPotentialRevenue * 0.075) + (totalTickets * fixedFeePerTicket)
     const yourEarnings = totalPotentialRevenue - platformFee
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-NG', {
-            style: 'currency',
-            currency: currency,
-            maximumFractionDigits: 0,
-        }).format(amount).replace('NGN', '₦')
+        return formatPrice(amount, currency)
     }
 
     return (
