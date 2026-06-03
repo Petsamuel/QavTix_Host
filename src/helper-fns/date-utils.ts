@@ -80,8 +80,30 @@ export const endOfMonth = (date: Date): Date => {
 
 
 export function formatDateTime(date: string | Date) {
-  const dateObj = typeof date === "string" ? new Date(date) : date
+  if (!date) return "";
 
+  // If it's an ISO string, extract exactly what the user provided
+  if (typeof date === "string") {
+    const isoRegex = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/;
+    const match = date.match(isoRegex);
+    if (match) {
+      const year = parseInt(match[1]);
+      const month = parseInt(match[2]) - 1;
+      const day = parseInt(match[3]);
+      let h = parseInt(match[4]);
+      const min = parseInt(match[5]);
+
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const ap = h >= 12 ? "PM" : "AM";
+      if (h > 12) h -= 12;
+      if (h === 0) h = 12;
+      const minStr = String(min).padStart(2, "0");
+
+      return `${monthNames[month]} ${day}, ${year} | ${h}:${minStr} ${ap}`;
+    }
+  }
+
+  const dateObj = typeof date === "string" ? new Date(date) : date
   if (isNaN(dateObj.getTime())) return ""
 
   const formattedDate = new Intl.DateTimeFormat("en-US", {
@@ -97,6 +119,44 @@ export function formatDateTime(date: string | Date) {
   }).format(dateObj)
 
   return `${formattedDate} | ${formattedTime}`
+}
+
+export function formatEventDate(date: string | Date) {
+  if (!date) return "";
+  if (typeof date === "string") {
+    const isoRegex = /^(\d{4})-(\d{2})-(\d{2})/;
+    const match = date.match(isoRegex);
+    if (match) {
+      const year = parseInt(match[1]);
+      const month = parseInt(match[2]) - 1;
+      const day = parseInt(match[3]);
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      return `${monthNames[month]} ${day}, ${year}`;
+    }
+  }
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-NG", { dateStyle: "long" });
+}
+
+export function formatEventTime(date: string | Date) {
+  if (!date) return "";
+  if (typeof date === "string") {
+    const isoRegex = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/;
+    const match = date.match(isoRegex);
+    if (match) {
+      let h = parseInt(match[4]);
+      const min = parseInt(match[5]);
+      const ap = h >= 12 ? "PM" : "AM";
+      if (h > 12) h -= 12;
+      if (h === 0) h = 12;
+      const minStr = String(min).padStart(2, "0");
+      return `${h}:${minStr} ${ap}`;
+    }
+  }
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString("en-NG", { timeStyle: "short" });
 }
 
 

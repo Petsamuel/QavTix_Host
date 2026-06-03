@@ -14,7 +14,7 @@ export async function getHostProfile(token: string | undefined): Promise<AuthUse
         if (!res.ok) return null
         const data = await res.json()
         return data.host
-            ? { ...data.host, subscription: data.subscription, verified_badge: data.verified_badge, payout_available: data.payout_available } as AuthUser
+            ? { ...data.host, subscription: data.subscription, verified_badge: data.verified_badge, payout_available: data.payout_available, can_activate_free_trial: data.can_activate_free_trial } as AuthUser
             : null
     } catch {
         return null

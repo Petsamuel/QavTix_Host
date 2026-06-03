@@ -101,7 +101,7 @@ export default function EventPublishStatusModal({
                                             "text-white w-42 bg-brand-primary-6 font-medium hover:bg-brand-primary-7 hover:shadow-sm text-center px-8 py-3 rounded-md hover:opacity-90 transition-opacity inline-flex items-center gap-1",
                                         )}
                                     >
-                                        View Dashboard <Icon icon="lucide:arrow-right" className="size-5" />
+                                        View Events <Icon icon="lucide:arrow-right" className="size-5" />
                                     </Button>
                                 </>
                             ) : (

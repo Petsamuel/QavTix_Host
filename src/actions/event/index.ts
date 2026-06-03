@@ -32,7 +32,7 @@ async function apiFetch(token: string, endpoint: string, params: Record<string, 
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
         },
-        next: { tags: [...(tags ?? [])], revalidate: 300 }
+        // next: { tags: [...(tags ?? [])], revalidate: 300 }
     })
     if (!res.ok) throw new Error(`Request failed: ${endpoint}`)
     const data = await res.json()

@@ -8,6 +8,7 @@ interface ProfileResponse {
         subscription:      Record<string, unknown> | null
         verified_badge:    boolean
         payout_available:  boolean
+        can_activate_free_trial: boolean
     }
     message: string
 }
@@ -48,7 +49,8 @@ export async function GET(req: NextRequest) {
                 ...json.data.host,
                 subscription: json.data.subscription,
                 verified_badge: json.data.verified_badge,
-                payout_available: json.data.payout_available
+                payout_available: json.data.payout_available,
+                can_activate_free_trial: json.data.can_activate_free_trial
             }
             : null
 

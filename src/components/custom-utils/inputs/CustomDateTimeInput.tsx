@@ -38,6 +38,21 @@ const TIMEZONES = [
     { label: "UTC+12 (NZST)", value: "UTC+12", offset: 12 },
 ]
 
+// Returns the UTC offset string matching the browser's local timezone (e.g. "UTC+1").
+// Falls back to "UTC+0" if no exact match is found in TIMEZONES.
+function getSystemTimezoneValue(): string {
+    const offsetMinutes = -new Date().getTimezoneOffset() // flip sign: UTC+1 → +60
+    const offsetHours = offsetMinutes / 60
+    const sign = offsetHours >= 0 ? '+' : '-'
+    const absHours = Math.abs(offsetHours)
+    const wholeHours = Math.floor(absHours)
+    const mins = Math.round((absHours % 1) * 60)
+    const candidate = mins === 30
+        ? `UTC${sign}${wholeHours}:30`
+        : `UTC${sign}${wholeHours}`
+    return TIMEZONES.find(t => t.value === candidate)?.value ?? 'UTC+0'
+}
+
 const HOURS_12 = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"))
 const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"))
 const VISIBLE_YEARS = 12
@@ -329,7 +344,7 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
         const [hour, setHour] = useState("10")
         const [minute, setMinute] = useState("00")
         const [ampm, setAmpm] = useState("AM")
-        const [timezone, setTimezone] = useState("UTC+1")
+        const [timezone, setTimezone] = useState(() => getSystemTimezoneValue())
         const [showTzDropdown, setShowTzDropdown] = useState(false)
         const [inputValue, setInputValue] = useState("")
 
@@ -347,6 +362,52 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
             if (!value || typeof value !== 'string') return
             if (committedDate) return
             try {
+                // Try parsing standard ISO string with offset first to preserve the exact time and timezone
+                const isoRegex = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:(?:\.\d+)?)(Z|[+-]\d{2}:\d{2})$/i;
+                const match = value.match(isoRegex);
+
+                if (match) {
+                    const year = parseInt(match[1]);
+                    const month = parseInt(match[2]) - 1;
+                    const day = parseInt(match[3]);
+                    let h = parseInt(match[4]);
+                    const min = parseInt(match[5]);
+                    const offsetStr = match[7].toUpperCase();
+
+                    let foundTz = timezone;
+                    if (offsetStr === 'Z') {
+                        const tz = TIMEZONES.find(t => t.offset === 0);
+                        if (tz) foundTz = tz.value;
+                    } else {
+                        const sign = offsetStr[0] === '+' ? 1 : -1;
+                        const offH = parseInt(offsetStr.slice(1, 3));
+                        const offM = parseInt(offsetStr.slice(4, 6));
+                        const offsetDecimal = sign * (offH + (offM / 60));
+                        // Find a timezone that matches this offset, or default to current
+                        const tz = TIMEZONES.find(t => t.offset === offsetDecimal);
+                        if (tz) foundTz = tz.value;
+                    }
+
+                    const ap = h >= 12 ? "PM" : "AM";
+                    if (h > 12) h -= 12;
+                    if (h === 0) h = 12;
+                    
+                    const hourStr = String(h).padStart(2, "0");
+                    const minuteStr = String(min).padStart(2, "0");
+
+                    setSelectedDate({ day, month, year });
+                    setCommittedDate({ day, month, year });
+                    setCalMonth(month);
+                    setCalYear(year);
+                    setHour(hourStr);
+                    setMinute(minuteStr);
+                    setAmpm(ap);
+                    setTimezone(foundTz);
+                    setCommittedTime({ hour: hourStr, minute: minuteStr, ampm: ap, timezone: foundTz });
+                    return;
+                }
+
+                // Fallback for non-ISO or standard JS dates
                 const date = new Date(value)
                 if (isNaN(date.getTime())) return
                 const day = date.getDate()
@@ -368,7 +429,7 @@ export const CustomDateTimeInput = forwardRef<HTMLInputElement, DateTimeInputPro
                 setAmpm(ap)
                 setCommittedTime({ hour: hourStr, minute: minuteStr, ampm: ap, timezone })
             } catch { }
-        }, [value])
+        }, [value, timezone])
 
         const yearsList = useMemo(() => {
             const base = today.getFullYear() - 4 + yearPage * VISIBLE_YEARS
