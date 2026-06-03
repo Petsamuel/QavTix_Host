@@ -6,6 +6,7 @@ import { PricingBreakdown } from './PricingBreakdown'
 import { useAppSelector } from '@/lib/redux/hooks'
 import { useCurrencyConversion } from '@/custom-hooks/useCurrencyConversion'
 import { formatPrice } from '@/helper-fns/formatPrice'
+import { CURRENCY_CHECKOUT_FEES, getCurrencySymbol } from '@/components-data/currencies'
 
 export default function CreateEventPricingSummary() {
     const { watch } = useFormContext<Step3FormData>()
@@ -24,9 +25,12 @@ export default function CreateEventPricingSummary() {
         return acc + (price * qty)
     }, 0)
 
-    const fixedFeePerTicket = convert(100).amount
-    const platformFee = (totalPotentialRevenue * 0.075) + (totalTickets * fixedFeePerTicket)
-    const yourEarnings = totalPotentialRevenue - platformFee
+    const fixedFeeNGN = CURRENCY_CHECKOUT_FEES[currency] ?? 100
+    const fixedFeeTotal = convert(fixedFeeNGN).amount
+    const fixedFeeLabel = `Fixed Fee (+${getCurrencySymbol(currency)}${fixedFeeNGN})`
+
+    const platformFee = totalPotentialRevenue * 0.075
+    const yourEarnings = totalPotentialRevenue - platformFee - fixedFeeTotal
 
     const formatCurrency = (amount: number) => {
         return formatPrice(amount, currency)
@@ -44,10 +48,12 @@ export default function CreateEventPricingSummary() {
                 </div>
             </div>
 
-            <PricingBreakdown 
+            <PricingBreakdown
                 ticketTypes={ticketTypes}
                 totalPotentialRevenue={totalPotentialRevenue}
                 platformFee={platformFee}
+                fixedFeeTotal={fixedFeeTotal}
+                fixedFeeLabel={fixedFeeLabel}
                 containerClassName='p-5'
                 yourEarnings={yourEarnings}
                 formatCurrency={formatCurrency}

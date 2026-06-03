@@ -8,6 +8,8 @@ interface PricingBreakdownProps {
     ticketTypes: TicketType[]
     totalPotentialRevenue: number
     platformFee: number
+    fixedFeeTotal?: number
+    fixedFeeLabel?: string
     containerClassName?: string
     yourEarnings: number
     formatCurrency: (amount: number) => string
@@ -17,6 +19,8 @@ export const PricingBreakdown = ({
     ticketTypes,
     totalPotentialRevenue,
     platformFee,
+    fixedFeeTotal,
+    fixedFeeLabel,
     yourEarnings,
     containerClassName,
     formatCurrency
@@ -59,6 +63,20 @@ export const PricingBreakdown = ({
                         {formatCurrency(platformFee)}
                     </span>
                 </div>
+
+                {fixedFeeTotal !== undefined && fixedFeeTotal > 0 && (
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Icon icon="hugeicons:note-done" className="text-brand-primary-4 size-5" />
+                            <span className="text-brand-neutral-7 text-xs">
+                                {fixedFeeLabel ?? 'Fixed Fee per Ticket'}
+                            </span>
+                        </div>
+                        <span className="text-brand-secondary-8 font-medium text-xs">
+                            {formatCurrency(fixedFeeTotal)}
+                        </span>
+                    </div>
+                )}
 
                 <div className="flex items-center justify-between pt-2">
                     <div className="flex items-center gap-2">

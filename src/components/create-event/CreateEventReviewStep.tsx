@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { space_grotesk } from '@/lib/fonts'
 import { PricingBreakdown } from './PricingBreakdown'
 import ActionButton1 from '../custom-utils/buttons/ActionBtn1'
+import { useCurrencyConversion } from '@/custom-hooks/useCurrencyConversion'
 import { useStepper } from '@/contexts/create-event/StepperProvider'
 import { useEffect, useState } from 'react'
 import SchedulePublishModal from './SchedulePublishModal'
@@ -24,6 +25,8 @@ import { uploadEventMedia } from '@/helper-fns/uploadEventMedia'
 import { sanitizeEventDataForServer } from '@/lib/cloudinary'
 import { clearEventDraft } from '@/custom-hooks/UseEventDraftPersist'
 import { useQueryClient } from '@tanstack/react-query'
+import { CURRENCY_CHECKOUT_FEES, getCurrencySymbol } from '@/components-data/currencies'
+import { formatEventDate, formatEventTime } from '@/helper-fns/date-utils'
 
 
 
@@ -68,14 +71,24 @@ export default function CreateEventReviewStep() {
     const currency = useAppSelector(store => store.authUser.user?.currency) || 'NGN'
     const ticketTypes = eventData.ticketsPricing?.ticketTypes || []
 
+    const { convert } = useCurrencyConversion(currency)
+
+    const totalTickets = ticketTypes.reduce((acc, ticket) => {
+        return acc + (Number(ticket.quantity) || 0)
+    }, 0)
+
     const totalPotentialRevenue = ticketTypes.reduce((acc, ticket) => {
         const price = Number(ticket.price) || 0
         const qty = Number(ticket.quantity) || 0
         return acc + (price * qty)
     }, 0)
 
-    const platformFee = totalPotentialRevenue * 0.03
-    const yourEarnings = totalPotentialRevenue - platformFee
+    const fixedFeeNGN = CURRENCY_CHECKOUT_FEES[currency] ?? 100
+    const fixedFeeTotal = convert(fixedFeeNGN).amount
+    const fixedFeeLabel = `Fixed Fee (+${getCurrencySymbol(currency)}${fixedFeeNGN})`
+
+    const platformFee = totalPotentialRevenue * 0.075
+    const yourEarnings = totalPotentialRevenue - platformFee - fixedFeeTotal
 
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('en-NG', {
@@ -317,6 +330,8 @@ export default function CreateEventReviewStep() {
                                 ticketTypes={ticketTypes}
                                 totalPotentialRevenue={totalPotentialRevenue}
                                 platformFee={platformFee}
+                                fixedFeeTotal={fixedFeeTotal}
+                                fixedFeeLabel={fixedFeeLabel}
                                 yourEarnings={yourEarnings}
                                 formatCurrency={formatCurrency}
                             />

@@ -49,6 +49,7 @@ export async function updateHostProfile(
                 subscription: profileRes.data.subscription,
                 verified_badge: profileRes.data.verified_badge,
                 payout_available: profileRes.data.payout_available,
+                can_activate_free_trial: profileRes.data.can_activate_free_trial,
             } as AuthUser
             : (data?.data ?? data)
 

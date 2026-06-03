@@ -29,7 +29,7 @@ async function getLayoutData() {
         const axiosInstance = await getServerAxios()
         const { data } = await axiosInstance.get(GET_PROFILE_ENDPOINT)
         const hostData = data.host
-            ? { ...data.host, subscription: data.subscription, verified_badge: data.verified_badge, payout_available: data.payout_available } as AuthUser
+            ? { ...data.host, subscription: data.subscription, verified_badge: data.verified_badge, payout_available: data.payout_available, can_activate_free_trial: data.can_activate_free_trial } as AuthUser
             : null
         return hostData
     } catch {

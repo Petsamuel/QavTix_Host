@@ -29,6 +29,17 @@ export const LOCALE_MAP: Record<string, string> = Object.fromEntries(
 // Convenience — get all codes as a union-friendly array
 export const CURRENCY_CODES = CURRENCIES.map(c => c.code)
 
+export const PLATFORM_FEE_PERCENT = 7.5
+
+/** Fixed per-ticket fee added on top of the 7.5% platform percentage fee */
+export const CURRENCY_CHECKOUT_FEES: Record<string, number> = {
+    "NGN": 100,
+    "GHS": 5,
+    "KES": 50,
+    "ZAR": 10,
+    "USD": 1,
+}
+
 
 export const MIN_WITHDRAWAL = {
     NGN: 150000,   // Nigeria (₦150,000)
