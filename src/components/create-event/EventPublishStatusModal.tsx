@@ -64,6 +64,8 @@ export default function EventPublishStatusModal({
                             alt="Status Illustration"
                             fill
                             className="object-contain"
+                            priority
+                            loading="eager"
                         />
                     </div>
 
