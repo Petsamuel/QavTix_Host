@@ -59,8 +59,8 @@ export function mapEventToFormData(
     // Sales period — pulled from first ticket (all tickets share same period)
     const firstTicket = event.tickets?.[0]
     const salesPeriod = {
-        startDateTime: firstTicket?.sales_start ? firstTicket.sales_start.slice(0, 16) : "",
-        endDateTime: firstTicket?.sales_end ? firstTicket.sales_end.slice(0, 16) : "",
+        startDateTime: firstTicket?.sales_start ?? "",
+        endDateTime: firstTicket?.sales_end ?? "",
     }
 
     return {
@@ -69,8 +69,8 @@ export function mapEventToFormData(
             eventCategory: categoryId,
             additionalTags: event.tags ?? [],
             eventType: event.event_type ?? "single",
-            startDateTime: event.start_datetime ? event.start_datetime.slice(0, 16) : "",
-            endDateTime: event.end_datetime ? event.end_datetime.slice(0, 16) : "",
+            startDateTime: event.start_datetime ?? "",
+            endDateTime: event.end_datetime ?? "",
             dates: [],
 
             locationType: event.location_type,

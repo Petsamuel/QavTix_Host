@@ -263,7 +263,7 @@ export default function CreateEventReviewStep() {
                                     <Icon icon="hugeicons:calendar-04" className="size-4 shrink-0 text-brand-accent-6" />
                                     <span className="text-brand-secondary-6 text-[11px]">
                                         {eventData.basicInformation?.startDateTime
-                                            ? new Date(eventData.basicInformation.startDateTime).toLocaleDateString("en-NG", { dateStyle: "long" })
+                                            ? formatEventDate(eventData.basicInformation.startDateTime)
                                             : "March 22, 2026"}
                                     </span>
                                 </div>
@@ -272,7 +272,7 @@ export default function CreateEventReviewStep() {
                                     <Icon icon="hugeicons:clock-01" className="size-4 shrink-0 text-brand-accent-6" />
                                     <span className="text-brand-secondary-7 text-[11px]">
                                         {eventData.basicInformation?.startDateTime
-                                            ? new Date(eventData.basicInformation.startDateTime).toLocaleTimeString("en-NG", { timeStyle: "short" })
+                                            ? formatEventTime(eventData.basicInformation.startDateTime)
                                             : "12PM WAT"}
                                     </span>
                                 </div>
