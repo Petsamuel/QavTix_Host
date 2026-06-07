@@ -88,29 +88,32 @@ export default function ProfileImageArea({
 
             {/* Profile Avatar Area */}
             <div className="relative px-6 pb-6 -mt-12 flex items-end">
-                <div className="relative size-30 group/avatar">
-                    <div
-                        className={`relative w-full h-full rounded-full border-4 border-white bg-white overflow-hidden shadow-sm ${isEditing ? "cursor-pointer" : ""}`}
-                        onClick={() => isEditing && profileInputRef.current?.click()}
-                    >
-                        {profilePreview ? (
-                            <Image
-                                src={profilePreview}
-                                alt="Profile Preview"
-                                fill
-                                className="object-cover"
-                            />
-                        ) : (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <Icon icon="guidance:image" className="w-14 h-14 text-gray-300" />
-                            </div>
-                        )}
+                <div className="relative group/avatar">
+                    <div className="relative p-[3px] rounded-full overflow-hidden flex items-center justify-center group-hover/avatar:scale-105 transition-transform duration-150 size-30">
+                        <div className="absolute inset-0 bg-[conic-gradient(from_0deg,#ef4444,#eab308,#22c55e,#3b82f6,#a855f7,#ef4444)] animate-[spin_3s_linear_infinite]" />
+                        <div
+                            className={`relative w-full h-full rounded-full border-4 border-white bg-white overflow-hidden shadow-sm z-10 ${isEditing ? "cursor-pointer" : ""}`}
+                            onClick={() => isEditing && profileInputRef.current?.click()}
+                        >
+                            {profilePreview ? (
+                                <Image
+                                    src={profilePreview}
+                                    alt="Profile Preview"
+                                    fill
+                                    className="object-cover"
+                                />
+                            ) : (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <Icon icon="guidance:image" className="w-14 h-14 text-gray-300" />
+                                </div>
+                            )}
 
-                        {isEditing && (
-                            <div className="absolute inset-0 bg-black/5 group-hover/avatar:bg-black/10 transition-colors flex items-center justify-center">
-                                <span className="sr-only">Upload Image</span>
-                            </div>
-                        )}
+                            {isEditing && (
+                                <div className="absolute inset-0 bg-black/5 group-hover/avatar:bg-black/10 transition-colors flex items-center justify-center">
+                                    <span className="sr-only">Upload Image</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {isEditing && (
